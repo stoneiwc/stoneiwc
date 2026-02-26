@@ -30,9 +30,9 @@ export function CartSheet() {
     <Sheet open={isOpen} onOpenChange={setOpen}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col p-0 sm:max-w-lg"
+        className="flex w-full flex-col p-0 sm:max-w-lg [&>button]:top-7"
       >
-        <SheetHeader className="border-b border-border px-6 py-5">
+        <SheetHeader className="border-b border-border px-6 py-5 pr-14">
           <SheetTitle className="flex items-center gap-3 font-sans text-xl font-semibold tracking-wide">
             <ShoppingBag className="h-5 w-5 text-primary" />
             Your Cart
@@ -89,17 +89,26 @@ export function CartSheet() {
                     </Link>
 
                     <div className="flex flex-1 flex-col justify-between">
-                      <div>
-                        <Link
-                          href={`/products/${product.slug}`}
-                          onClick={() => setOpen(false)}
-                          className="font-sans text-sm font-semibold text-foreground transition-colors hover:text-primary leading-snug line-clamp-2"
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <Link
+                            href={`/products/${product.slug}`}
+                            onClick={() => setOpen(false)}
+                            className="font-sans text-sm font-semibold text-foreground transition-colors hover:text-primary leading-snug line-clamp-2"
+                          >
+                            {product.name}
+                          </Link>
+                          <p className="mt-0.5 text-xs font-body text-muted-foreground">
+                            {product.category}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeItem(product.id)}
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                          aria-label={`Remove ${product.name} from cart`}
                         >
-                          {product.name}
-                        </Link>
-                        <p className="mt-0.5 text-xs font-body text-muted-foreground">
-                          {product.category}
-                        </p>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
 
                       <div className="flex items-end justify-between">
@@ -127,18 +136,9 @@ export function CartSheet() {
                           </button>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-sans font-semibold text-foreground">
-                            ${(product.price * quantity).toFixed(2)}
-                          </span>
-                          <button
-                            onClick={() => removeItem(product.id)}
-                            className="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                            aria-label={`Remove ${product.name} from cart`}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
+                        <span className="text-sm font-sans font-semibold text-foreground">
+                          ${(product.price * quantity).toFixed(2)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -146,57 +146,61 @@ export function CartSheet() {
               </div>
             </div>
 
-            <SheetFooter className="flex-col border-t border-border p-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm font-body">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm font-body">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="text-foreground">
-                    {totalPrice >= 75 ? (
-                      <span className="font-semibold text-primary">Free</span>
-                    ) : (
-                      "At checkout"
-                    )}
-                  </span>
-                </div>
-                {totalPrice < 75 && (
-                  <div className="rounded-sm bg-secondary px-3 py-2">
-                    <p className="text-xs font-body text-muted-foreground">
-                      Add ${(75 - totalPrice).toFixed(2)} more for free shipping
-                    </p>
+            <SheetFooter className="border-t border-border p-6">
+              <div className="flex flex-col lg:flex-row gap-6 w-full">
+                {/* Left side - Price summary */}
+                <div className="flex-1 space-y-2.5">
+                  <div className="flex items-center justify-between text-sm font-body">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
                   </div>
-                )}
-                <div className="h-px bg-border" />
-                <div className="flex items-center justify-between">
-                  <span className="font-sans text-xl font-bold text-foreground">
-                    Total
-                  </span>
-                  <span className="font-sans text-xl font-bold text-foreground">
-                    ${totalPrice.toFixed(2)}
-                  </span>
+                  <div className="flex items-center justify-between text-sm font-body">
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-foreground">
+                      {totalPrice >= 75 ? (
+                        <span className="font-semibold text-primary">Free</span>
+                      ) : (
+                        "At checkout"
+                      )}
+                    </span>
+                  </div>
+                  {totalPrice < 75 && (
+                    <div className="rounded-sm bg-secondary px-3 py-2 mt-2">
+                      <p className="text-xs font-body text-muted-foreground">
+                        Add ${(75 - totalPrice).toFixed(2)} more for free shipping
+                      </p>
+                    </div>
+                  )}
+                  <div className="h-px bg-border my-3" />
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="font-sans text-lg font-bold text-foreground">
+                      Total
+                    </span>
+                    <span className="font-sans text-lg font-bold text-foreground">
+                      ${totalPrice.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-6 space-y-2">
-                <a
-                  href={BOOKING_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary py-4 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
-                >
-                  Proceed to Checkout
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+                {/* Right side - Action buttons */}
+                <div className="flex flex-col gap-3 lg:min-w-[280px]">
+                  <a
+                    href={BOOKING_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-body font-bold tracking-wide text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-md"
+                  >
+                    Proceed to Checkout
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
 
-                <button
-                  onClick={clearCart}
-                  className="w-full rounded-sm border border-border py-3 text-xs font-body font-bold tracking-wider text-muted-foreground transition-all hover:border-destructive hover:bg-destructive/5 hover:text-destructive"
-                >
-                  Clear Cart
-                </button>
+                  <button
+                    onClick={clearCart}
+                    className="w-full rounded-md border border-border px-6 py-3 text-sm font-body font-semibold tracking-wide text-muted-foreground transition-all hover:border-destructive hover:bg-destructive/5 hover:text-destructive"
+                  >
+                    Clear Cart
+                  </button>
+                </div>
               </div>
             </SheetFooter>
           </>
