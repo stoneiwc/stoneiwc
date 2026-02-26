@@ -5,6 +5,7 @@ import {
   useContext,
   useReducer,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react"
 import type { Product } from "@/lib/products"
@@ -25,6 +26,7 @@ type CartAction =
   | { type: "UPDATE_QUANTITY"; productId: string; quantity: number }
   | { type: "CLEAR_CART" }
   | { type: "SET_OPEN"; isOpen: boolean }
+  | { type: "LOAD_CART"; items: CartItem[] }
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -72,6 +74,8 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return { ...state, items: [] }
     case "SET_OPEN":
       return { ...state, isOpen: action.isOpen }
+    case "LOAD_CART":
+      return { ...state, items: action.items }
     default:
       return state
   }
@@ -96,6 +100,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     items: [],
     isOpen: false,
   })
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem("stone-iwc-cart")
+      if (savedCart) {
+        const items = JSON.parse(savedCart) as CartItem[]
+        dispatch({ type: "LOAD_CART", items })
+      }
+    } catch (error) {
+      console.error("Failed to load cart from localStorage:", error)
+    }
+  }, [])
+
+  // Save cart to localStorage whenever items change
+  useEffect(() => {
+    try {
+      localStorage.setItem("stone-iwc-cart", JSON.stringify(state.items))
+    } catch (error) {
+      console.error("Failed to save cart to localStorage:", error)
+    }
+  }, [state.items])
 
   const setOpen = useCallback(
     (isOpen: boolean) => dispatch({ type: "SET_OPEN", isOpen }),
