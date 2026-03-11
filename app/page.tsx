@@ -9,6 +9,9 @@ import { Testimonials } from "@/components/home/testimonials"
 import { PoliciesSection } from "@/components/home/policies-section"
 import { CTASection } from "@/components/home/cta-section"
 
+// Revalidate this page every 60 seconds
+export const revalidate = 60
+
 export default function HomePage() {
   return (
     <>

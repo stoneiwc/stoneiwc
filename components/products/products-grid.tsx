@@ -1,16 +1,21 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { products, type Category } from "@/lib/products"
+import { type Category, type Product } from "@/lib/products"
 import { ProductCard } from "@/components/products/product-card"
 import {
   ProductFilters,
   type SortOption,
 } from "@/components/products/product-filters"
 
-export function ProductsGrid() {
+interface ProductsGridProps {
+  products: Product[]
+  categories: string[]
+}
+
+export function ProductsGrid({ products, categories }: ProductsGridProps) {
   const [search, setSearch] = useState("")
-  const [category, setCategory] = useState<Category>("All")
+  const [category, setCategory] = useState<string>("All")
   const [sort, setSort] = useState<SortOption>("featured")
 
   const filtered = useMemo(() => {
@@ -48,7 +53,7 @@ export function ProductsGrid() {
     }
 
     return result
-  }, [search, category, sort])
+  }, [products, search, category, sort])
 
   return (
     <div className="flex flex-col gap-10">
@@ -60,6 +65,7 @@ export function ProductsGrid() {
         sort={sort}
         onSortChange={setSort}
         resultCount={filtered.length}
+        categories={categories}
       />
 
       {filtered.length === 0 ? (
