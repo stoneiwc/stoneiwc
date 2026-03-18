@@ -5,9 +5,9 @@ import {schemaTypes} from './schemaTypes'
 
 export default defineConfig({
   name: 'default',
-  title: 'stoneiwc-demo',
+  title: 'studio',
 
-  projectId: 'tphb2ubz',
+  projectId: 'g4ifqs0b',
   dataset: 'production',
 
   plugins: [structureTool(), visionTool()],
