@@ -33,8 +33,6 @@ interface SanityProduct {
     name: string
   }
   tags?: string[]
-  rating: number
-  reviewCount: number
   inStock: boolean
   featured: boolean
 }
@@ -51,8 +49,6 @@ function transformProduct(sanityProduct: SanityProduct): Product {
     image: urlFor(sanityProduct.image).width(800).height(800).url(),
     category: sanityProduct.category.name,
     tags: sanityProduct.tags || [],
-    rating: sanityProduct.rating,
-    reviewCount: sanityProduct.reviewCount,
     inStock: sanityProduct.inStock,
     featured: sanityProduct.featured,
   }
@@ -69,8 +65,6 @@ const productProjection = `
   image,
   "category": category->{name},
   tags,
-  rating,
-  reviewCount,
   inStock,
   featured
 `
@@ -112,7 +106,7 @@ export async function getProductsByCategory(categoryName: string): Promise<Produ
 }
 
 export async function getAllCategories(): Promise<SanityCategory[]> {
-  const query = `*[_type == "category"] | order(order asc, name asc) {
+  const query = `*[_type == "category"] | order(orderRank asc) {
     _id,
     name,
     slug,
@@ -126,4 +120,176 @@ export async function getAllCategories(): Promise<SanityCategory[]> {
 export async function getAllProductSlugs(): Promise<string[]> {
   const query = `*[_type == "product"].slug.current`
   return client.fetch<string[]>(query)
+}
+
+export interface SanityHeroSlide {
+  subtitle: string
+  title: string
+  description: string
+  image: { asset: { _ref: string; _type: string }; alt?: string }
+}
+
+export async function getHeroSlides(): Promise<SanityHeroSlide[]> {
+  const query = `*[_type == "heroSlide"] | order(orderRank asc) {
+    subtitle,
+    title,
+    description,
+    image
+  }`
+  return client.fetch<SanityHeroSlide[]>(query)
+}
+
+type SanityImageField = { asset: { _ref: string; _type: string }; alt?: string }
+
+export interface SanityHomePageImages {
+  aboutImage?: SanityImageField
+  culinaryImage?: SanityImageField
+}
+
+export async function getHomePageImages(): Promise<SanityHomePageImages | null> {
+  const query = `*[_type == "homePageImages" && _id == "homePageImages"][0] {
+    aboutImage,
+    culinaryImage
+  }`
+  return client.fetch<SanityHomePageImages | null>(query)
+}
+
+// ─── Services Page ───────────────────────────────────────────────────────────
+
+export interface SanityServicesPageImages {
+  treatmentsImage?: SanityImageField
+  conciergeImage?: SanityImageField
+  culinaryImage?: SanityImageField
+}
+
+export async function getServicesPageImages(): Promise<SanityServicesPageImages | null> {
+  const query = `*[_type == "servicesPageImages" && _id == "servicesPageImages"][0] {
+    treatmentsImage,
+    conciergeImage,
+    culinaryImage
+  }`
+  return client.fetch<SanityServicesPageImages | null>(query)
+}
+
+export interface SanityConciergeImages {
+  mainImage?: SanityImageField
+}
+
+export async function getConciergeImages(): Promise<SanityConciergeImages | null> {
+  const query = `*[_type == "conciergeImages" && _id == "conciergeImages"][0] {
+    mainImage
+  }`
+  return client.fetch<SanityConciergeImages | null>(query)
+}
+
+export interface SanityVirtualConsultationsImages {
+  mainImage?: SanityImageField
+}
+
+export async function getVirtualConsultationsImages(): Promise<SanityVirtualConsultationsImages | null> {
+  const query = `*[_type == "virtualConsultationsImages" && _id == "virtualConsultationsImages"][0] {
+    mainImage
+  }`
+  return client.fetch<SanityVirtualConsultationsImages | null>(query)
+}
+
+// ─── Education ───────────────────────────────────────────────────────────────
+
+export async function getCertificationImages(): Promise<{mainImage?: SanityImageField} | null> {
+  return client.fetch(`*[_type == "certificationImages" && _id == "certificationImages"][0]{mainImage}`)
+}
+
+export async function getLicenseeProgramImages(): Promise<{mainImage?: SanityImageField} | null> {
+  return client.fetch(`*[_type == "licenseeProgramImages" && _id == "licenseeProgramImages"][0]{mainImage}`)
+}
+
+export async function getCuppingImages(): Promise<{mainImage?: SanityImageField} | null> {
+  return client.fetch(`*[_type == "cuppingImages" && _id == "cuppingImages"][0]{mainImage}`)
+}
+
+export interface SanityArticle {
+  _id: string
+  title: string
+  slug: { current: string }
+  publishedAt: string
+  coverImage?: SanityImageField
+  excerpt: string
+  tags?: string[]
+}
+
+export interface SanityArticleFull extends SanityArticle {
+  body: any[]
+}
+
+export async function getArticles(): Promise<SanityArticle[]> {
+  return client.fetch(`*[_type == "article"] | order(publishedAt desc) {
+    _id, title, slug, publishedAt, coverImage, excerpt, tags
+  }`)
+}
+
+export async function getArticleBySlug(slug: string): Promise<SanityArticleFull | null> {
+  return client.fetch(`*[_type == "article" && slug.current == $slug][0] {
+    _id, title, slug, publishedAt, coverImage, excerpt, tags, body
+  }`, {slug})
+}
+
+export async function getAllArticleSlugs(): Promise<string[]> {
+  return client.fetch(`*[_type == "article"].slug.current`)
+}
+
+// ─── Our Story ──────────────────────────────────────────────────────────────
+
+export interface SanityOurStoryImages {
+  mainImage?: SanityImageField
+}
+
+export async function getOurStoryImages(): Promise<SanityOurStoryImages | null> {
+  const query = `*[_type == "ourStoryImages" && _id == "ourStoryImages"][0] {
+    mainImage
+  }`
+  return client.fetch<SanityOurStoryImages | null>(query)
+}
+
+// ─── Team Members ────────────────────────────────────────────────────────────
+
+export interface SanityTeamMember {
+  _id: string
+  name: string
+  title: string
+  bio?: string
+  image?: SanityImageField
+  specialties?: string[]
+}
+
+export async function getTeamMembers(): Promise<SanityTeamMember[]> {
+  const query = `*[_type == "teamMember"] | order(orderRank asc) {
+    _id,
+    name,
+    title,
+    bio,
+    image,
+    specialties
+  }`
+  return client.fetch<SanityTeamMember[]>(query)
+}
+
+// ─── Partners & Affiliates ───────────────────────────────────────────────────
+
+export interface SanityPartner {
+  _id: string
+  name: string
+  description?: string
+  logo?: SanityImageField
+  websiteUrl?: string
+}
+
+export async function getPartners(): Promise<SanityPartner[]> {
+  const query = `*[_type == "partner"] | order(orderRank asc) {
+    _id,
+    name,
+    description,
+    logo,
+    websiteUrl
+  }`
+  return client.fetch<SanityPartner[]>(query)
 }
