@@ -1,8 +1,18 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Award, Users } from "lucide-react"
+import { urlFor } from "@/lib/sanity.image"
+import type { SanityHomePageImages } from "@/lib/sanity.queries"
 
-export function AboutSection() {
+interface AboutSectionProps {
+  image?: SanityHomePageImages["aboutImage"]
+}
+
+export function AboutSection({ image }: AboutSectionProps) {
+  const imageSrc = image
+    ? urlFor(image).width(800).height(1000).url()
+    : "/images/about-wellness.jpg"
+  const imageAlt = image?.alt ?? "Stone IWC holistic practitioners"
   return (
     <section className="py-24 lg:py-32 overflow-hidden">
       <div className="mx-auto max-w-7xl px-6">
@@ -10,8 +20,8 @@ export function AboutSection() {
           <div className="relative">
             <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
               <Image
-                src="/images/about-wellness.jpg"
-                alt="Stone IWC holistic practitioners"
+                src={imageSrc}
+                alt={imageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

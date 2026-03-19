@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, UtensilsCrossed, Apple, ShoppingBasket, Salad } from "lucide-react"
+import { urlFor } from "@/lib/sanity.image"
+import type { SanityHomePageImages } from "@/lib/sanity.queries"
 
 const programs = [
   {
@@ -29,7 +31,15 @@ const programs = [
   },
 ]
 
-export function CulinaryWellness() {
+interface CulinaryWellnessProps {
+  image?: SanityHomePageImages["culinaryImage"]
+}
+
+export function CulinaryWellness({ image }: CulinaryWellnessProps) {
+  const imageSrc = image
+    ? urlFor(image).width(800).height(1000).url()
+    : "/images/culinary-wellness.jpg"
+  const imageAlt = image?.alt ?? "Stone IWC culinary wellness program with fresh organic ingredients"
   return (
     <section className="py-24 lg:py-32 overflow-hidden">
       <div className="mx-auto max-w-7xl px-6">
@@ -37,8 +47,8 @@ export function CulinaryWellness() {
           <div className="relative">
             <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
               <Image
-                src="/images/culinary-wellness.jpg"
-                alt="Stone IWC culinary wellness program with fresh organic ingredients"
+                src={imageSrc}
+                alt={imageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

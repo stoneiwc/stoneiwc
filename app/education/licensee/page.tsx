@@ -3,6 +3,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { BOOKING_URL } from "@/lib/navigation"
+import { getLicenseeProgramImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 import {
   ArrowRight,
   Building2,
@@ -96,7 +98,14 @@ const idealCandidates = [
   "Community leaders wanting to bring holistic wellness to their market",
 ]
 
-export default function LicenseePage() {
+export const revalidate = 60
+
+export default async function LicenseePage() {
+  const images = await getLicenseeProgramImages()
+  const mainImageSrc = images?.mainImage
+    ? urlFor(images.mainImage).width(900).height(675).url()
+    : "/images/licensee-program.jpg"
+  const mainImageAlt = images?.mainImage?.alt ?? "Stone IWC licensee program certification ceremony"
   return (
     <>
       <PageHeader
@@ -109,8 +118,8 @@ export default function LicenseePage() {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/licensee-program.jpg"
-                alt="Stone IWC licensee program certification ceremony"
+                src={mainImageSrc}
+                alt={mainImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

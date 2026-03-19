@@ -4,6 +4,8 @@ import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { BOOKING_URL } from "@/lib/navigation"
 import { Flame, Droplets, Wind, CircleDot, MoveRight, Zap } from "lucide-react"
+import { getCuppingImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 
 export const metadata: Metadata = {
   title: "Cupping Therapy",
@@ -90,7 +92,14 @@ const expectations = [
   },
 ]
 
-export default function CuppingPage() {
+export const revalidate = 60
+
+export default async function CuppingPage() {
+  const images = await getCuppingImages()
+  const mainImageSrc = images?.mainImage
+    ? urlFor(images.mainImage).width(900).height(675).url()
+    : "/images/fire-cupping.jpg"
+  const mainImageAlt = images?.mainImage?.alt ?? "Traditional fire cupping therapy"
   return (
     <>
       <PageHeader
@@ -129,8 +138,8 @@ export default function CuppingPage() {
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/fire-cupping.jpg"
-                alt="Traditional fire cupping therapy"
+                src={mainImageSrc}
+                alt={mainImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

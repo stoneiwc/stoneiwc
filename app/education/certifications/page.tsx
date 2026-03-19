@@ -16,6 +16,8 @@ import {
   Award,
   GraduationCap,
 } from "lucide-react"
+import { getCertificationImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 
 export const metadata: Metadata = {
   title: "Holistic Practitioner Certifications",
@@ -119,7 +121,14 @@ const programBenefits = [
   "Graduates eligible to join the Stone IWC practitioner network",
 ]
 
-export default function CertificationsPage() {
+export const revalidate = 60
+
+export default async function CertificationsPage() {
+  const images = await getCertificationImages()
+  const mainImageSrc = images?.mainImage
+    ? urlFor(images.mainImage).width(900).height(675).url()
+    : "/images/certifications.jpg"
+  const mainImageAlt = images?.mainImage?.alt ?? "Holistic practitioner certification training at Stone IWC"
   return (
     <>
       <PageHeader
@@ -183,8 +192,8 @@ export default function CertificationsPage() {
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/certifications.jpg"
-                alt="Holistic practitioner certification training at Stone IWC"
+                src={mainImageSrc}
+                alt={mainImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
