@@ -84,21 +84,6 @@ export const productType = defineType({
       description: 'E.g., "bestseller", "organic", "new", etc.',
     }),
     defineField({
-      name: 'rating',
-      title: 'Rating',
-      type: 'number',
-      description: 'Product rating out of 5',
-      validation: (Rule) => Rule.required().min(0).max(5),
-      initialValue: 5,
-    }),
-    defineField({
-      name: 'reviewCount',
-      title: 'Review Count',
-      type: 'number',
-      validation: (Rule) => Rule.required().min(0).integer(),
-      initialValue: 0,
-    }),
-    defineField({
       name: 'inStock',
       title: 'In Stock',
       type: 'boolean',
