@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Star, ShoppingBag, Minus, Plus } from "lucide-react"
+import { ShoppingBag, Minus, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
@@ -53,23 +53,6 @@ export function ProductCard({ product }: { product: Product }) {
           {product.shortDescription}
         </p>
 
-        <div className="mt-3 flex items-center gap-1.5">
-          <div className="flex items-center gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`h-3.5 w-3.5 ${
-                  i < Math.floor(product.rating)
-                    ? "fill-primary text-primary"
-                    : "fill-muted text-muted"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-xs font-body text-muted-foreground">
-            ({product.reviewCount})
-          </span>
-        </div>
 
         <div className="mt-4 flex items-end justify-between">
           <div className="flex items-baseline gap-2">

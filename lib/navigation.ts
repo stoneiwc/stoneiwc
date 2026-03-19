@@ -21,11 +21,7 @@ export const navigation: NavItem[] = [
     children: [
       { label: "Professional Treatments", href: "/services/treatments" },
       { label: "Concierge", href: "/services/concierge" },
-      { label: "Book Our Services", href: "/services/booking" },
       { label: "Virtual Consultations", href: "/services/virtual-consultations" },
-      { label: "Speaking & QC Show", href: "/services/speaking" },
-      { label: "Business Consultation", href: "/services/business-consultation" },
-      { label: "All Patient Forms", href: "/services/forms" },
     ],
   },
   { label: "Products", href: "/products" },

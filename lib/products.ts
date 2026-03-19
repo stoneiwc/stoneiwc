@@ -9,8 +9,6 @@ export interface Product {
   image: string
   category: string
   tags: string[]
-  rating: number
-  reviewCount: number
   inStock: boolean
   featured: boolean
 }
@@ -40,8 +38,6 @@ export const products: Product[] = [
     image: "/images/products/herbal-oil.jpg",
     category: "Oils & Serums",
     tags: ["bestseller", "organic"],
-    rating: 4.9,
-    reviewCount: 127,
     inStock: true,
     featured: true,
   },
@@ -57,8 +53,6 @@ export const products: Product[] = [
     image: "/images/products/cupping-set.jpg",
     category: "Tools & Accessories",
     tags: ["professional"],
-    rating: 4.8,
-    reviewCount: 84,
     inStock: true,
     featured: true,
   },
@@ -75,8 +69,6 @@ export const products: Product[] = [
     image: "/images/products/face-serum.jpg",
     category: "Oils & Serums",
     tags: ["bestseller", "anti-aging"],
-    rating: 4.7,
-    reviewCount: 203,
     inStock: true,
     featured: true,
   },
@@ -92,8 +84,6 @@ export const products: Product[] = [
     image: "/images/products/body-cream.jpg",
     category: "Body Care",
     tags: ["organic", "post-treatment"],
-    rating: 4.6,
-    reviewCount: 156,
     inStock: true,
     featured: false,
   },
@@ -110,8 +100,6 @@ export const products: Product[] = [
     image: "/images/products/essential-kit.jpg",
     category: "Kits & Sets",
     tags: ["gift", "organic"],
-    rating: 4.9,
-    reviewCount: 91,
     inStock: true,
     featured: true,
   },
@@ -127,8 +115,6 @@ export const products: Product[] = [
     image: "/images/products/tea-blend.jpg",
     category: "Teas & Supplements",
     tags: ["organic", "detox"],
-    rating: 4.5,
-    reviewCount: 178,
     inStock: true,
     featured: false,
   },
@@ -144,8 +130,6 @@ export const products: Product[] = [
     image: "/images/products/gua-sha.jpg",
     category: "Tools & Accessories",
     tags: ["bestseller"],
-    rating: 4.8,
-    reviewCount: 215,
     inStock: true,
     featured: false,
   },
@@ -162,8 +146,6 @@ export const products: Product[] = [
     image: "/images/products/bath-salts.jpg",
     category: "Body Care",
     tags: ["relaxation", "organic"],
-    rating: 4.7,
-    reviewCount: 142,
     inStock: true,
     featured: false,
   },

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export type SortOption = "featured" | "price-asc" | "price-desc" | "rating" | "newest"
+export type SortOption = "featured" | "price-asc" | "price-desc"
 
 interface ProductFiltersProps {
   search: string
@@ -69,7 +69,6 @@ export function ProductFilters({
               <SelectItem value="featured">Featured</SelectItem>
               <SelectItem value="price-asc">Price: Low to High</SelectItem>
               <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="rating">Highest Rated</SelectItem>
             </SelectContent>
           </Select>
         </div>

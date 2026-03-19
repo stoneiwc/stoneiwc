@@ -4,25 +4,15 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
-  Star,
   Minus,
   Plus,
   ShoppingBag,
   ArrowLeft,
   Check,
-  Truck,
-  RotateCcw,
-  Shield,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
-
-const guarantees = [
-  { icon: Truck, label: "Free shipping over $75" },
-  { icon: RotateCcw, label: "30-day returns" },
-  { icon: Shield, label: "Quality guaranteed" },
-]
 
 export function ProductDetail({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1)
@@ -76,23 +66,6 @@ export function ProductDetail({ product }: { product: Product }) {
             {product.name}
           </h1>
 
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(product.rating)
-                      ? "fill-primary text-primary"
-                      : "fill-muted text-muted"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-sm font-body text-muted-foreground">
-              {product.rating} ({product.reviewCount} reviews)
-            </span>
-          </div>
 
           <div className="mt-6 flex items-baseline gap-3">
             <span className="font-sans text-3xl font-semibold text-foreground">
@@ -163,19 +136,6 @@ export function ProductDetail({ product }: { product: Product }) {
             </button>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {guarantees.map((g) => (
-              <div
-                key={g.label}
-                className="flex items-center gap-2.5 rounded-sm bg-secondary p-3"
-              >
-                <g.icon className="h-4 w-4 shrink-0 text-primary" />
-                <span className="text-xs font-body text-muted-foreground">
-                  {g.label}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>

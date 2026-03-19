@@ -43,9 +43,6 @@ export function ProductsGrid({ products, categories }: ProductsGridProps) {
       case "price-desc":
         result.sort((a, b) => b.price - a.price)
         break
-      case "rating":
-        result.sort((a, b) => b.rating - a.rating)
-        break
       case "featured":
       default:
         result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
