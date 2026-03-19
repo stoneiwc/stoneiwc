@@ -3,13 +3,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { BOOKING_URL } from "@/lib/navigation"
-import {
-  ArrowRight,
-  Stethoscope,
-  MapPin,
-  FileText,
-  Utensils,
-} from "lucide-react"
+import { ArrowRight, Stethoscope, MapPin, Utensils } from "lucide-react"
+import { getServicesPageImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 
 export const metadata: Metadata = {
   title: "Services",
@@ -17,32 +13,7 @@ export const metadata: Metadata = {
     "Over 100 holistic wellness services delivered to your location -- treatments, culinary wellness, and nutritional programs.",
 }
 
-const serviceCategories = [
-  {
-    icon: Stethoscope,
-    title: "Professional Treatments",
-    description:
-      "Over 100 holistic treatments addressing chronic conditions at the root -- from traditional fire cupping and lymphatic drainage to skin imperfection removal, chronic acne care, and weight loss programs.",
-    href: "/services/treatments",
-    image: "/images/treatment-room.jpg",
-  },
-  {
-    icon: MapPin,
-    title: "Concierge Services",
-    description:
-      "We come to you. Corporate offices, churches, events, private homes, hotels, hospitals, hospice -- wherever you are, our practitioners and chefs bring the full Stone IWC experience to your door.",
-    href: "/services/concierge",
-    image: "/images/concierge-service.jpg",
-  },
-  {
-    icon: Utensils,
-    title: "Culinary Wellness",
-    description:
-      "17+ trained chefs delivering nutritional detox programs, pantry cleanouts, grocery guidance, and custom meal preparation. We teach the 3-day concept and believe food is medicine.",
-    href: "/services/concierge",
-    image: "/images/culinary-wellness.jpg",
-  },
-]
+export const revalidate = 60
 
 const highlights = [
   { value: "100+", label: "Holistic Services" },
@@ -51,7 +22,45 @@ const highlights = [
   { value: "8+", label: "Location Types Served" },
 ]
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const images = await getServicesPageImages()
+
+  const serviceCategories = [
+    {
+      icon: Stethoscope,
+      title: "Professional Treatments",
+      description:
+        "Over 100 holistic treatments addressing chronic conditions at the root -- from traditional fire cupping and lymphatic drainage to skin imperfection removal, chronic acne care, and weight loss programs.",
+      href: "/services/treatments",
+      image: images?.treatmentsImage
+        ? urlFor(images.treatmentsImage).width(900).height(675).url()
+        : "/images/treatment-room.jpg",
+      imageAlt: images?.treatmentsImage?.alt ?? "Professional Treatments",
+    },
+    {
+      icon: MapPin,
+      title: "Concierge Services",
+      description:
+        "We come to you. Corporate offices, churches, events, private homes, hotels, hospitals, hospice -- wherever you are, our practitioners and chefs bring the full Stone IWC experience to your door.",
+      href: "/services/concierge",
+      image: images?.conciergeImage
+        ? urlFor(images.conciergeImage).width(900).height(675).url()
+        : "/images/concierge-service.jpg",
+      imageAlt: images?.conciergeImage?.alt ?? "Concierge Services",
+    },
+    {
+      icon: Utensils,
+      title: "Culinary Wellness",
+      description:
+        "17+ trained chefs delivering nutritional detox programs, pantry cleanouts, grocery guidance, and custom meal preparation. We teach the 3-day concept and believe food is medicine.",
+      href: "/services/concierge",
+      image: images?.culinaryImage
+        ? urlFor(images.culinaryImage).width(900).height(675).url()
+        : "/images/culinary-wellness.jpg",
+      imageAlt: images?.culinaryImage?.alt ?? "Culinary Wellness",
+    },
+  ]
+
   return (
     <>
       <PageHeader
@@ -82,9 +91,7 @@ export default function ServicesPage() {
             {serviceCategories.map((cat, i) => (
               <div
                 key={cat.title}
-                className={`grid grid-cols-1 items-center gap-12 lg:grid-cols-2 ${
-                  i % 2 === 1 ? "lg:direction-rtl" : ""
-                }`}
+                className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2"
               >
                 <div className={i % 2 === 1 ? "lg:order-2" : ""}>
                   <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10">
@@ -111,7 +118,7 @@ export default function ServicesPage() {
                 >
                   <Image
                     src={cat.image}
-                    alt={cat.title}
+                    alt={cat.imageAlt}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover"
@@ -119,26 +126,6 @@ export default function ServicesPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-border py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <Link
-              href="/services/forms"
-              className="inline-flex items-center gap-3 rounded-sm border border-border bg-card px-8 py-4 transition-all hover:border-primary/30 hover:shadow-lg"
-            >
-              <FileText className="h-5 w-5 text-primary" />
-              <span className="font-body font-bold text-foreground">
-                All Patient Forms
-              </span>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-            <p className="text-sm text-muted-foreground font-body">
-              Download and complete required forms before your first visit.
-            </p>
           </div>
         </div>
       </section>

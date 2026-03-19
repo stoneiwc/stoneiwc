@@ -6,10 +6,12 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { BOOKING_URL } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
+import { urlFor } from "@/lib/sanity.image"
+import type { SanityHeroSlide } from "@/lib/sanity.queries"
 
 const SLOGAN = "Your Modern Holistic Path to Health & Wellness"
 
-const slides = [
+const DEFAULT_SLIDES = [
   {
     image: "/images/hero-wellness.jpg",
     subtitle: "Concierge Holistic Wellness Retreat",
@@ -33,7 +35,19 @@ const slides = [
   },
 ]
 
-export function Hero() {
+interface HeroProps {
+  slides?: SanityHeroSlide[]
+}
+
+export function Hero({ slides: sanitySlides }: HeroProps) {
+  const slides = sanitySlides?.length
+    ? sanitySlides.map((s) => ({
+        image: urlFor(s.image).width(1920).height(1080).url(),
+        subtitle: s.subtitle,
+        title: s.title,
+        description: s.description,
+      }))
+    : DEFAULT_SLIDES
   const [current, setCurrent] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
 

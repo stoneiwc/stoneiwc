@@ -4,6 +4,8 @@ import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { BOOKING_URL } from "@/lib/navigation"
 import { Award, Heart, Globe, Utensils, GraduationCap, Clock } from "lucide-react"
+import { getOurStoryImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 
 export const metadata: Metadata = {
   title: "Our Story",
@@ -50,7 +52,12 @@ const milestones = [
   },
 ]
 
-export default function OurStoryPage() {
+export default async function OurStoryPage() {
+  const storyImages = await getOurStoryImages()
+  const mainImageSrc = storyImages?.mainImage
+    ? urlFor(storyImages.mainImage).width(900).height(675).url()
+    : "/images/our-story.jpg"
+  const mainImageAlt = storyImages?.mainImage?.alt ?? "Stone IWC holistic practitioners"
   return (
     <>
       <PageHeader
@@ -93,8 +100,8 @@ export default function OurStoryPage() {
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/our-story.jpg"
-                alt="Stone IWC holistic practitioners"
+                src={mainImageSrc}
+                alt={mainImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

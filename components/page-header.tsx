@@ -5,7 +5,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
-    <section className="relative bg-foreground py-28 lg:py-36 overflow-hidden">
+    <section className="relative bg-foreground py-16 lg:py-20 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,hsl(var(--primary)/0.18),transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_70%,hsl(var(--accent)/0.10),transparent_50%)]" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />

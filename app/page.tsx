@@ -8,16 +8,25 @@ import { ProductsSection } from "@/components/home/products-section"
 import { Testimonials } from "@/components/home/testimonials"
 import { PoliciesSection } from "@/components/home/policies-section"
 import { CTASection } from "@/components/home/cta-section"
+import { getHeroSlides, getHomePageImages } from "@/lib/sanity.queries"
 
-export default function HomePage() {
+// Revalidate this page every 60 seconds
+export const revalidate = 60
+
+export default async function HomePage() {
+  const [heroSlides, homePageImages] = await Promise.all([
+    getHeroSlides(),
+    getHomePageImages(),
+  ])
+
   return (
     <>
-      <Hero />
+      <Hero slides={heroSlides} />
       <Philosophy />
-      <AboutSection />
+      <AboutSection image={homePageImages?.aboutImage} />
       <ServicesPreview />
       <WhereWeServe />
-      <CulinaryWellness />
+      <CulinaryWellness image={homePageImages?.culinaryImage} />
       <ProductsSection />
       <Testimonials />
       <PoliciesSection />

@@ -14,6 +14,8 @@ import {
   GlassWater,
   Check,
 } from "lucide-react"
+import { getConciergeImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 
 export const metadata: Metadata = {
   title: "Concierge Services",
@@ -83,7 +85,14 @@ const conciergeIncludes = [
   "All equipment, supplies, and products provided",
 ]
 
-export default function ConciergePage() {
+export const revalidate = 60
+
+export default async function ConciergePage() {
+  const images = await getConciergeImages()
+  const mainImageSrc = images?.mainImage
+    ? urlFor(images.mainImage).width(900).height(675).url()
+    : "/images/concierge-service.jpg"
+  const mainImageAlt = images?.mainImage?.alt ?? "Concierge wellness service setup"
   return (
     <>
       <PageHeader
@@ -128,8 +137,8 @@ export default function ConciergePage() {
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/concierge-service.jpg"
-                alt="Concierge wellness service setup"
+                src={mainImageSrc}
+                alt={mainImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

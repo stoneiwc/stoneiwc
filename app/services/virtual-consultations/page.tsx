@@ -11,6 +11,8 @@ import {
   MessageSquare,
   Check,
 } from "lucide-react"
+import { getVirtualConsultationsImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
 
 export const metadata: Metadata = {
   title: "Virtual Holistic Consultations",
@@ -56,7 +58,14 @@ const servicesOffered = [
   "Holistic wellness education and Q&A",
 ]
 
-export default function VirtualConsultationsPage() {
+export const revalidate = 60
+
+export default async function VirtualConsultationsPage() {
+  const images = await getVirtualConsultationsImages()
+  const mainImageSrc = images?.mainImage
+    ? urlFor(images.mainImage).width(900).height(675).url()
+    : "/images/virtual-consultation.jpg"
+  const mainImageAlt = images?.mainImage?.alt ?? "Virtual holistic wellness consultation"
   return (
     <>
       <PageHeader
@@ -69,8 +78,8 @@ export default function VirtualConsultationsPage() {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/virtual-consultation.jpg"
-                alt="Virtual holistic wellness consultation"
+                src={mainImageSrc}
+                alt={mainImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

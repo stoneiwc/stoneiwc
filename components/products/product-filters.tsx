@@ -2,7 +2,6 @@
 
 import { Search, SlidersHorizontal, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { categories, type Category } from "@/lib/products"
 import {
   Select,
   SelectContent,
@@ -11,16 +10,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export type SortOption = "featured" | "price-asc" | "price-desc" | "rating" | "newest"
+export type SortOption = "featured" | "price-asc" | "price-desc"
 
 interface ProductFiltersProps {
   search: string
   onSearchChange: (value: string) => void
-  category: Category
-  onCategoryChange: (value: Category) => void
+  category: string
+  onCategoryChange: (value: string) => void
   sort: SortOption
   onSortChange: (value: SortOption) => void
   resultCount: number
+  categories: string[]
 }
 
 export function ProductFilters({
@@ -31,6 +31,7 @@ export function ProductFilters({
   sort,
   onSortChange,
   resultCount,
+  categories,
 }: ProductFiltersProps) {
   return (
     <div className="flex flex-col gap-6">
@@ -68,7 +69,6 @@ export function ProductFilters({
               <SelectItem value="featured">Featured</SelectItem>
               <SelectItem value="price-asc">Price: Low to High</SelectItem>
               <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="rating">Highest Rated</SelectItem>
             </SelectContent>
           </Select>
         </div>
