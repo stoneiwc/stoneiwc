@@ -36,7 +36,7 @@ interface CulinaryWellnessProps {
 }
 
 export function CulinaryWellness({ image }: CulinaryWellnessProps) {
-  const imageSrc = image
+  const imageSrc = image?.asset
     ? urlFor(image).width(800).height(1000).url()
     : "/images/culinary-wellness.jpg"
   const imageAlt = image?.alt ?? "Stone IWC culinary wellness program with fresh organic ingredients"

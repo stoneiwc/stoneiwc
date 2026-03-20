@@ -31,7 +31,7 @@ export default async function PartnersPage() {
                   key={partner._id}
                   className="group flex flex-col rounded-sm border border-border bg-card p-8 transition-all hover:border-primary/30 hover:shadow-lg"
                 >
-                  {partner.logo ? (
+                  {partner.logo?.asset ? (
                     <div className="relative mb-6 h-16 w-full">
                       <Image
                         src={urlFor(partner.logo).width(400).height(128).url()}

@@ -9,7 +9,7 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({ image }: AboutSectionProps) {
-  const imageSrc = image
+  const imageSrc = image?.asset
     ? urlFor(image).width(800).height(1000).url()
     : "/images/about-wellness.jpg"
   const imageAlt = image?.alt ?? "Stone IWC holistic practitioners"

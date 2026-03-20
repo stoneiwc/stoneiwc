@@ -41,7 +41,7 @@ interface HeroProps {
 
 export function Hero({ slides: sanitySlides }: HeroProps) {
   const slides = sanitySlides?.length
-    ? sanitySlides.map((s) => ({
+    ? sanitySlides.filter((s) => s.image?.asset).map((s) => ({
         image: urlFor(s.image).width(1920).height(1080).url(),
         subtitle: s.subtitle,
         title: s.title,

@@ -89,7 +89,7 @@ export const revalidate = 60
 
 export default async function ConciergePage() {
   const images = await getConciergeImages()
-  const mainImageSrc = images?.mainImage
+  const mainImageSrc = images?.mainImage?.asset
     ? urlFor(images.mainImage).width(900).height(675).url()
     : "/images/concierge-service.jpg"
   const mainImageAlt = images?.mainImage?.alt ?? "Concierge wellness service setup"

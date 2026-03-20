@@ -102,7 +102,7 @@ export const revalidate = 60
 
 export default async function LicenseePage() {
   const images = await getLicenseeProgramImages()
-  const mainImageSrc = images?.mainImage
+  const mainImageSrc = images?.mainImage?.asset
     ? urlFor(images.mainImage).width(900).height(675).url()
     : "/images/licensee-program.jpg"
   const mainImageAlt = images?.mainImage?.alt ?? "Stone IWC licensee program certification ceremony"

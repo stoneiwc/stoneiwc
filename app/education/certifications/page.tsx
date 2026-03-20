@@ -125,7 +125,7 @@ export const revalidate = 60
 
 export default async function CertificationsPage() {
   const images = await getCertificationImages()
-  const mainImageSrc = images?.mainImage
+  const mainImageSrc = images?.mainImage?.asset
     ? urlFor(images.mainImage).width(900).height(675).url()
     : "/images/certifications.jpg"
   const mainImageAlt = images?.mainImage?.alt ?? "Holistic practitioner certification training at Stone IWC"
