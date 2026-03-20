@@ -7,6 +7,8 @@ import { Award, Heart, Globe, Utensils, GraduationCap, Clock } from "lucide-reac
 import { getOurStoryImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
+export const revalidate = 60
+
 export const metadata: Metadata = {
   title: "Our Story",
   description:
