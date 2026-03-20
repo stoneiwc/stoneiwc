@@ -32,7 +32,7 @@ export default async function ServicesPage() {
       description:
         "Over 100 holistic treatments addressing chronic conditions at the root -- from traditional fire cupping and lymphatic drainage to skin imperfection removal, chronic acne care, and weight loss programs.",
       href: "/services/treatments",
-      image: images?.treatmentsImage
+      image: images?.treatmentsImage?.asset
         ? urlFor(images.treatmentsImage).width(900).height(675).url()
         : "/images/treatment-room.jpg",
       imageAlt: images?.treatmentsImage?.alt ?? "Professional Treatments",
@@ -43,7 +43,7 @@ export default async function ServicesPage() {
       description:
         "We come to you. Corporate offices, churches, events, private homes, hotels, hospitals, hospice -- wherever you are, our practitioners and chefs bring the full Stone IWC experience to your door.",
       href: "/services/concierge",
-      image: images?.conciergeImage
+      image: images?.conciergeImage?.asset
         ? urlFor(images.conciergeImage).width(900).height(675).url()
         : "/images/concierge-service.jpg",
       imageAlt: images?.conciergeImage?.alt ?? "Concierge Services",
@@ -54,7 +54,7 @@ export default async function ServicesPage() {
       description:
         "17+ trained chefs delivering nutritional detox programs, pantry cleanouts, grocery guidance, and custom meal preparation. We teach the 3-day concept and believe food is medicine.",
       href: "/services/concierge",
-      image: images?.culinaryImage
+      image: images?.culinaryImage?.asset
         ? urlFor(images.culinaryImage).width(900).height(675).url()
         : "/images/culinary-wellness.jpg",
       imageAlt: images?.culinaryImage?.alt ?? "Culinary Wellness",

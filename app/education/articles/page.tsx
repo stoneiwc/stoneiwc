@@ -34,7 +34,7 @@ export default async function ArticlesPage() {
                   className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card transition-all hover:border-primary/30 hover:shadow-lg"
                 >
                   <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                    {article.coverImage ? (
+                    {article.coverImage?.asset ? (
                       <Image
                         src={urlFor(article.coverImage).width(800).height(450).url()}
                         alt={article.coverImage.alt ?? article.title}

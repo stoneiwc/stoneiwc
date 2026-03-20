@@ -62,7 +62,7 @@ export const revalidate = 60
 
 export default async function VirtualConsultationsPage() {
   const images = await getVirtualConsultationsImages()
-  const mainImageSrc = images?.mainImage
+  const mainImageSrc = images?.mainImage?.asset
     ? urlFor(images.mainImage).width(900).height(675).url()
     : "/images/virtual-consultation.jpg"
   const mainImageAlt = images?.mainImage?.alt ?? "Virtual holistic wellness consultation"

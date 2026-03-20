@@ -32,7 +32,7 @@ export default async function TeamPage() {
                   className="group flex flex-col rounded-sm border border-border bg-card overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg"
                 >
                   <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                    {member.image ? (
+                    {member.image?.asset ? (
                       <Image
                         src={urlFor(member.image).width(600).height(800).url()}
                         alt={member.image.alt ?? member.name}

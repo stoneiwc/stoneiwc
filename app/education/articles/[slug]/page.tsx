@@ -75,7 +75,7 @@ export default async function ArticlePage({
 
       <div className="mx-auto my-8 h-px bg-border" />
 
-      {article.coverImage && (
+      {article.coverImage?.asset && (
         <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-sm">
           <Image
             src={urlFor(article.coverImage).width(1200).height(675).url()}
