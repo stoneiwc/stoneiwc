@@ -54,7 +54,7 @@ const milestones = [
 
 export default async function OurStoryPage() {
   const storyImages = await getOurStoryImages()
-  const mainImageSrc = storyImages?.mainImage
+  const mainImageSrc = storyImages?.mainImage?.asset
     ? urlFor(storyImages.mainImage).width(900).height(675).url()
     : "/images/our-story.jpg"
   const mainImageAlt = storyImages?.mainImage?.alt ?? "Stone IWC holistic practitioners"
