@@ -237,6 +237,70 @@ export async function getAllArticleSlugs(): Promise<string[]> {
   return client.fetch(`*[_type == "article"].slug.current`)
 }
 
+// ─── Press Items ─────────────────────────────────────────────────────────────
+
+export interface SanityPressItem {
+  _id: string
+  title: string
+  description: string
+  image: { asset: { _ref: string; _type: string }; alt?: string }
+  link: string
+}
+
+export async function getPressItems(): Promise<SanityPressItem[]> {
+  const query = `*[_type == "pressItem"] | order(orderRank asc) {
+    _id,
+    title,
+    description,
+    image,
+    link
+  }`
+  return client.fetch<SanityPressItem[]>(query)
+}
+
+// ─── Media Items ─────────────────────────────────────────────────────────────
+
+export interface SanityMediaItem {
+  _id: string
+  title: string
+  description: string
+  youtubeUrl: string
+}
+
+export async function getMediaItems(): Promise<SanityMediaItem[]> {
+  const query = `*[_type == "mediaItem"] | order(orderRank asc) {
+    _id,
+    title,
+    description,
+    youtubeUrl
+  }`
+  return client.fetch<SanityMediaItem[]>(query)
+}
+
+// ─── QC Show ─────────────────────────────────────────────────────────────────
+
+export interface SanityQcShowFlyer {
+  image?: { asset: { _ref: string; _type: string }; alt?: string }
+}
+
+export async function getQcShowFlyer(): Promise<SanityQcShowFlyer | null> {
+  return client.fetch(`*[_type == "qcShowFlyer" && _id == "qcShowFlyer"][0]{ image }`)
+}
+
+export interface SanityQcShowEpisode {
+  _id: string
+  _createdAt: string
+  youtubeUrl: string
+}
+
+export async function getQcShowEpisodes(): Promise<SanityQcShowEpisode[]> {
+  return client.fetch(`*[_type == "qcShowEpisode"] | order(_createdAt asc) {
+    _id,
+    _createdAt,
+    youtubeUrl
+  }`)
+}
+
 // ─── Our Story ──────────────────────────────────────────────────────────────
 
 export interface SanityOurStoryImages {

@@ -238,6 +238,62 @@ export default defineConfig({
                           ]),
                       ),
 
+                    // ── Featured On ──────────────────────────────────
+                    S.listItem()
+                      .title('Featured On')
+                      .child(
+                        S.list()
+                          .title('Featured On')
+                          .items([
+                            S.listItem()
+                              .title('Press')
+                              .child(
+                                S.list()
+                                  .title('Press')
+                                  .items([
+                                    S.documentTypeListItem('pressItem').title('All Presses'),
+                                    orderableDocumentListDeskItem({
+                                      type: 'pressItem',
+                                      title: 'Manage Order',
+                                      S,
+                                      context,
+                                    }),
+                                  ]),
+                              ),
+                            S.listItem()
+                              .title('Media')
+                              .child(
+                                S.list()
+                                  .title('Media')
+                                  .items([
+                                    S.documentTypeListItem('mediaItem').title('All Media'),
+                                    orderableDocumentListDeskItem({
+                                      type: 'mediaItem',
+                                      title: 'Manage Order',
+                                      S,
+                                      context,
+                                    }),
+                                  ]),
+                              ),
+                            S.listItem()
+                              .title('QC Show')
+                              .child(
+                                S.list()
+                                  .title('QC Show')
+                                  .items([
+                                    S.listItem()
+                                      .title('Flyer')
+                                      .child(
+                                        S.document()
+                                          .schemaType('qcShowFlyer')
+                                          .documentId('qcShowFlyer'),
+                                      ),
+                                    S.documentTypeListItem('qcShowEpisode').title('All Episodes'),
+                                  ]),
+                              ),
+                          ]),
+                      ),
+
                     // ── Add new pages below as the site grows ────────
 
                   ]),
@@ -291,6 +347,10 @@ export default defineConfig({
                   'licenseeProgramImages',
                   'cuppingImages',
                   'article',
+                  'pressItem',
+                  'mediaItem',
+                  'qcShowFlyer',
+                  'qcShowEpisode',
                 ].includes(item.getId() ?? ''),
             ),
           ]),
@@ -309,6 +369,7 @@ export default defineConfig({
         'certificationImages',
         'licenseeProgramImages',
         'cuppingImages',
+        'qcShowFlyer',
       ]
       if (singletonTypes.includes(context.schemaType)) {
         return prev.filter(({action}) =>
