@@ -12,6 +12,10 @@ import {certificationImagesType} from './certificationImages'
 import {licenseeProgramImagesType} from './licenseeProgramImages'
 import {cuppingImagesType} from './cuppingImages'
 import {articleType} from './article'
+import {pressItemType} from './pressItem'
+import {mediaItemType} from './mediaItem'
+import {qcShowFlyerType} from './qcShowFlyer'
+import {qcShowEpisodeType} from './qcShowEpisode'
 
 export const schemaTypes = [
   categoryType,
@@ -28,4 +32,8 @@ export const schemaTypes = [
   licenseeProgramImagesType,
   cuppingImagesType,
   articleType,
+  pressItemType,
+  mediaItemType,
+  qcShowFlyerType,
+  qcShowEpisodeType,
 ]
