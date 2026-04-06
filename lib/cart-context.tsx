@@ -15,9 +15,17 @@ export interface CartItem {
   quantity: number
 }
 
+export interface AppliedCoupon {
+  code: string
+  description: string
+  type: "percentage" | "fixed"
+  value: number
+}
+
 interface CartState {
   items: CartItem[]
   isOpen: boolean
+  coupon: AppliedCoupon | null
 }
 
 type CartAction =
@@ -26,7 +34,9 @@ type CartAction =
   | { type: "UPDATE_QUANTITY"; productId: string; quantity: number }
   | { type: "CLEAR_CART" }
   | { type: "SET_OPEN"; isOpen: boolean }
-  | { type: "LOAD_CART"; items: CartItem[] }
+  | { type: "LOAD_CART"; items: CartItem[]; coupon: AppliedCoupon | null }
+  | { type: "APPLY_COUPON"; coupon: AppliedCoupon }
+  | { type: "REMOVE_COUPON" }
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -71,11 +81,15 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       }
     }
     case "CLEAR_CART":
-      return { ...state, items: [] }
+      return { ...state, items: [], coupon: null }
     case "SET_OPEN":
       return { ...state, isOpen: action.isOpen }
     case "LOAD_CART":
-      return { ...state, items: action.items }
+      return { ...state, items: action.items, coupon: action.coupon }
+    case "APPLY_COUPON":
+      return { ...state, coupon: action.coupon }
+    case "REMOVE_COUPON":
+      return { ...state, coupon: null }
     default:
       return state
   }
@@ -90,6 +104,11 @@ interface CartContextValue {
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
   totalItems: number
+  subtotal: number
+  appliedCoupon: AppliedCoupon | null
+  applyCoupon: (coupon: AppliedCoupon) => void
+  removeCoupon: () => void
+  discountAmount: number
   totalPrice: number
 }
 
@@ -99,6 +118,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     isOpen: false,
+    coupon: null,
   })
 
   // Load cart from localStorage on mount
@@ -106,8 +126,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const savedCart = localStorage.getItem("stone-iwc-cart")
       if (savedCart) {
-        const items = JSON.parse(savedCart) as CartItem[]
-        dispatch({ type: "LOAD_CART", items })
+        const parsed = JSON.parse(savedCart) as
+          | CartItem[]
+          | { items?: CartItem[]; coupon?: AppliedCoupon | null }
+
+        if (Array.isArray(parsed)) {
+          dispatch({ type: "LOAD_CART", items: parsed, coupon: null })
+        } else {
+          dispatch({
+            type: "LOAD_CART",
+            items: parsed.items ?? [],
+            coupon: parsed.coupon ?? null,
+          })
+        }
       }
     } catch (error) {
       console.error("Failed to load cart from localStorage:", error)
@@ -117,11 +148,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Save cart to localStorage whenever items change
   useEffect(() => {
     try {
-      localStorage.setItem("stone-iwc-cart", JSON.stringify(state.items))
+      localStorage.setItem(
+        "stone-iwc-cart",
+        JSON.stringify({ items: state.items, coupon: state.coupon })
+      )
     } catch (error) {
       console.error("Failed to save cart to localStorage:", error)
     }
-  }, [state.items])
+  }, [state.items, state.coupon])
 
   const setOpen = useCallback(
     (isOpen: boolean) => dispatch({ type: "SET_OPEN", isOpen }),
@@ -147,11 +181,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => dispatch({ type: "CLEAR_CART" }), [])
 
+  const applyCoupon = useCallback(
+    (coupon: AppliedCoupon) => dispatch({ type: "APPLY_COUPON", coupon }),
+    []
+  )
+
+  const removeCoupon = useCallback(() => dispatch({ type: "REMOVE_COUPON" }), [])
+
   const totalItems = state.items.reduce((sum, i) => sum + i.quantity, 0)
-  const totalPrice = state.items.reduce(
+  const subtotal = state.items.reduce(
     (sum, i) => sum + i.product.price * i.quantity,
     0
   )
+  const discountAmount = state.coupon
+    ? Math.min(
+        state.coupon.type === "percentage"
+          ? (subtotal * state.coupon.value) / 100
+          : state.coupon.value,
+        subtotal
+      )
+    : 0
+  const totalPrice = Math.max(subtotal - discountAmount, 0)
 
   return (
     <CartContext.Provider
@@ -164,6 +214,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updateQuantity,
         clearCart,
         totalItems,
+        subtotal,
+        appliedCoupon: state.coupon,
+        applyCoupon,
+        removeCoupon,
+        discountAmount,
         totalPrice,
       }}
     >
