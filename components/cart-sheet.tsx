@@ -12,7 +12,6 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { useCart } from "@/lib/cart-context"
-import { BOOKING_URL } from "@/lib/navigation"
 
 export function CartSheet() {
   const {
@@ -23,6 +22,9 @@ export function CartSheet() {
     updateQuantity,
     clearCart,
     totalItems,
+    subtotal,
+    appliedCoupon,
+    discountAmount,
     totalPrice,
   } = useCart()
 
@@ -152,22 +154,28 @@ export function CartSheet() {
                 <div className="flex-1 space-y-2.5">
                   <div className="flex items-center justify-between text-sm font-body">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-semibold text-foreground">${totalPrice.toFixed(2)}</span>
+                    <span className="font-semibold text-foreground">${subtotal.toFixed(2)}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex items-center justify-between text-sm font-body">
+                      <span className="text-muted-foreground">Discount ({appliedCoupon.code})</span>
+                      <span className="font-semibold text-primary">-${discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-sm font-body">
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="text-foreground">
-                      {totalPrice >= 75 ? (
+                      {subtotal >= 75 ? (
                         <span className="font-semibold text-primary">Free</span>
                       ) : (
                         "At checkout"
                       )}
                     </span>
                   </div>
-                  {totalPrice < 75 && (
+                  {subtotal < 75 && (
                     <div className="rounded-sm bg-secondary px-3 py-2 mt-2">
                       <p className="text-xs font-body text-muted-foreground">
-                        Add ${(75 - totalPrice).toFixed(2)} more for free shipping
+                        Add ${(75 - subtotal).toFixed(2)} more for free shipping
                       </p>
                     </div>
                   )}
@@ -184,15 +192,14 @@ export function CartSheet() {
 
                 {/* Right side - Action buttons */}
                 <div className="flex flex-col gap-3 lg:min-w-[280px]">
-                  <a
-                    href={BOOKING_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/view-cart"
+                    onClick={() => setOpen(false)}
                     className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-body font-bold tracking-wide text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-md"
                   >
-                    Proceed to Checkout
+                    View Cart
                     <ArrowRight className="h-4 w-4" />
-                  </a>
+                  </Link>
 
                   <button
                     onClick={clearCart}

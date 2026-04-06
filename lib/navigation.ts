@@ -48,6 +48,7 @@ export const navigation: NavItem[] = [
     ],
   },
   { label: "Contact Us", href: "/contact" },
+  { label: "View Cart", href: "/view-cart" },
 ]
 
 export const BOOKING_URL =
