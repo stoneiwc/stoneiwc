@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { PageHeader } from "@/components/page-header"
-import { BOOKING_URL } from "@/lib/navigation"
+const BOOKING_URL = "/book?category=professional-treatment"
 import Link from "next/link"
 
 export const metadata: Metadata = {
@@ -209,14 +209,12 @@ export default function TreatmentsPage() {
               discuss your health goals.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
+              <Link
                 href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
               >
                 Schedule a Consultation
-              </a>
+              </Link>
               <Link
                 href="/contact"
                 className="inline-flex items-center justify-center rounded-sm border border-border px-8 py-3 text-sm font-body font-bold tracking-wider text-foreground transition-all hover:border-primary hover:text-primary"

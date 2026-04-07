@@ -51,15 +51,13 @@ export function MobileNav({
         </div>
 
         <div className="px-6 pb-4">
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="block w-full rounded-sm bg-primary py-3.5 text-center text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
             onClick={onClose}
           >
             Book Now
-          </a>
+          </Link>
         </div>
 
         <div className="border-t border-border px-6 py-6">

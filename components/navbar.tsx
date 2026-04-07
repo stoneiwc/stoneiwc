@@ -90,14 +90,12 @@ export function Navbar() {
                 </span>
               )}
             </button>
-            <a
+            <Link
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center justify-center rounded-sm bg-primary px-6 py-2.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
             >
               Book Now
-            </a>
+            </Link>
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
