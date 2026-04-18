@@ -51,8 +51,7 @@ export const navigation: NavItem[] = [
   { label: "View Cart", href: "/view-cart" },
 ]
 
-export const BOOKING_URL =
-  "https://www.fresha.com/a/stone-international-wellness-center-plano-1108-west-parker-road-rrih48ux/booking?cartId=72ed3fb4-b2f6-490c-a9db-a0d7e877298a"
+export const BOOKING_URL = "/book"
 
 export const CONTACT_INFO = {
   email: "Info@stoneiwc.com",

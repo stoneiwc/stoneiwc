@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import Image from "next/image"
 import { PageHeader } from "@/components/page-header"
-import { BOOKING_URL, CONTACT_INFO } from "@/lib/navigation"
+import { CONTACT_INFO } from "@/lib/navigation"
 import {
   Video,
   Calendar,
@@ -13,6 +14,8 @@ import {
 } from "lucide-react"
 import { getVirtualConsultationsImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
+
+const BOOKING_URL = "/book?category=virtual-consultation"
 
 export const metadata: Metadata = {
   title: "Virtual Holistic Consultations",
@@ -105,15 +108,13 @@ export default async function VirtualConsultationsPage() {
                 provide the same expert care you would receive in person.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
+                <Link
                   href={BOOKING_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-8 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
                 >
                   <Video className="h-4 w-4" />
                   Book Virtual Consultation
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -199,15 +200,13 @@ export default async function VirtualConsultationsPage() {
               30-60 minutes.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
+              <Link
                 href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
               >
                 <Video className="h-4 w-4" />
                 Book Now
-              </a>
+              </Link>
               <a
                 href={`mailto:${CONTACT_INFO.email}?subject=Virtual Consultation Inquiry`}
                 className="inline-flex items-center justify-center rounded-sm border border-border px-10 py-3.5 text-sm font-body font-bold tracking-wider text-foreground transition-all hover:border-primary hover:text-primary"
@@ -229,14 +228,12 @@ export default async function VirtualConsultationsPage() {
             in-facility care at The Source of Hope in Plano, TX. Choose the
             option that works best for your needs.
           </p>
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/book"
             className="mt-8 inline-flex items-center justify-center rounded-sm border border-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground"
           >
             View All Services
-          </a>
+          </Link>
         </div>
       </section>
     </>

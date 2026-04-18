@@ -104,14 +104,12 @@ export function Footer() {
             <SocialIcons />
           </div>
 
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="rounded-sm border border-primary px-8 py-2.5 text-sm font-body font-bold tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground"
           >
             Book an Appointment
-          </a>
+          </Link>
 
           <p className="text-xs font-body text-background/50">
             &copy; {new Date().getFullYear()} Stone International Wellness
