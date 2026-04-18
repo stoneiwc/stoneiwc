@@ -73,8 +73,7 @@ export async function getAllProducts(): Promise<Product[]> {
   const query = `*[_type == "product"] | order(name asc) {
     ${productProjection}
   }`
-  
-  const products = await client.fetch<SanityProduct[]>(query)
+  const products = await client.fetch<SanityProduct[]>(query, {}, { next: { tags: ["product"] } })
   return products.map(transformProduct)
 }
 
@@ -82,8 +81,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   const query = `*[_type == "product" && slug.current == $slug][0] {
     ${productProjection}
   }`
-  
-  const product = await client.fetch<SanityProduct | null>(query, { slug })
+  const product = await client.fetch<SanityProduct | null>(query, { slug }, { next: { tags: ["product"] } })
   return product ? transformProduct(product) : null
 }
 
@@ -91,8 +89,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   const query = `*[_type == "product" && featured == true] | order(name asc) {
     ${productProjection}
   }`
-  
-  const products = await client.fetch<SanityProduct[]>(query)
+  const products = await client.fetch<SanityProduct[]>(query, {}, { next: { tags: ["product"] } })
   return products.map(transformProduct)
 }
 
@@ -100,8 +97,7 @@ export async function getProductsByCategory(categoryName: string): Promise<Produ
   const query = `*[_type == "product" && category->name == $categoryName] | order(name asc) {
     ${productProjection}
   }`
-  
-  const products = await client.fetch<SanityProduct[]>(query, { categoryName })
+  const products = await client.fetch<SanityProduct[]>(query, { categoryName }, { next: { tags: ["product"] } })
   return products.map(transformProduct)
 }
 
@@ -113,13 +109,12 @@ export async function getAllCategories(): Promise<SanityCategory[]> {
     description,
     order
   }`
-  
-  return client.fetch<SanityCategory[]>(query)
+  return client.fetch<SanityCategory[]>(query, {}, { next: { tags: ["category"] } })
 }
 
 export async function getAllProductSlugs(): Promise<string[]> {
   const query = `*[_type == "product"].slug.current`
-  return client.fetch<string[]>(query)
+  return client.fetch<string[]>(query, {}, { next: { tags: ["product"] } })
 }
 
 export interface SanityHeroSlide {
@@ -196,15 +191,15 @@ export async function getVirtualConsultationsImages(): Promise<SanityVirtualCons
 // ─── Education ───────────────────────────────────────────────────────────────
 
 export async function getCertificationImages(): Promise<{mainImage?: SanityImageField} | null> {
-  return client.fetch(`*[_type == "certificationImages" && _id == "certificationImages"][0]{mainImage}`)
+  return client.fetch(`*[_type == "certificationImages" && _id == "certificationImages"][0]{mainImage}`, {}, { next: { tags: ["certificationImages"] } })
 }
 
 export async function getLicenseeProgramImages(): Promise<{mainImage?: SanityImageField} | null> {
-  return client.fetch(`*[_type == "licenseeProgramImages" && _id == "licenseeProgramImages"][0]{mainImage}`)
+  return client.fetch(`*[_type == "licenseeProgramImages" && _id == "licenseeProgramImages"][0]{mainImage}`, {}, { next: { tags: ["licenseeProgramImages"] } })
 }
 
 export async function getCuppingImages(): Promise<{mainImage?: SanityImageField} | null> {
-  return client.fetch(`*[_type == "cuppingImages" && _id == "cuppingImages"][0]{mainImage}`)
+  return client.fetch(`*[_type == "cuppingImages" && _id == "cuppingImages"][0]{mainImage}`, {}, { next: { tags: ["cuppingImages"] } })
 }
 
 export interface SanityArticle {
@@ -224,17 +219,17 @@ export interface SanityArticleFull extends SanityArticle {
 export async function getArticles(): Promise<SanityArticle[]> {
   return client.fetch(`*[_type == "article"] | order(publishedAt desc) {
     _id, title, slug, publishedAt, coverImage, excerpt, tags
-  }`)
+  }`, {}, { next: { tags: ["article"] } })
 }
 
 export async function getArticleBySlug(slug: string): Promise<SanityArticleFull | null> {
   return client.fetch(`*[_type == "article" && slug.current == $slug][0] {
     _id, title, slug, publishedAt, coverImage, excerpt, tags, body
-  }`, {slug})
+  }`, { slug }, { next: { tags: ["article"] } })
 }
 
 export async function getAllArticleSlugs(): Promise<string[]> {
-  return client.fetch(`*[_type == "article"].slug.current`)
+  return client.fetch(`*[_type == "article"].slug.current`, {}, { next: { tags: ["article"] } })
 }
 
 // ─── Press Items ─────────────────────────────────────────────────────────────
@@ -255,7 +250,7 @@ export async function getPressItems(): Promise<SanityPressItem[]> {
     image,
     link
   }`
-  return client.fetch<SanityPressItem[]>(query)
+  return client.fetch<SanityPressItem[]>(query, {}, { next: { tags: ["pressItem"] } })
 }
 
 // ─── Media Items ─────────────────────────────────────────────────────────────
@@ -274,7 +269,7 @@ export async function getMediaItems(): Promise<SanityMediaItem[]> {
     description,
     youtubeUrl
   }`
-  return client.fetch<SanityMediaItem[]>(query)
+  return client.fetch<SanityMediaItem[]>(query, {}, { next: { tags: ["mediaItem"] } })
 }
 
 // ─── QC Show ─────────────────────────────────────────────────────────────────
@@ -284,7 +279,7 @@ export interface SanityQcShowFlyer {
 }
 
 export async function getQcShowFlyer(): Promise<SanityQcShowFlyer | null> {
-  return client.fetch(`*[_type == "qcShowFlyer" && _id == "qcShowFlyer"][0]{ image }`)
+  return client.fetch(`*[_type == "qcShowFlyer" && _id == "qcShowFlyer"][0]{ image }`, {}, { next: { tags: ["qcShowFlyer"] } })
 }
 
 export interface SanityQcShowEpisode {
@@ -298,7 +293,7 @@ export async function getQcShowEpisodes(): Promise<SanityQcShowEpisode[]> {
     _id,
     _createdAt,
     youtubeUrl
-  }`)
+  }`, {}, { next: { tags: ["qcShowEpisode"] } })
 }
 
 // ─── Our Story ──────────────────────────────────────────────────────────────
@@ -311,7 +306,7 @@ export async function getOurStoryImages(): Promise<SanityOurStoryImages | null> 
   const query = `*[_type == "ourStoryImages" && _id == "ourStoryImages"][0] {
     mainImage
   }`
-  return client.fetch<SanityOurStoryImages | null>(query)
+  return client.fetch<SanityOurStoryImages | null>(query, {}, { next: { tags: ["ourStoryImages"] } })
 }
 
 // ─── Team Members ────────────────────────────────────────────────────────────
@@ -334,7 +329,7 @@ export async function getTeamMembers(): Promise<SanityTeamMember[]> {
     image,
     specialties
   }`
-  return client.fetch<SanityTeamMember[]>(query)
+  return client.fetch<SanityTeamMember[]>(query, {}, { next: { tags: ["teamMember"] } })
 }
 
 // ─── Partners & Affiliates ───────────────────────────────────────────────────
@@ -355,5 +350,5 @@ export async function getPartners(): Promise<SanityPartner[]> {
     logo,
     websiteUrl
   }`
-  return client.fetch<SanityPartner[]>(query)
+  return client.fetch<SanityPartner[]>(query, {}, { next: { tags: ["partner"] } })
 }
