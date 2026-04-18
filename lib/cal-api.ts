@@ -3,43 +3,46 @@ export type CalEventType = {
   title: string
   slug: string
   description: string | null
-  length: number // minutes
+  lengthInMinutes: number
   price: number
   currency: string
 }
 
-export type BookingCategory =
-  | "professional-treatment"
-  | "concierge"
-  | "virtual-consultation"
+// Ordered head-to-toe for the sidebar filter
+export const BOOKING_CATEGORIES = [
+  // Head
+  { value: "hair",                        label: "Hair",                                 slugPrefix: "hair-" },
+  { value: "face",                        label: "Face",                                 slugPrefix: "face-" },
+  { value: "lash-extension",              label: "Lash Extension",                       slugPrefix: "lash-extension-" },
+  { value: "permanent-makeup",            label: "Permanent Makeup",                     slugPrefix: "permanent-makeup-" },
+  { value: "semi-permanent-makeup",       label: "Semi-Permanent Makeup",                slugPrefix: "semi-permanent-makeup-" },
+  { value: "skin-imperfection",           label: "Skin Imperfection",                    slugPrefix: "skin-imperfection-" },
+  // Upper Body
+  { value: "acupuncture",                 label: "Acupuncture",                          slugPrefix: "acupuncture-" },
+  { value: "cupping",                     label: "Cupping",                              slugPrefix: "cupping-" },
+  { value: "massage-body",                label: "Massage & Body Treatments",            slugPrefix: "massage-body-" },
+  { value: "chiropractic",                label: "Chiropractic",                         slugPrefix: "chiropractic-" },
+  // Mid / Lower Body
+  { value: "body-transformation",         label: "Body Transformation",                  slugPrefix: "body-transformation-" },
+  { value: "lipo-treatments",             label: "Lipo Treatments",                      slugPrefix: "lipo-treatments-" },
+  { value: "waxing",                      label: "Waxing",                               slugPrefix: "waxing-" },
+  { value: "chronic-venous-insufficiency",label: "Chronic Venous Insufficiency",         slugPrefix: "chronic-venous-insufficiency-" },
+  // Extremities
+  { value: "nail",                        label: "Nail",                                 slugPrefix: "nail-" },
+  // General / Virtual
+  { value: "wellness",                    label: "Wellness",                             slugPrefix: "wellness-" },
+  { value: "consultation",                label: "Consultation",                         slugPrefix: "consultation-" },
+  { value: "virtual-consultation",        label: "Virtual Consultation",                 slugPrefix: "virtual-consultation-" },
+  { value: "concierge",                   label: "Concierge",                            slugPrefix: "concierge-" },
+] as const
 
-export type CategoryOption = {
-  value: BookingCategory | "all"
-  label: string
-  slugPrefix: string
-}
+export type BookingCategory = typeof BOOKING_CATEGORIES[number]["value"]
 
-export const BOOKING_CATEGORIES: CategoryOption[] = [
-  {
-    value: "professional-treatment",
-    label: "Professional Treatment",
-    slugPrefix: "professional-treatment-",
-  },
-  {
-    value: "concierge",
-    label: "Concierge Services",
-    slugPrefix: "concierge-",
-  },
-  {
-    value: "virtual-consultation",
-    label: "Virtual Consultations",
-    slugPrefix: "virtual-consultation-",
-  },
-]
+export type CategoryOption = typeof BOOKING_CATEGORIES[number]
 
 export function getCategoryFromSlug(slug: string): BookingCategory | null {
-  const match = BOOKING_CATEGORIES.find((cat) =>
-    slug.startsWith(cat.slugPrefix)
+  const match = BOOKING_CATEGORIES.find(
+    (cat) => slug === cat.value || slug.startsWith(cat.slugPrefix)
   )
   return match ? (match.value as BookingCategory) : null
 }
@@ -50,14 +53,14 @@ export async function getEventTypes(username: string): Promise<CalEventType[]> {
       `https://api.cal.com/v2/event-types?username=${username}`,
       {
         headers: { "cal-api-version": "2024-06-14" },
-        next: { revalidate: 3600 },
+        cache: "no-store",
       }
     )
 
     if (!res.ok) return []
 
     const data = await res.json()
-    return data?.data?.eventTypeGroups?.[0]?.eventTypes ?? []
+    return Array.isArray(data?.data) ? data.data : []
   } catch {
     return []
   }
@@ -72,5 +75,7 @@ export function filterEventsByCategory(
   const cat = BOOKING_CATEGORIES.find((c) => c.value === category)
   if (!cat) return events
 
-  return events.filter((e) => e.slug.startsWith(cat.slugPrefix))
+  return events.filter(
+    (e) => e.slug === cat.value || e.slug.startsWith(cat.slugPrefix)
+  )
 }
