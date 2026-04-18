@@ -54,7 +54,7 @@ export const navigation: NavItem[] = [
 export const BOOKING_URL = "/book"
 
 export const CONTACT_INFO = {
-  email: "Info@stoneiwc.com",
+  email: "info@stoneiwc.com",
   phone: "+1 972-473-2205",
   address: "1108 W Parker Rd Ste 102 Plano, TX 75075",
 }
