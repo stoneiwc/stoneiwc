@@ -1,4 +1,4 @@
-import { updateTag } from "next/cache"
+import { revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
 
 // Map Sanity _type → cache tag(s) to revalidate
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: `Unknown type: ${type}` }, { status: 200 })
   }
 
-  for (const tag of tags) updateTag(tag)
+  for (const tag of tags) (revalidateTag as (tag: string) => void)(tag)
 
   return NextResponse.json({ revalidated: true, tags })
 }
