@@ -192,6 +192,15 @@ export function CartSheet() {
 
                 {/* Right side - Action buttons */}
                 <div className="flex flex-col gap-3 lg:min-w-[280px]">
+                  <Link
+                    href="/view-cart"
+                    onClick={() => setOpen(false)}
+                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-body font-bold tracking-wide text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-md"
+                  >
+                    View Cart
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+
                   <button
                     onClick={clearCart}
                     className="w-full rounded-md border border-border px-6 py-3 text-sm font-body font-semibold tracking-wide text-muted-foreground transition-all hover:border-destructive hover:bg-destructive/5 hover:text-destructive"
