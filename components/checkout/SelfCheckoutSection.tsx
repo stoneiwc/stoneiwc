@@ -4,27 +4,7 @@ import { useState, useEffect } from 'react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
-
-const SHIPPING_METHODS = [
-  {
-    id: 'standard',
-    name: 'Standard Shipping',
-    description: 'Delivery in 5-7 business days',
-    cost: 8.99,
-  },
-  {
-    id: 'express',
-    name: 'Express Shipping',
-    description: 'Delivery in 2-3 business days',
-    cost: 19.99,
-  },
-  {
-    id: 'overnight',
-    name: 'Overnight Shipping',
-    description: 'Delivery next business day',
-    cost: 39.99,
-  }
-]
+import { getShippingMethods, type SanityShippingMethod } from '@/lib/sanity.queries'
 
 interface CheckoutFormState {
   email: string
@@ -179,27 +159,28 @@ export default function SelfCheckoutSection({
     shippingPostalCode: '',
     shippingCountry: 'US',
     shippingSameAsBilling: true,
-    shippingMethod: typeof window !== 'undefined' 
-      ? localStorage.getItem('selectedShippingMethod') || 'standard'
-      : 'standard',
+    shippingMethod: '',
   }))
 
+  const [shippingMethods, setShippingMethods] = useState<SanityShippingMethod[]>([])
   const [stripePromise, setStripePromise] = useState<any>(null)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Initialize shipping method on component mount
+  // Fetch shipping methods from Sanity and restore saved selection
   useEffect(() => {
-    const savedMethod = typeof window !== 'undefined' 
-      ? localStorage.getItem('selectedShippingMethod') || 'standard'
-      : 'standard'
-    
-    const shipping = SHIPPING_METHODS.find((m) => m.id === savedMethod)
-    if (shipping) {
-      setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
-      onShippingMethodChange(shipping.name, shipping.cost)
-    }
+    getShippingMethods().then((methods) => {
+      setShippingMethods(methods)
+      const savedMethod = typeof window !== 'undefined'
+        ? localStorage.getItem('selectedShippingMethod') || (methods[0]?.id ?? '')
+        : (methods[0]?.id ?? '')
+      const shipping = methods.find((m) => m.id === savedMethod)
+      if (shipping) {
+        setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
+        onShippingMethodChange(shipping.name, shipping.cost)
+      }
+    })
   }, [onShippingMethodChange])
 
   const updateField = <K extends keyof CheckoutFormState>(
@@ -213,7 +194,7 @@ export default function SelfCheckoutSection({
         localStorage.setItem('selectedShippingMethod', String(value))
       }
       
-      const method = SHIPPING_METHODS.find((m) => m.id === value)
+      const method = shippingMethods.find((m) => m.id === value)
       if (method) {
         onShippingMethodChange(method.name, method.cost)
       }
@@ -655,7 +636,7 @@ export default function SelfCheckoutSection({
               Shipping Method
             </h3>
             <div className="mt-4 space-y-3">
-              {SHIPPING_METHODS.map((method) => (
+              {shippingMethods.map((method) => (
                 <label
                   key={method.id}
                   className="flex items-center gap-3 rounded-sm border border-input p-4 cursor-pointer transition-colors hover:bg-muted"

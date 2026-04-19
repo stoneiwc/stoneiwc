@@ -16,6 +16,8 @@ import {pressItemType} from './pressItem'
 import {mediaItemType} from './mediaItem'
 import {qcShowFlyerType} from './qcShowFlyer'
 import {qcShowEpisodeType} from './qcShowEpisode'
+import {couponType} from './coupon'
+import {shippingMethodType} from './shippingMethod'
 
 export const schemaTypes = [
   categoryType,
@@ -36,4 +38,6 @@ export const schemaTypes = [
   mediaItemType,
   qcShowFlyerType,
   qcShowEpisodeType,
+  couponType,
+  shippingMethodType,
 ]

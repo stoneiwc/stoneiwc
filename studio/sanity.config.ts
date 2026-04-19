@@ -329,6 +329,28 @@ export default defineConfig({
 
             S.divider(),
 
+            // ─── Shipping & Coupons ─────────────────────────────────
+            S.listItem()
+              .title('Shipping & Coupons')
+              .child(
+                S.list()
+                  .title('Shipping & Coupons')
+                  .items([
+                    S.listItem()
+                      .title('Coupons')
+                      .child(
+                        S.documentTypeList('coupon').title('All Coupons'),
+                      ),
+                    S.listItem()
+                      .title('Shipping Methods')
+                      .child(
+                        S.documentTypeList('shippingMethod').title('All Shipping Methods'),
+                      ),
+                  ]),
+              ),
+
+            S.divider(),
+
             // ─── Everything else ────────────────────────────────────
             ...S.documentTypeListItems().filter(
               (item) =>
@@ -351,6 +373,8 @@ export default defineConfig({
                   'mediaItem',
                   'qcShowFlyer',
                   'qcShowEpisode',
+                  'coupon',
+                  'shippingMethod',
                 ].includes(item.getId() ?? ''),
             ),
           ]),

@@ -6,33 +6,11 @@ import Link from "next/link"
 import { Minus, Plus, Tag, Trash2 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { useCart, type AppliedCoupon } from "@/lib/cart-context"
+import { getCoupons, type SanityCoupon } from "@/lib/sanity.queries"
 
 type CouponTemplate = AppliedCoupon & {
 	minSubtotal?: number
 }
-
-const MOCK_COUPONS: CouponTemplate[] = [
-	{
-		code: "WELCOME10",
-		description: "10% off your cart",
-		type: "percentage",
-		value: 10,
-	},
-	{
-		code: "STONE15",
-		description: "$15 off orders over $100",
-		type: "fixed",
-		value: 15,
-		minSubtotal: 100,
-	},
-	{
-		code: "WELLNESS20",
-		description: "20% off orders over $150",
-		type: "percentage",
-		value: 20,
-		minSubtotal: 150,
-	},
-]
 
 export default function ViewCartPage() {
 	const {
@@ -49,9 +27,14 @@ export default function ViewCartPage() {
 		totalPrice,
 	} = useCart()
 
+	const [coupons, setCoupons] = useState<SanityCoupon[]>([])
 	const [couponInput, setCouponInput] = useState("")
 	const [couponMessage, setCouponMessage] = useState<string | null>(null)
 	const [couponError, setCouponError] = useState<string | null>(null)
+
+	useEffect(() => {
+		getCoupons().then(setCoupons)
+	}, [])
 
 	useEffect(() => {
 		if (!appliedCoupon) {
@@ -64,7 +47,7 @@ export default function ViewCartPage() {
 
 	const couponList = useMemo(
 		() =>
-			MOCK_COUPONS.map((coupon) => {
+			coupons.map((coupon) => {
 				if (!coupon.minSubtotal) return coupon
 				return {
 					...coupon,
@@ -82,7 +65,7 @@ export default function ViewCartPage() {
 			return
 		}
 
-		const matchedCoupon = MOCK_COUPONS.find((coupon) => coupon.code === code)
+		const matchedCoupon = coupons.find((coupon) => coupon.code === code)
 		if (!matchedCoupon) {
 			setCouponError("Coupon code is not valid.")
 			setCouponMessage(null)

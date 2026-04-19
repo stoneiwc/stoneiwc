@@ -21,6 +21,8 @@ const TYPE_TAG_MAP: Record<string, string[]> = {
   ourStoryImages:                ["ourStoryImages"],
   teamMember:                    ["teamMember"],
   partner:                       ["partner"],
+  coupon:                        ["coupon"],
+  shippingMethod:                ["shippingMethod"],
 }
 
 export async function POST(req: NextRequest) {

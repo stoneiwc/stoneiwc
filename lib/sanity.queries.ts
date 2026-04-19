@@ -352,3 +352,51 @@ export async function getPartners(): Promise<SanityPartner[]> {
   }`
   return client.fetch<SanityPartner[]>(query, {}, { next: { tags: ["partner"] } })
 }
+
+// ─── Coupons ─────────────────────────────────────────────────────────────────
+
+export interface SanityCoupon {
+  code: string
+  description: string
+  type: "percentage" | "fixed"
+  value: number
+  minSubtotal?: number
+  isActive: boolean
+}
+
+export async function getCoupons(): Promise<SanityCoupon[]> {
+  return client.fetch(
+    `*[_type == "coupon" && isActive == true] {
+      code,
+      description,
+      type,
+      value,
+      minSubtotal,
+      isActive
+    }`,
+    {},
+    { next: { tags: ["coupon"] } }
+  )
+}
+
+// ─── Shipping Methods ─────────────────────────────────────────────────────────
+
+export interface SanityShippingMethod {
+  id: string
+  name: string
+  description: string
+  cost: number
+}
+
+export async function getShippingMethods(): Promise<SanityShippingMethod[]> {
+  return client.fetch(
+    `*[_type == "shippingMethod" && isActive == true] | order(order asc) {
+      "id": id.current,
+      name,
+      description,
+      cost
+    }`,
+    {},
+    { next: { tags: ["shippingMethod"] } }
+  )
+}
