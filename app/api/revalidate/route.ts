@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: `Unknown type: ${type}` }, { status: 200 })
   }
 
-  for (const tag of tags) (revalidateTag as (tag: string) => void)(tag)
+  for (const tag of tags) revalidateTag(tag, "default")
 
   return NextResponse.json({ revalidated: true, tags })
 }
