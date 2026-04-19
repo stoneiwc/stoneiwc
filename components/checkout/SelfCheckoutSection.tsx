@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
-import { getShippingMethods, type SanityShippingMethod } from '@/lib/sanity.queries'
+import type { SanityShippingMethod } from '@/lib/sanity.queries'
 
 interface CheckoutFormState {
   email: string
@@ -168,19 +168,21 @@ export default function SelfCheckoutSection({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch shipping methods from Sanity and restore saved selection
+  // Fetch shipping methods and restore saved selection
   useEffect(() => {
-    getShippingMethods().then((methods) => {
-      setShippingMethods(methods)
-      const savedMethod = typeof window !== 'undefined'
-        ? localStorage.getItem('selectedShippingMethod') || (methods[0]?.id ?? '')
-        : (methods[0]?.id ?? '')
-      const shipping = methods.find((m) => m.id === savedMethod)
-      if (shipping) {
-        setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
-        onShippingMethodChange(shipping.name, shipping.cost)
-      }
-    })
+    fetch('/api/shipping-methods')
+      .then((r) => r.json())
+      .then((methods: SanityShippingMethod[]) => {
+        setShippingMethods(methods)
+        const savedMethod =
+          (typeof window !== 'undefined' && localStorage.getItem('selectedShippingMethod')) ||
+          (methods[0]?.id ?? '')
+        const shipping = methods.find((m) => m.id === savedMethod)
+        if (shipping) {
+          setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
+          onShippingMethodChange(shipping.name, shipping.cost)
+        }
+      })
   }, [onShippingMethodChange])
 
   const updateField = <K extends keyof CheckoutFormState>(

@@ -1,16 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Minus, Plus, Tag, Trash2 } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
-import { useCart, type AppliedCoupon } from "@/lib/cart-context"
-import { getCoupons, type SanityCoupon } from "@/lib/sanity.queries"
-
-type CouponTemplate = AppliedCoupon & {
-	minSubtotal?: number
-}
+import { useCart } from "@/lib/cart-context"
 
 export default function ViewCartPage() {
 	const {
@@ -27,65 +22,46 @@ export default function ViewCartPage() {
 		totalPrice,
 	} = useCart()
 
-	const [coupons, setCoupons] = useState<SanityCoupon[]>([])
 	const [couponInput, setCouponInput] = useState("")
 	const [couponMessage, setCouponMessage] = useState<string | null>(null)
 	const [couponError, setCouponError] = useState<string | null>(null)
-
-	useEffect(() => {
-		getCoupons().then(setCoupons)
-	}, [])
+	const [couponLoading, setCouponLoading] = useState(false)
 
 	useEffect(() => {
 		if (!appliedCoupon) {
 			setCouponMessage(null)
 			return
 		}
-
 		setCouponMessage(`${appliedCoupon.code} applied. Cart total: $${totalPrice.toFixed(2)}`)
 	}, [appliedCoupon, totalPrice])
 
-	const couponList = useMemo(
-		() =>
-			coupons.map((coupon) => {
-				if (!coupon.minSubtotal) return coupon
-				return {
-					...coupon,
-					description: `${coupon.description} (min $${coupon.minSubtotal.toFixed(2)})`,
-				}
-			}),
-		[]
-	)
-
-	const handleApplyCoupon = () => {
-		const code = couponInput.trim().toUpperCase()
+	const handleApplyCoupon = async () => {
+		const code = couponInput.trim()
 		if (!code) {
 			setCouponError("Enter a coupon code.")
 			setCouponMessage(null)
 			return
 		}
 
-		const matchedCoupon = coupons.find((coupon) => coupon.code === code)
-		if (!matchedCoupon) {
-			setCouponError("Coupon code is not valid.")
-			setCouponMessage(null)
-			return
-		}
+		setCouponLoading(true)
+		setCouponError(null)
 
-		if (matchedCoupon.minSubtotal && subtotal < matchedCoupon.minSubtotal) {
-			setCouponError(
-				`This coupon requires a minimum subtotal of $${matchedCoupon.minSubtotal.toFixed(2)}.`
-			)
-			setCouponMessage(null)
-			return
-		}
-
-		applyCoupon({
-			code: matchedCoupon.code,
-			description: matchedCoupon.description,
-			type: matchedCoupon.type,
-			value: matchedCoupon.value,
+		const res = await fetch("/api/validate-coupon", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ code, subtotal }),
 		})
+		const data = await res.json()
+
+		setCouponLoading(false)
+
+		if (!res.ok) {
+			setCouponError(data.error)
+			setCouponMessage(null)
+			return
+		}
+
+		applyCoupon(data)
 		setCouponError(null)
 		setCouponInput("")
 	}
@@ -244,9 +220,10 @@ export default function ViewCartPage() {
 								/>
 								<button
 									onClick={handleApplyCoupon}
-									className="rounded-sm bg-primary px-4 py-2 text-sm font-body font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90"
+									disabled={couponLoading}
+									className="rounded-sm bg-primary px-4 py-2 text-sm font-body font-bold tracking-wide text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
 								>
-									Apply
+									{couponLoading ? "..." : "Apply"}
 								</button>
 							</div>
 
@@ -271,16 +248,6 @@ export default function ViewCartPage() {
 								<p className="mt-2 text-xs font-body text-primary">{couponMessage}</p>
 							)}
 
-							<div className="mt-4 space-y-1 rounded-sm bg-secondary p-3">
-								<p className="text-xs font-body font-bold uppercase tracking-[0.15em] text-muted-foreground">
-									Mock Coupons
-								</p>
-								{couponList.map((coupon) => (
-									<p key={coupon.code} className="text-xs font-body text-foreground/80">
-										{coupon.code} - {coupon.description}
-									</p>
-								))}
-							</div>
 						</div>
 
 						<Link
