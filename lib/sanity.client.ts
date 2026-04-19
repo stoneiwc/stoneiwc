@@ -9,7 +9,7 @@ export const client = createClient({
   dataset,
   token,
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2024-03-11',
-  useCdn: true,
+  useCdn: false,
   perspective: 'published',
   token: process.env.SANITY_API_TOKEN,
 })
