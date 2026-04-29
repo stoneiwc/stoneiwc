@@ -68,13 +68,13 @@ export default async function QCShowPage() {
             </h2>
             <div className="mt-1 h-1 w-16 bg-primary" />
             <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body">
-              For more than 30 years, the QC Show has been a trusted voice in the community on Radio Saigon 900 AM. Through these platforms, we have shared resources and conversations on holistic health, wellness, entrepreneurship, and community issues — along the way inspiring individuals and families to live better.
+              For more than 30 years, the QC Show has been a trusted voice in the community on Radio Saigon Dallas KBDT 1160AM. Through these platforms, we have shared resources and conversations on holistic health, wellness, entrepreneurship, and community issues — along the way inspiring individuals and families to live better.
             </p>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body">
               Our founder, Quynh Chau Stone, continues to lead the QC Show in Vietnamese every week, while also appearing on American television. We encourage our viewers and listeners to tune in and follow our missions to serve your community.
             </p>
             <div className="mt-6 space-y-1 text-sm text-muted-foreground font-body">
-              <p>📻 Tune in every Saturday at 10 AM on Radio Saigon 900 AM</p>
+              <p>📻 Tune in every Saturday at 10 AM on Radio Saigon Dallas KBDT 1160AM</p>
               <p>📞 Listen by phone: 214-490-5108</p>
               <p>🌐 Available in both English &amp; Vietnamese</p>
             </div>
