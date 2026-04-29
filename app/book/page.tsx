@@ -102,6 +102,10 @@ export default async function BookPage({ searchParams }: Props) {
                               currency: event.currency.toUpperCase(),
                             })}
                           </span>
+                        ) : event.slug.endsWith("-free") ? (
+                          <span className="text-sm font-body font-bold text-foreground">
+                            Free
+                          </span>
                         ) : (
                           <span className="text-sm font-body text-muted-foreground">
                             Contact for pricing
