@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { PageHeader } from "@/components/page-header"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 import { CONTACT_INFO, BOOKING_URL } from "@/lib/navigation"
+import { ContactForm } from "@/components/contact/contact-form"
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -95,33 +96,7 @@ export default function ContactPage() {
             <p className="mt-2 text-sm text-muted-foreground font-body">
               Fill out the form below and we will get back to you shortly.
             </p>
-            <form className="mt-8 flex flex-col gap-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="firstName" className="text-sm font-body font-bold text-foreground">First Name</label>
-                  <input id="firstName" type="text" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="John" />
-                </div>
-                <div>
-                  <label htmlFor="lastName" className="text-sm font-body font-bold text-foreground">Last Name</label>
-                  <input id="lastName" type="text" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Doe" />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="email" className="text-sm font-body font-bold text-foreground">Email</label>
-                <input id="email" type="email" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="john@example.com" />
-              </div>
-              <div>
-                <label htmlFor="phone" className="text-sm font-body font-bold text-foreground">Phone</label>
-                <input id="phone" type="tel" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(555) 000-0000" />
-              </div>
-              <div>
-                <label htmlFor="message" className="text-sm font-body font-bold text-foreground">Message</label>
-                <textarea id="message" rows={4} className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none" placeholder="How can we help you?" />
-              </div>
-              <button type="submit" className="w-full rounded-sm bg-primary py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90">
-                Send Message
-              </button>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </section>
