@@ -30,7 +30,6 @@ export const BOOKING_CATEGORIES = [
   // General
   { value: "wellness",                     label: "Wellness",                           slugPrefix: "wellness-" },
   { value: "consultation",                 label: "Consultation",                       slugPrefix: "consultation-" },
-  { value: "virtual-consultation",         label: "Virtual Consultation",               slugPrefix: "virtual-consultation-" },
   { value: "concierge",                    label: "Concierge",                          slugPrefix: "concierge-" },
 ] as const
 

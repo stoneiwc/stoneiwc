@@ -25,7 +25,7 @@ const SECTIONS = [
   },
   {
     label: "General",
-    values: ["wellness", "consultation", "virtual-consultation", "concierge"],
+    values: ["wellness", "consultation", "concierge"],
   },
 ]
 
