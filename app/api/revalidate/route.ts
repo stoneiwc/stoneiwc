@@ -16,6 +16,7 @@ const TYPE_TAG_MAP: Record<string, string[]> = {
   article:                       ["article"],
   pressItem:                     ["pressItem"],
   mediaItem:                     ["mediaItem"],
+  awardItem:                     ["awardItem"],
   qcShowFlyer:                   ["qcShowFlyer"],
   qcShowEpisode:                 ["qcShowEpisode"],
   ourStoryImages:                ["ourStoryImages"],

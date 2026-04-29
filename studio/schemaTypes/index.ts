@@ -18,6 +18,7 @@ import {qcShowFlyerType} from './qcShowFlyer'
 import {qcShowEpisodeType} from './qcShowEpisode'
 import {couponType} from './coupon'
 import {shippingMethodType} from './shippingMethod'
+import {awardItemType} from './awardItem'
 
 export const schemaTypes = [
   categoryType,
@@ -40,4 +41,5 @@ export const schemaTypes = [
   qcShowEpisodeType,
   couponType,
   shippingMethodType,
+  awardItemType,
 ]

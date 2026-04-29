@@ -253,6 +253,25 @@ export async function getPressItems(): Promise<SanityPressItem[]> {
   return client.fetch<SanityPressItem[]>(query, {}, { next: { tags: ["pressItem"] } })
 }
 
+// ─── Award Items ─────────────────────────────────────────────────────────────
+
+export interface SanityAwardItem {
+  _id: string
+  title: string
+  description: string
+  image: { asset: { _ref: string; _type: string }; alt?: string }
+}
+
+export async function getAwardItems(): Promise<SanityAwardItem[]> {
+  const query = `*[_type == "awardItem"] | order(orderRank asc) {
+    _id,
+    title,
+    description,
+    image
+  }`
+  return client.fetch<SanityAwardItem[]>(query, {}, { next: { tags: ["awardItem"] } })
+}
+
 // ─── Media Items ─────────────────────────────────────────────────────────────
 
 export interface SanityMediaItem {

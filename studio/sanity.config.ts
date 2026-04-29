@@ -276,6 +276,21 @@ export default defineConfig({
                                   ]),
                               ),
                             S.listItem()
+                              .title('Awards')
+                              .child(
+                                S.list()
+                                  .title('Awards')
+                                  .items([
+                                    S.documentTypeListItem('awardItem').title('All Awards'),
+                                    orderableDocumentListDeskItem({
+                                      type: 'awardItem',
+                                      title: 'Manage Order',
+                                      S,
+                                      context,
+                                    }),
+                                  ]),
+                              ),
+                            S.listItem()
                               .title('QC Show')
                               .child(
                                 S.list()
@@ -371,6 +386,7 @@ export default defineConfig({
                   'article',
                   'pressItem',
                   'mediaItem',
+                  'awardItem',
                   'qcShowFlyer',
                   'qcShowEpisode',
                   'coupon',
