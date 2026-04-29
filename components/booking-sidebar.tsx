@@ -9,7 +9,7 @@ import { BOOKING_CATEGORIES } from "@/lib/cal-api"
 const SECTIONS = [
   {
     label: "Head",
-    values: ["hair", "face", "lash-extension", "permanent-makeup", "semi-permanent-makeup", "skin-imperfection"],
+    values: ["hair", "face", "lash-extension", "micropigmentation", "skin-imperfection"],
   },
   {
     label: "Upper Body",
