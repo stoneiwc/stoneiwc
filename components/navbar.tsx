@@ -36,11 +36,18 @@ export function Navbar() {
               {CONTACT_INFO.email}
             </a>
             <a
-              href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`}
+              href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
               className="flex items-center gap-2 transition-colors hover:text-primary"
             >
               <Phone className="h-3 w-3" />
-              {CONTACT_INFO.phone}
+              General Info: {CONTACT_INFO.phoneGeneral}
+            </a>
+            <a
+              href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
+              className="flex items-center gap-2 transition-colors hover:text-primary"
+            >
+              <Phone className="h-3 w-3" />
+              Concierge Services: {CONTACT_INFO.phoneConcierge}
             </a>
           </div>
           <p className="text-background/70">{CONTACT_INFO.address}</p>

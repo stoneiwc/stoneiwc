@@ -70,11 +70,18 @@ export function MobileNav({
               {CONTACT_INFO.email}
             </a>
             <a
-              href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`}
+              href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
               className="flex items-center gap-3 hover:text-primary transition-colors"
             >
               <Phone className="h-4 w-4 shrink-0 text-primary" />
-              {CONTACT_INFO.phone}
+              General Info: {CONTACT_INFO.phoneGeneral}
+            </a>
+            <a
+              href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
+              className="flex items-center gap-3 hover:text-primary transition-colors"
+            >
+              <Phone className="h-4 w-4 shrink-0 text-primary" />
+              Concierge Services: {CONTACT_INFO.phoneConcierge}
             </a>
             <div className="flex items-start gap-3">
               <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />

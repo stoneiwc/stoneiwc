@@ -39,9 +39,20 @@ export default function ContactPage() {
                   <Phone className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-body font-bold text-foreground">Phone</h3>
-                  <a href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`} className="mt-1 text-sm font-body text-muted-foreground hover:text-primary transition-colors">
-                    {CONTACT_INFO.phone}
+                  <h3 className="font-body font-bold text-foreground">General Information</h3>
+                  <a href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`} className="mt-1 text-sm font-body text-muted-foreground hover:text-primary transition-colors">
+                    {CONTACT_INFO.phoneGeneral}
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-primary/10">
+                  <Phone className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-body font-bold text-foreground">Concierge Services</h3>
+                  <a href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`} className="mt-1 text-sm font-body text-muted-foreground hover:text-primary transition-colors">
+                    {CONTACT_INFO.phoneConcierge}
                   </a>
                 </div>
               </div>

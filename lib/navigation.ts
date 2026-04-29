@@ -56,6 +56,8 @@ export const BOOKING_URL = "/book"
 export const CONTACT_INFO = {
   email: "info@stoneiwc.com",
   phone: "+1 972-473-2205",
+  phoneGeneral: "+1 972-473-2205",
+  phoneConcierge: "+1 469-439-0052",
   address: "1108 W Parker Rd Ste 102 Plano, TX 75075",
 }
 
