@@ -1,6 +1,7 @@
 "use client"
 
 import type { CartItem, AppliedCoupon } from "@/lib/cart-context"
+import type { AppliedGiftCard } from "@/app/checkout/page"
 
 interface CheckoutDetailsSectionProps {
   items: CartItem[]
@@ -10,6 +11,8 @@ interface CheckoutDetailsSectionProps {
   shippingMethod: string
   shippingCost: number
   totalPrice: number
+  appliedGiftCard?: AppliedGiftCard | null
+  giftCardDiscount?: number
 }
 
 export default function CheckoutDetailsSection({
@@ -20,6 +23,8 @@ export default function CheckoutDetailsSection({
   shippingMethod,
   shippingCost,
   totalPrice,
+  appliedGiftCard,
+  giftCardDiscount,
 }: CheckoutDetailsSectionProps) {
   return (
     <aside className="h-fit rounded-sm border border-border bg-card p-6">
@@ -60,6 +65,13 @@ export default function CheckoutDetailsSection({
           <div className="flex items-center justify-between text-muted-foreground">
             <span>Coupon ({appliedCoupon.code})</span>
             <span className="font-semibold text-primary">-${discountAmount.toFixed(2)}</span>
+          </div>
+        )}
+
+        {appliedGiftCard && giftCardDiscount !== undefined && giftCardDiscount > 0 && (
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Gift Card ({appliedGiftCard.code})</span>
+            <span className="font-semibold text-primary">-${giftCardDiscount.toFixed(2)}</span>
           </div>
         )}
 

@@ -29,6 +29,8 @@ type CreateStripePaymentIntentBody = {
     billingAddress?: CheckoutAddress;
     totalAmount?: number | string;
     email?: string;
+    giftCardCode?: string;
+    giftCardPromotionCodeId?: string;
 };
 
 /**
@@ -73,6 +75,8 @@ export async function POST(request: Request) {
             shippingAddress,
             totalAmount,
             email,
+            giftCardCode,
+            giftCardPromotionCodeId,
         } = body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
@@ -93,6 +97,8 @@ export async function POST(request: Request) {
             processing_fee: processingFee ? Number(processingFee).toFixed(2) : '0.00',
             shipping_cost: shippingCost ? Number(shippingCost).toFixed(2) : '0.00',
             tax_amount: taxAmount ? Number(taxAmount).toFixed(2) : '0.00',
+            ...(giftCardCode && { gift_card_code: giftCardCode }),
+            ...(giftCardPromotionCodeId && { gift_card_promotion_code_id: giftCardPromotionCodeId }),
         };
 
         const paymentIntent = await stripe.paymentIntents.create({
