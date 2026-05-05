@@ -37,7 +37,6 @@ export function BookingSidebar() {
     BOOKING_CATEGORIES.map((c) => [c.value, c.label])
   )
 
-  // Open the section that contains the active category by default
   const defaultOpen = SECTIONS.reduce<Record<string, boolean>>((acc, s) => {
     acc[s.label] = s.values.includes(activeCategory)
     return acc

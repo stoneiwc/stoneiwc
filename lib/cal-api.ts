@@ -71,3 +71,16 @@ export function filterEventsByCategory(
 
   return events.filter((e) => e.slug.startsWith(cat.slugPrefix))
 }
+
+export function filterEventsBySearch(
+  events: CalEventType[],
+  query: string
+): CalEventType[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return events
+  return events.filter(
+    (e) =>
+      e.title.toLowerCase().includes(q) ||
+      e.description?.toLowerCase().includes(q)
+  )
+}
