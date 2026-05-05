@@ -36,8 +36,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ valid: false, error: 'This gift card has already been redeemed.' })
   }
 
-  const coupon = promoCode.coupon as Stripe.Coupon
-  const amountOff = coupon.amount_off ? coupon.amount_off / 100 : 0
+  const couponData = promoCode.promotion.coupon
+  const coupon = typeof couponData === 'string' ? null : (couponData as Stripe.Coupon)
+  const amountOff = coupon?.amount_off ? coupon.amount_off / 100 : 0
 
   return NextResponse.json({
     valid: true,

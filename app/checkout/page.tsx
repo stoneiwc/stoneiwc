@@ -7,6 +7,12 @@ import { useCart } from "@/lib/cart-context"
 import SelfCheckoutSection from "@/components/checkout/SelfCheckoutSection"
 import CheckoutDetailsSection from "@/components/checkout/CheckoutDetailsSection"
 
+export interface AppliedGiftCard {
+  code: string
+  amount: number
+  promotionCodeId: string
+}
+
 export default function CheckoutPage() {
 	const {
 		items,
@@ -18,13 +24,15 @@ export default function CheckoutPage() {
 	} = useCart()
 	const [shippingMethod, setShippingMethod] = useState("")
 	const [shippingCost, setShippingCost] = useState(0)
+	const [appliedGiftCard, setAppliedGiftCard] = useState<AppliedGiftCard | null>(null)
 
 	const handleShippingMethodChange = useCallback((method: string, cost: number) => {
 		setShippingMethod(method)
 		setShippingCost(cost)
 	}, [])
 
-	const finalTotal = subtotal - discountAmount + shippingCost
+	const giftCardDiscount = appliedGiftCard ? Math.min(appliedGiftCard.amount, subtotal - discountAmount + shippingCost) : 0
+	const finalTotal = Math.max(0, subtotal - discountAmount + shippingCost - giftCardDiscount)
 
 	if (items.length === 0) {
 		return (
@@ -68,6 +76,8 @@ export default function CheckoutPage() {
 						totalPrice={finalTotal}
 						onShippingMethodChange={handleShippingMethodChange}
 						shippingCost={shippingCost}
+						appliedGiftCard={appliedGiftCard}
+						onGiftCardChange={setAppliedGiftCard}
 					/>
 
 					{/* Right Column: Order Summary */}
@@ -79,6 +89,8 @@ export default function CheckoutPage() {
 						shippingMethod={shippingMethod}
 						shippingCost={shippingCost}
 						totalPrice={finalTotal}
+						appliedGiftCard={appliedGiftCard}
+						giftCardDiscount={giftCardDiscount}
 					/>
 				</div>
 			</section>

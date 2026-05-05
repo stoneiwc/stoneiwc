@@ -42,6 +42,16 @@ export async function POST(request: Request) {
 
   const paymentIntent = event.data.object as Stripe.PaymentIntent
 
+  // Deactivate gift card promo code if one was redeemed in this order
+  const redeemedPromoCodeId = paymentIntent.metadata?.gift_card_promotion_code_id
+  if (redeemedPromoCodeId) {
+    try {
+      await stripe.promotionCodes.update(redeemedPromoCodeId, { active: false })
+    } catch (err) {
+      console.error('Failed to deactivate gift card promo code:', err)
+    }
+  }
+
   if (paymentIntent.metadata?.order_type !== 'gift_card') {
     return NextResponse.json({ received: true })
   }
@@ -69,7 +79,7 @@ export async function POST(request: Request) {
     })
 
     await stripe.promotionCodes.create({
-      coupon: coupon.id,
+      promotion: { type: 'coupon', coupon: coupon.id },
       code,
       max_redemptions: 1,
       expires_at: Math.floor(expiryDate.getTime() / 1000),

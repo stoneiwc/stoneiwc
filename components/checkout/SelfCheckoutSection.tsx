@@ -5,6 +5,7 @@ import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
+import type { AppliedGiftCard } from '@/app/checkout/page'
 
 interface CheckoutFormState {
   email: string
@@ -129,6 +130,8 @@ interface SelfCheckoutSectionProps {
   totalPrice: number
   onShippingMethodChange: (method: string, cost: number) => void
   shippingCost: number
+  appliedGiftCard: AppliedGiftCard | null
+  onGiftCardChange: (giftCard: AppliedGiftCard | null) => void
 }
 
 export default function SelfCheckoutSection({
@@ -139,6 +142,8 @@ export default function SelfCheckoutSection({
   totalPrice,
   onShippingMethodChange,
   shippingCost,
+  appliedGiftCard,
+  onGiftCardChange,
 }: SelfCheckoutSectionProps) {
   // Initialize form with saved shipping method or default to 'standard'
   const [form, setForm] = useState<CheckoutFormState>(() => ({
@@ -167,6 +172,31 @@ export default function SelfCheckoutSection({
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [giftCardInput, setGiftCardInput] = useState('')
+  const [giftCardError, setGiftCardError] = useState<string | null>(null)
+  const [isValidatingGiftCard, setIsValidatingGiftCard] = useState(false)
+
+  const handleApplyGiftCard = async () => {
+    const code = giftCardInput.trim().toUpperCase()
+    if (!code) return
+    setGiftCardError(null)
+    setIsValidatingGiftCard(true)
+    try {
+      const res = await fetch(`/api/gift-cards/validate?code=${encodeURIComponent(code)}`)
+      const data = await res.json()
+      if (!data.valid) {
+        setGiftCardError(data.error || 'Invalid gift card code.')
+      } else {
+        onGiftCardChange({ code: data.code, amount: data.amount, promotionCodeId: data.promotionCodeId })
+        setGiftCardInput('')
+      }
+    } catch {
+      setGiftCardError('Failed to validate gift card. Please try again.')
+    } finally {
+      setIsValidatingGiftCard(false)
+    }
+  }
 
   // Fetch shipping methods and restore saved selection
   useEffect(() => {
@@ -268,6 +298,8 @@ export default function SelfCheckoutSection({
           shippingCost,
           totalAmount: totalPrice,
           email: form.email,
+          giftCardCode: appliedGiftCard?.code,
+          giftCardPromotionCodeId: appliedGiftCard?.promotionCodeId,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
             lastName: form.shippingSameAsBilling ? form.lastName : form.lastName,
@@ -661,6 +693,48 @@ export default function SelfCheckoutSection({
                 </label>
               ))}
             </div>
+          </div>
+
+          {/* Gift Card */}
+          <div>
+            <h3 className="font-sans text-lg font-semibold text-foreground">Gift Card</h3>
+            {appliedGiftCard ? (
+              <div className="mt-4 flex items-center justify-between rounded-sm border border-border bg-background p-4">
+                <div>
+                  <p className="font-body font-semibold text-foreground">{appliedGiftCard.code}</p>
+                  <p className="text-xs text-primary">-${appliedGiftCard.amount.toFixed(2)} applied</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onGiftCardChange(null)}
+                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  value={giftCardInput}
+                  onChange={(e) => { setGiftCardInput(e.target.value); setGiftCardError(null) }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleApplyGiftCard()}
+                  placeholder="STONE-XXXX-XXXX"
+                  className="flex-1 rounded-sm border border-input bg-background px-3 py-2 text-sm font-body font-mono text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyGiftCard}
+                  disabled={!giftCardInput.trim() || isValidatingGiftCard}
+                  className="rounded-sm bg-primary px-4 py-2 text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
+                >
+                  {isValidatingGiftCard ? '...' : 'Apply'}
+                </button>
+              </div>
+            )}
+            {giftCardError && (
+              <p className="mt-2 text-xs font-body text-red-600">{giftCardError}</p>
+            )}
           </div>
 
           {error && (
