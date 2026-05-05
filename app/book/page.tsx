@@ -4,9 +4,11 @@ import { Suspense } from "react"
 import { Clock, ArrowRight } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
 import { BookingSidebar, BookingTabsMobile } from "@/components/booking-sidebar"
+import { BookingSearch } from "@/components/booking-search"
 import {
   getEventTypes,
   filterEventsByCategory,
+  filterEventsBySearch,
   type BookingCategory,
 } from "@/lib/cal-api"
 
@@ -17,16 +19,17 @@ export const metadata: Metadata = {
 }
 
 type Props = {
-  searchParams: Promise<{ category?: string }>
+  searchParams: Promise<{ category?: string; search?: string }>
 }
 
 export default async function BookPage({ searchParams }: Props) {
-  const { category } = await searchParams
+  const { category, search } = await searchParams
   const activeCategory = (category as BookingCategory) ?? "all"
 
   const username = process.env.NEXT_PUBLIC_CAL_USERNAME!
   const allEvents = await getEventTypes(username)
-  const events = filterEventsByCategory(allEvents, activeCategory)
+  const categoryFiltered = filterEventsByCategory(allEvents, activeCategory)
+  const events = filterEventsBySearch(categoryFiltered, search ?? "")
 
   return (
     <>
@@ -43,6 +46,7 @@ export default async function BookPage({ searchParams }: Props) {
             <Suspense>
               {/* Desktop sidebar */}
               <aside className="hidden lg:block w-56 shrink-0 sticky top-28">
+                <BookingSearch events={allEvents} />
                 <BookingSidebar />
               </aside>
 
@@ -72,16 +76,25 @@ export default async function BookPage({ searchParams }: Props) {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {events.map((event) => (
+                  {events.map((event) => {
+                    const isConsultation = event.slug.includes("-consultation-")
+                    return (
                     <div
                       key={event.id}
                       className="group flex flex-col rounded-sm border border-border bg-card p-6 transition-all hover:border-primary/40 hover:shadow-md"
                     >
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span className="text-xs font-body font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                          {event.lengthInMinutes} min
-                        </span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <span className="text-xs font-body font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                            {event.lengthInMinutes} min
+                          </span>
+                        </div>
+                        {isConsultation && (
+                          <span className="inline-flex shrink-0 items-center rounded-full bg-amber-100 px-2.5 py-1 text-[9px] font-body font-bold uppercase tracking-[0.12em] text-amber-700 whitespace-nowrap">
+                            Consultation Service
+                          </span>
+                        )}
                       </div>
 
                       <h3 className="mt-4 font-sans text-xl font-semibold text-foreground">
@@ -95,33 +108,41 @@ export default async function BookPage({ searchParams }: Props) {
                       )}
 
                       <div className="mt-6 flex items-center justify-between">
-                        {event.price > 0 ? (
-                          <span className="text-sm font-body font-bold text-foreground">
-                            {(event.price / 100).toLocaleString("en-US", {
-                              style: "currency",
-                              currency: event.currency.toUpperCase(),
-                            })}
-                          </span>
-                        ) : event.slug.endsWith("-free") ? (
-                          <span className="text-sm font-body font-bold text-foreground">
-                            Free
-                          </span>
-                        ) : (
-                          <span className="text-sm font-body text-muted-foreground">
-                            Contact for pricing
-                          </span>
-                        )}
+                        <div className="flex flex-col gap-0.5">
+                          {isConsultation && (
+                            <span className="text-[10px] font-body font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                              Price for Consultation
+                            </span>
+                          )}
+                          {event.price > 0 ? (
+                            <span className="text-sm font-body font-bold text-foreground">
+                              {(event.price / 100).toLocaleString("en-US", {
+                                style: "currency",
+                                currency: event.currency.toUpperCase(),
+                              })}
+                            </span>
+                          ) : event.slug.endsWith("-free") ? (
+                            <span className="text-sm font-body font-bold text-foreground">
+                              Free
+                            </span>
+                          ) : (
+                            <span className="text-sm font-body text-muted-foreground">
+                              Contact for pricing
+                            </span>
+                          )}
+                        </div>
 
                         <Link
                           href={`/book/${event.slug}`}
-                          className="inline-flex items-center gap-1.5 rounded-sm bg-primary px-4 py-2 text-xs font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-sm bg-primary px-4 py-2 text-xs font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 whitespace-nowrap"
                         >
                           Book Now
                           <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
 
