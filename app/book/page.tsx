@@ -3,8 +3,9 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { Clock, ArrowRight } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
-import { BookingSidebar, BookingTabsMobile } from "@/components/booking-sidebar"
+import { BookingSidebar } from "@/components/booking-sidebar"
 import { BookingSearch } from "@/components/booking-search"
+import { BookingMobileBar } from "@/components/booking-mobile-bar"
 import {
   getEventTypes,
   filterEventsByCategory,
@@ -50,9 +51,9 @@ export default async function BookPage({ searchParams }: Props) {
                 <BookingSidebar />
               </aside>
 
-              {/* Mobile chip strip */}
+              {/* Mobile search + filter sheet */}
               <div className="lg:hidden">
-                <BookingTabsMobile />
+                <BookingMobileBar events={allEvents} />
               </div>
             </Suspense>
 
