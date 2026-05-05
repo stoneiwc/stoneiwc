@@ -321,6 +321,33 @@ NEXT_PUBLIC_FRONTEND_URL=https://stoneiwc.com    # "Shop Now" link inside the em
 
 ---
 
+## Troubleshooting: Gift Card Email Not Arriving After Test Purchase
+
+If a test payment succeeds but no gift card email arrives, work through these causes in order:
+
+**1. Webhook is not configured (most likely)**
+The email is sent inside the webhook handler, not during the payment itself. If the webhook endpoint hasn't been registered in Stripe Dashboard, `payment_intent.succeeded` never reaches the app and no email is ever triggered. Set up the webhook first — see the Deploy Checklist below.
+
+**2. `STRIPE_WEBHOOK_SECRET` is missing or wrong**
+Even if the webhook fires, the handler immediately rejects any request that fails signature verification. Check that `STRIPE_WEBHOOK_SECRET` in your environment matches the `whsec_xxx` value shown in Stripe Dashboard for that specific endpoint. The secret is unique per endpoint — sandbox and production have different values.
+
+**3. Resend domain not verified**
+Resend blocks outgoing emails from unverified sender domains. Make sure the domain in `RESEND_FROM_EMAIL` (e.g. `stoneiwc.com`) is verified in the Resend dashboard under Domains. Without verification, `resend.emails.send()` will return an error silently — the webhook still returns 200 but no email goes out.
+
+**4. `RESEND_API_KEY` missing in the deployed environment**
+The API key might exist in `.env.local` but not in Vercel's environment variables. Check Vercel → Project → Settings → Environment Variables and confirm `RESEND_API_KEY` is present for the correct environment (Preview / Production).
+
+**5. Email arrived but landed in spam**
+Resend delivered the email but it was filtered. Check the spam/junk folder. Long-term fix: set up SPF, DKIM, and DMARC records for the sending domain in Resend.
+
+**6. Webhook fired but email send failed silently**
+The webhook handler logs email errors with `console.error` but does not throw — it still returns `{ received: true }` to Stripe. This means Stripe reports the webhook as successful even if the email failed. To debug: check Vercel function logs for any `"Gift card email send error:"` entries after the payment.
+
+**7. Local development: Stripe CLI not running**
+When testing on `localhost`, Stripe cannot reach your local server directly. You must run `stripe listen --forward-to localhost:3000/api/webhooks/stripe` in a separate terminal to forward events. The `whsec_xxx` printed by the CLI is different from the Dashboard one — update `.env.local` accordingly each session.
+
+---
+
 ## Known Limitations
 
 - **No partial balance:** A gift card is fully consumed on first use. A $100 gift card used on a $60 order loses the remaining $40. Partial balance tracking would require Stripe Customer Balance (future sprint).
