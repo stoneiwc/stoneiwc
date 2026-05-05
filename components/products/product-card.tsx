@@ -6,10 +6,11 @@ import { ShoppingBag, Minus, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
+import { GIFT_CARD_SLUG } from "@/components/products/gift-card-purchase"
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity } = useCart()
-  
+  const isGiftCard = product.slug === GIFT_CARD_SLUG
   const cartItem = items.find(item => item.product.id === product.id)
   const quantity = cartItem?.quantity || 0
 
@@ -57,16 +58,25 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-4 flex items-end justify-between">
           <div className="flex items-baseline gap-2">
             <span className="font-sans text-xl font-semibold text-foreground">
-              ${product.price}
+              {isGiftCard ? 'From $25' : `$${product.price}`}
             </span>
-            {product.originalPrice && (
+            {!isGiftCard && product.originalPrice && (
               <span className="text-sm font-body text-muted-foreground line-through">
                 ${product.originalPrice}
               </span>
             )}
           </div>
-          
-          {quantity > 0 ? (
+
+          {isGiftCard ? (
+            <Link
+              href={`/products/${product.slug}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-xs font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-md"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              Buy
+            </Link>
+          ) : quantity > 0 ? (
             <div className="flex items-center rounded-sm border border-input bg-background">
               <button
                 onClick={(e) => {
