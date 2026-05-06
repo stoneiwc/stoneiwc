@@ -5,6 +5,7 @@ import "./globals.css"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { CartProvider } from "@/lib/cart-context"
+import { JsonLd } from "@/components/seo/json-ld"
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -65,9 +66,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `${BASE_URL}/#organization`,
+    name: "Stone International Wellness Center",
+    url: BASE_URL,
+    logo: `${BASE_URL}/stoneiwc-logo.png`,
+    description: DESCRIPTION,
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${BASE_URL}/#website`,
+        url: BASE_URL,
+        name: "Stone International Wellness Center",
+        publisher: { "@id": `${BASE_URL}/#organization` },
+      },
+    ],
+  }
+
   return (
     <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
       <body className="font-body antialiased" suppressHydrationWarning>
+        <JsonLd data={organizationSchema} />
         <CartProvider>
           <Navbar />
           <main>{children}</main>

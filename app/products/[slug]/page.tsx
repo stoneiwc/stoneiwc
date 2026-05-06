@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getAllProductSlugs, getProductBySlug } from "@/lib/sanity.queries"
 import { ProductDetail } from "@/components/products/product-detail"
+import { JsonLd } from "@/components/seo/json-ld"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -31,5 +32,34 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound()
 
-  return <ProductDetail product={product} />
+  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.image,
+    url: `${baseUrl}/products/${product.slug}`,
+    brand: {
+      "@type": "Brand",
+      name: "Stone IWC",
+    },
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: "USD",
+      availability: product.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      url: `${baseUrl}/products/${product.slug}`,
+    },
+  }
+
+  return (
+    <>
+      <JsonLd data={productSchema} />
+      <ProductDetail product={product} />
+    </>
+  )
 }

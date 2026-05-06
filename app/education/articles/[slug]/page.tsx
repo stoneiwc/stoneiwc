@@ -6,6 +6,7 @@ import { PortableText } from "@portabletext/react"
 import { getArticleBySlug, getAllArticleSlugs } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 import { CalendarDays, ArrowLeft } from "lucide-react"
+import { JsonLd } from "@/components/seo/json-ld"
 
 export const revalidate = 60
 
@@ -37,8 +38,35 @@ export default async function ArticlePage({
   const article = await getArticleBySlug(slug)
   if (!article) notFound()
 
+  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
+  const articleUrl = `${baseUrl}/education/articles/${article.slug.current}`
+  const coverImageUrl = article.coverImage?.asset
+    ? urlFor(article.coverImage).width(1200).height(675).url()
+    : undefined
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    datePublished: article.publishedAt,
+    url: articleUrl,
+    ...(coverImageUrl && { image: coverImageUrl }),
+    publisher: {
+      "@type": "Organization",
+      name: "Stone International Wellness Center",
+      url: baseUrl,
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+  }
+
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16 lg:py-24">
+    <>
+      <JsonLd data={articleSchema} />
+      <article className="mx-auto max-w-3xl px-6 py-16 lg:py-24">
       <Link
         href="/education/articles"
         className="mb-10 inline-flex items-center gap-2 font-body text-sm font-bold tracking-wider text-muted-foreground transition-colors hover:text-primary"
@@ -113,5 +141,6 @@ export default async function ArticlePage({
         </Link>
       </div>
     </article>
+    </>
   )
 }
