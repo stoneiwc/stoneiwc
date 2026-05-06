@@ -6,9 +6,15 @@ import { ArrowRight, Newspaper, Tv, Trophy, Mic, Radio } from "lucide-react"
 import { getFeaturedPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
+const DESCRIPTION =
+  "Stone International Wellness Center in the press, media, podcasts, awards, and thought leadership platforms."
+
 export const metadata: Metadata = {
   title: "Featured On",
-  description: "Stone International Wellness Center in the press, media, podcasts, awards, and thought leadership platforms.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/featured" },
+  openGraph: { title: "Featured On | Stone IWC", description: DESCRIPTION, url: "/featured", type: "website" },
+  twitter: { card: "summary_large_image", title: "Featured On | Stone IWC", description: DESCRIPTION },
 }
 
 export const revalidate = 60

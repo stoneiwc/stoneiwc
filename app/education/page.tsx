@@ -15,10 +15,15 @@ import {
 import { getEducationPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
+const DESCRIPTION =
+  "Stone IWC advanced education center -- practitioner certifications, licensee programs, and holistic health education honoring Eastern and Western traditions."
+
 export const metadata: Metadata = {
   title: "Education",
-  description:
-    "Stone IWC advanced education center -- practitioner certifications, licensee programs, and holistic health education honoring Eastern and Western traditions.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/education" },
+  openGraph: { title: "Education | Stone IWC", description: DESCRIPTION, url: "/education", type: "website" },
+  twitter: { card: "summary_large_image", title: "Education | Stone IWC", description: DESCRIPTION },
 }
 
 export const revalidate = 60
