@@ -18,13 +18,42 @@ const lato = Lato({
   variable: "--font-lato",
 })
 
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
+
+const DESCRIPTION =
+  "A concierge holistic wellness retreat devoted to restoring the body from the inside out. Personalized lymphatic care, non-surgical body contouring, restorative hand & foot care, holistic nourishment guidance, and refined semi-permanent aesthetics."
+
 export const metadata: Metadata = {
+  metadataBase: new URL(BASE_URL),
   title: {
     default: "Stone International Wellness Center",
     template: "%s | Stone IWC",
   },
-  description:
-    "A concierge holistic wellness retreat devoted to restoring the body from the inside out. Personalized lymphatic care, non-surgical body contouring, restorative hand & foot care, holistic nourishment guidance, and refined semi-permanent aesthetics.",
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Stone International Wellness Center",
+    title: "Stone International Wellness Center",
+    description: DESCRIPTION,
+    url: BASE_URL,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Stone International Wellness Center",
+    description: DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  alternates: {
+    canonical: BASE_URL,
+  },
 }
 
 export const viewport: Viewport = {
