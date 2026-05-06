@@ -44,6 +44,9 @@ client.fetch(query, params, { next: { tags: ["product"] } })
 | Page | Revalidate |
 |------|-----------|
 | `/` (homepage) | 60s |
+| `/about` | 60s |
+| `/education` | 60s |
+| `/featured` | 60s |
 | `/products` | 60s |
 | `/products/[slug]` | 60s |
 | `/education/articles/[slug]` | 60s |
@@ -163,16 +166,20 @@ These are simpler content types managed in Sanity. Most are single-document type
 
 **Singleton image documents** (one document per page section):
 
-| Schema ID | Used On |
-|-----------|---------|
-| `homePageImages` | Homepage about + culinary images |
-| `servicesPageImages` | Services page section images |
-| `conciergeImages` | Concierge page |
-| `virtualConsultationsImages` | Virtual consultations page |
-| `ourStoryImages` | About → Our Story |
-| `certificationImages` | Education → Certifications |
-| `licenseeProgramImages` | Education → Licensee Program |
-| `cuppingImages` | Education → Cupping |
+| Schema ID | Used On | Studio Path |
+|-----------|---------|-------------|
+| `homePageImages` | Homepage about + culinary images | Pages → Home → Images |
+| `aboutPageImages` | `/about` hero image | Pages → About Us → About Us Page → Images |
+| `ourStoryImages` | About → Our Story | Pages → About Us → Our Story → Images |
+| `servicesPageImages` | `/services` section images | Pages → Services → Services Page → Images |
+| `conciergeImages` | Services → Concierge | Pages → Services → Concierge → Images |
+| `virtualConsultationsImages` | Services → Virtual Consultations | Pages → Services → Virtual Consultations → Images |
+| `educationPageImages` | `/education` hero image | Pages → Education → Education Page → Images |
+| `certificationImages` | Education → Certifications | Pages → Education → Practitioner Certifications → Images |
+| `licenseeProgramImages` | Education → Licensee Program | Pages → Education → Licensee Programs → Images |
+| `cuppingImages` | Education → Cupping | Pages → Education → Cupping → Images |
+| `featuredPageImages` | `/featured` hero image | Pages → Featured On → Featured On Page → Images |
+| `qcShowFlyer` | Featured → QC Show | Pages → Featured On → QC Show → Flyer |
 
 These use a fixed `_id` (same as `_type`) so there is always exactly one document per type. Queried with `[0]` selector and the `_id` filter.
 
@@ -215,6 +222,9 @@ The `"category": category->{name}` syntax dereferences the category reference an
 | `getShippingMethods()` | `isActive == true` ordered by `order` | `shippingMethod` |
 | `getArticles()` | ordered by `publishedAt desc` | `article` |
 | `getArticleBySlug(slug)` | `slug.current == $slug` | `article` |
+| `getAboutPageImages()` | singleton `aboutPageImages` | `aboutPageImages` |
+| `getEducationPageImages()` | singleton `educationPageImages` | `educationPageImages` |
+| `getFeaturedPageImages()` | singleton `featuredPageImages` | `featuredPageImages` |
 
 ### `transformProduct` Function
 
@@ -245,13 +255,58 @@ Images are passed to Next.js `<Image>` which handles further optimization (WebP 
 
 ---
 
+## Studio Structure (`studio/sanity.config.ts`)
+
+The Studio sidebar is manually structured — new schema types do not appear automatically. The hierarchy mirrors the site navigation:
+
+```
+Pages
+├── Home
+│   ├── Hero Slides
+│   └── Images (homePageImages)
+├── About Us
+│   ├── About Us Page → Images (aboutPageImages)
+│   ├── Our Story → Images (ourStoryImages)
+│   ├── Team Members
+│   └── Partners & Affiliates
+├── Services
+│   ├── Services Page → Images (servicesPageImages)
+│   ├── Concierge → Images (conciergeImages)
+│   └── Virtual Consultations → Images (virtualConsultationsImages)
+├── Education
+│   ├── Education Page → Images (educationPageImages)
+│   ├── Practitioner Certifications → Images (certificationImages)
+│   ├── Licensee Programs → Images (licenseeProgramImages)
+│   ├── Cupping → Images (cuppingImages)
+│   └── Articles
+└── Featured On
+    ├── Featured On Page → Images (featuredPageImages)
+    ├── Press
+    ├── Media
+    ├── Awards
+    └── QC Show (Flyer + Episodes)
+
+Products
+└── Categories, All Products
+
+Shipping & Coupons
+└── Coupons, Shipping Methods
+```
+
+When adding a new schema type, it must be registered in both `studio/schemaTypes/index.ts` AND manually placed in the structure in `sanity.config.ts`. It must also be added to the exclusion filter at the bottom of `sanity.config.ts` to prevent it from appearing twice. If the document is a singleton, add it to the `singletonTypes` array in the same file.
+
+---
+
 ## Adding a New Schema Type
 
 1. Create `studio/schemaTypes/{typeName}.ts`
 2. Define fields with `defineType` + `defineField`
 3. Export the type and import it in `studio/schemaTypes/index.ts`
 4. Add to the `schemaTypes` array in `index.ts`
-5. Write a query function in `lib/sanity.queries.ts` with an appropriate cache tag
-6. Deploy the Studio: `cd studio && npx sanity deploy`
+5. Add a `S.listItem()` entry in the correct section of `sanity.config.ts`
+6. Add the type name to the exclusion filter array at the bottom of `sanity.config.ts`
+7. If singleton: add to `singletonTypes` in `sanity.config.ts` and use a fixed `documentId` matching `_type`
+8. Write a query function in `lib/sanity.queries.ts` with an appropriate cache tag
+9. Deploy the Studio: `cd studio && npx sanity deploy`
 
 > Schema changes are non-destructive — adding fields does not affect existing documents. Removing or renaming fields will cause existing data to silently disappear from queries.
