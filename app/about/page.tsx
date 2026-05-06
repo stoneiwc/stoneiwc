@@ -6,10 +6,15 @@ import { ArrowRight, BookOpen, Users, Handshake } from "lucide-react"
 import { getAboutPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
+const DESCRIPTION =
+  "Learn about Stone International Wellness Center -- holistic practitioners with over five decades of experience, honoring both Eastern and Western medicine."
+
 export const metadata: Metadata = {
   title: "About Us",
-  description:
-    "Learn about Stone International Wellness Center -- holistic practitioners with over five decades of experience, honoring both Eastern and Western medicine.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/about" },
+  openGraph: { title: "About Us | Stone IWC", description: DESCRIPTION, url: "/about", type: "website" },
+  twitter: { card: "summary_large_image", title: "About Us | Stone IWC", description: DESCRIPTION },
 }
 
 export const revalidate = 60

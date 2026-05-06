@@ -4,9 +4,14 @@ import { Mail, Phone, MapPin, Clock } from "lucide-react"
 import { CONTACT_INFO, BOOKING_URL } from "@/lib/navigation"
 import { ContactForm } from "@/components/contact/contact-form"
 
+const DESCRIPTION = "Get in touch with Stone International Wellness Center in Plano, TX."
+
 export const metadata: Metadata = {
   title: "Contact Us",
-  description: "Get in touch with Stone International Wellness Center in Plano, TX.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/contact" },
+  openGraph: { title: "Contact Us | Stone IWC", description: DESCRIPTION, url: "/contact", type: "website" },
+  twitter: { card: "summary_large_image", title: "Contact Us | Stone IWC", description: DESCRIPTION },
 }
 
 export default function ContactPage() {

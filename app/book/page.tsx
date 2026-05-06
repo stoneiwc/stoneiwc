@@ -13,10 +13,15 @@ import {
   type BookingCategory,
 } from "@/lib/cal-api"
 
+const DESCRIPTION =
+  "Schedule a professional treatment, concierge visit, or virtual consultation with Stone IWC."
+
 export const metadata: Metadata = {
   title: "Book a Service",
-  description:
-    "Schedule a professional treatment, concierge visit, or virtual consultation with Stone IWC.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/book" },
+  openGraph: { title: "Book a Service | Stone IWC", description: DESCRIPTION, url: "/book", type: "website" },
+  twitter: { card: "summary_large_image", title: "Book a Service | Stone IWC", description: DESCRIPTION },
 }
 
 type Props = {

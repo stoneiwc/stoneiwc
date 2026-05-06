@@ -122,3 +122,4 @@ public/               Static assets
 | [`project-documentation/cal-com-booking.md`](project-documentation/cal-com-booking.md) | Booking page, Cal.com API, slug conventions, provisioning scripts |
 | [`project-documentation/sanity-cms.md`](project-documentation/sanity-cms.md) | Content schemas, GROQ queries, ISR, image handling, products |
 | [`project-documentation/resend-email.md`](project-documentation/resend-email.md) | Email templates, rate limiting, adding new email types |
+| [`project-documentation/seo.md`](project-documentation/seo.md) | Sitemap, robots, JSON-LD, metadata strategy, post-deploy steps, remaining work |

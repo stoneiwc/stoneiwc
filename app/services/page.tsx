@@ -7,10 +7,15 @@ import { ArrowRight, Stethoscope, MapPin, Utensils } from "lucide-react"
 import { getServicesPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
+const DESCRIPTION =
+  "Over 100 holistic wellness services delivered to your location -- treatments, culinary wellness, and nutritional programs."
+
 export const metadata: Metadata = {
   title: "Services",
-  description:
-    "Over 100 holistic wellness services delivered to your location -- treatments, culinary wellness, and nutritional programs.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/services" },
+  openGraph: { title: "Services | Stone IWC", description: DESCRIPTION, url: "/services", type: "website" },
+  twitter: { card: "summary_large_image", title: "Services | Stone IWC", description: DESCRIPTION },
 }
 
 export const revalidate = 60
