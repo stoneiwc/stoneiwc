@@ -127,21 +127,33 @@ function MobileNavItem({
 
   return (
     <div>
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className={cn(
-          "flex w-full items-center justify-between px-6 py-3.5 text-base font-body font-bold tracking-wide transition-colors hover:text-primary",
-          isActive ? "text-primary" : "text-foreground"
-        )}
-      >
-        {item.label}
-        <ChevronDown
+      <div className="flex items-center">
+        <Link
+          href={item.href}
+          onClick={onClose}
           className={cn(
-            "h-4 w-4 transition-transform duration-200",
-            expanded && "rotate-180"
+            "flex-1 px-6 py-3.5 text-base font-body font-bold tracking-wide transition-colors hover:text-primary",
+            isActive ? "text-primary" : "text-foreground"
           )}
-        />
-      </button>
+        >
+          {item.label}
+        </Link>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className={cn(
+            "px-4 py-3.5 transition-colors hover:text-primary",
+            isActive ? "text-primary" : "text-foreground"
+          )}
+          aria-label={`Toggle ${item.label} submenu`}
+        >
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              expanded && "rotate-180"
+            )}
+          />
+        </button>
+      </div>
 
       <div
         className={cn(

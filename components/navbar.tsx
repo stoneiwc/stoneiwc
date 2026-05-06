@@ -152,7 +152,8 @@ function NavItemDesktop({
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button
+      <Link
+        href={item.href}
         className={cn(
           "flex items-center gap-1 px-3 py-2 text-sm font-body font-bold tracking-wide transition-colors hover:text-primary",
           isActive ? "text-primary" : "text-foreground"
@@ -165,7 +166,7 @@ function NavItemDesktop({
             open && "rotate-180"
           )}
         />
-      </button>
+      </Link>
 
       <div
         className={cn(
