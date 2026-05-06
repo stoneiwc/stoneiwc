@@ -23,9 +23,33 @@ export async function generateMetadata({
   const { slug } = await params
   const article = await getArticleBySlug(slug)
   if (!article) return {}
+
+  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
+  const canonicalUrl = `${baseUrl}/education/articles/${slug}`
+  const ogImage = article.coverImage?.asset
+    ? urlFor(article.coverImage).width(1200).height(630).url()
+    : undefined
+
   return {
     title: article.title,
     description: article.excerpt,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      url: canonicalUrl,
+      type: "article",
+      publishedTime: article.publishedAt,
+      ...(ogImage && {
+        images: [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      ...(ogImage && { images: [ogImage] }),
+    },
   }
 }
 

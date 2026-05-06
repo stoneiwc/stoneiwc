@@ -20,9 +20,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(slug)
   if (!product) return { title: "Product Not Found" }
 
+  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
+  const canonicalUrl = `${baseUrl}/products/${slug}`
+
   return {
     title: product.name,
     description: product.shortDescription,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: product.name,
+      description: product.shortDescription,
+      url: canonicalUrl,
+      type: "website",
+      ...(product.image && {
+        images: [{ url: product.image, alt: product.name }],
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.shortDescription,
+      ...(product.image && { images: [product.image] }),
+    },
   }
 }
 
