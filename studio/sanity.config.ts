@@ -65,6 +65,22 @@ export default defineConfig({
                           .title('About Us')
                           .items([
 
+                            S.listItem()
+                              .title('About Us Page')
+                              .child(
+                                S.list()
+                                  .title('About Us Page')
+                                  .items([
+                                    S.listItem()
+                                      .title('Images')
+                                      .child(
+                                        S.document()
+                                          .schemaType('aboutPageImages')
+                                          .documentId('aboutPageImages'),
+                                      ),
+                                  ]),
+                              ),
+
                             // Our Story
                             S.listItem()
                               .title('Our Story')
@@ -127,10 +143,10 @@ export default defineConfig({
                           .title('Services')
                           .items([
                             S.listItem()
-                              .title('All Services')
+                              .title('Services Page')
                               .child(
                                 S.list()
-                                  .title('All Services')
+                                  .title('Services Page')
                                   .items([
                                     S.listItem()
                                       .title('Images')
@@ -181,6 +197,21 @@ export default defineConfig({
                         S.list()
                           .title('Education')
                           .items([
+                            S.listItem()
+                              .title('Education Page')
+                              .child(
+                                S.list()
+                                  .title('Education Page')
+                                  .items([
+                                    S.listItem()
+                                      .title('Images')
+                                      .child(
+                                        S.document()
+                                          .schemaType('educationPageImages')
+                                          .documentId('educationPageImages'),
+                                      ),
+                                  ]),
+                              ),
                             S.listItem()
                               .title('Practitioner Certifications')
                               .child(
@@ -245,6 +276,21 @@ export default defineConfig({
                         S.list()
                           .title('Featured On')
                           .items([
+                            S.listItem()
+                              .title('Featured On Page')
+                              .child(
+                                S.list()
+                                  .title('Featured On Page')
+                                  .items([
+                                    S.listItem()
+                                      .title('Images')
+                                      .child(
+                                        S.document()
+                                          .schemaType('featuredPageImages')
+                                          .documentId('featuredPageImages'),
+                                      ),
+                                  ]),
+                              ),
                             S.listItem()
                               .title('Press')
                               .child(
@@ -372,10 +418,13 @@ export default defineConfig({
                 ![
                   'heroSlide',
                   'homePageImages',
+                  'aboutPageImages',
                   'ourStoryImages',
                   'teamMember',
                   'partner',
                   'servicesPageImages',
+                  'educationPageImages',
+                  'featuredPageImages',
                   'conciergeImages',
                   'virtualConsultationsImages',
                   'category',
@@ -402,8 +451,11 @@ export default defineConfig({
     actions: (prev, context) => {
       const singletonTypes = [
         'homePageImages',
+        'aboutPageImages',
         'ourStoryImages',
         'servicesPageImages',
+        'educationPageImages',
+        'featuredPageImages',
         'conciergeImages',
         'virtualConsultationsImages',
         'certificationImages',

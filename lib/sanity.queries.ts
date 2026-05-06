@@ -149,6 +149,19 @@ export async function getHomePageImages(): Promise<SanityHomePageImages | null> 
   return client.fetch<SanityHomePageImages | null>(query)
 }
 
+// ─── About Page ──────────────────────────────────────────────────────────────
+
+export interface SanityAboutPageImages {
+  heroImage?: SanityImageField
+}
+
+export async function getAboutPageImages(): Promise<SanityAboutPageImages | null> {
+  const query = `*[_type == "aboutPageImages" && _id == "aboutPageImages"][0] {
+    heroImage
+  }`
+  return client.fetch<SanityAboutPageImages | null>(query, {}, { next: { tags: ["aboutPageImages"] } })
+}
+
 // ─── Services Page ───────────────────────────────────────────────────────────
 
 export interface SanityServicesPageImages {
@@ -186,6 +199,32 @@ export async function getVirtualConsultationsImages(): Promise<SanityVirtualCons
     mainImage
   }`
   return client.fetch<SanityVirtualConsultationsImages | null>(query)
+}
+
+// ─── Education Page ──────────────────────────────────────────────────────────
+
+export interface SanityEducationPageImages {
+  heroImage?: SanityImageField
+}
+
+export async function getEducationPageImages(): Promise<SanityEducationPageImages | null> {
+  const query = `*[_type == "educationPageImages" && _id == "educationPageImages"][0] {
+    heroImage
+  }`
+  return client.fetch<SanityEducationPageImages | null>(query, {}, { next: { tags: ["educationPageImages"] } })
+}
+
+// ─── Featured On Page ────────────────────────────────────────────────────────
+
+export interface SanityFeaturedPageImages {
+  heroImage?: SanityImageField
+}
+
+export async function getFeaturedPageImages(): Promise<SanityFeaturedPageImages | null> {
+  const query = `*[_type == "featuredPageImages" && _id == "featuredPageImages"][0] {
+    heroImage
+  }`
+  return client.fetch<SanityFeaturedPageImages | null>(query, {}, { next: { tags: ["featuredPageImages"] } })
 }
 
 // ─── Education ───────────────────────────────────────────────────────────────

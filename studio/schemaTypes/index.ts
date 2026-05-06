@@ -5,7 +5,10 @@ import {homePageImagesType} from './homePageImages'
 import {ourStoryImagesType} from './ourStoryImages'
 import {teamMemberType} from './teamMember'
 import {partnerType} from './partner'
+import {aboutPageImagesType} from './aboutPageImages'
 import {servicesPageImagesType} from './servicesPageImages'
+import {educationPageImagesType} from './educationPageImages'
+import {featuredPageImagesType} from './featuredPageImages'
 import {conciergeImagesType} from './conciergeImages'
 import {virtualConsultationsImagesType} from './virtualConsultationsImages'
 import {certificationImagesType} from './certificationImages'
@@ -28,7 +31,10 @@ export const schemaTypes = [
   ourStoryImagesType,
   teamMemberType,
   partnerType,
+  aboutPageImagesType,
   servicesPageImagesType,
+  educationPageImagesType,
+  featuredPageImagesType,
   conciergeImagesType,
   virtualConsultationsImagesType,
   certificationImagesType,
