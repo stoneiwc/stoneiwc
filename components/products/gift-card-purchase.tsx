@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 
-export const GIFT_CARD_SLUG = 'stoneiwc-gift-certificate'
+export { GIFT_CARD_SLUG } from '@/lib/constants'
 
 const PRESET_AMOUNTS = [25, 50, 100, 150, 200]
 
