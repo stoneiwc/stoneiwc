@@ -17,6 +17,7 @@ import { GiftCardPurchase, GIFT_CARD_SLUG } from "@/components/products/gift-car
 
 export function ProductDetail({ product }: { product: Product }) {
   const isGiftCard = product.slug === GIFT_CARD_SLUG
+  const isOnSale = Boolean(product.isDiscount && product.originalPrice && product.originalPrice > product.price)
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addItem } = useCart()
@@ -47,7 +48,7 @@ export function ProductDetail({ product }: { product: Product }) {
             sizes="(max-width: 1024px) 100vw, 50vw"
             priority
           />
-          {product.originalPrice && (
+          {isOnSale && product.originalPrice && (
             <Badge className="absolute left-4 top-4 rounded-sm bg-destructive text-destructive-foreground font-body">
               {Math.round(
                 ((product.originalPrice - product.price) /
@@ -74,7 +75,7 @@ export function ProductDetail({ product }: { product: Product }) {
               <span className="font-sans text-3xl font-semibold text-foreground">
                 ${product.price.toFixed(2)}
               </span>
-              {product.originalPrice && (
+              {isOnSale && product.originalPrice && (
                 <span className="text-lg font-body text-muted-foreground line-through">
                   ${product.originalPrice.toFixed(2)}
                 </span>

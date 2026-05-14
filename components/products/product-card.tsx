@@ -13,6 +13,7 @@ export function ProductCard({ product }: { product: Product }) {
   const isGiftCard = product.slug === GIFT_CARD_SLUG
   const cartItem = items.find(item => item.product.id === product.id)
   const quantity = cartItem?.quantity || 0
+  const isOnSale = Boolean(product.isDiscount && product.originalPrice && product.originalPrice > product.price)
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card transition-all duration-300 hover:shadow-xl hover:border-primary/30">
@@ -27,12 +28,12 @@ export function ProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
-        {product.originalPrice && (
+        {isOnSale && (
           <Badge className="absolute left-3 top-3 rounded-sm bg-destructive text-destructive-foreground font-body text-xs">
             Sale
           </Badge>
         )}
-        {product.tags.includes("bestseller") && !product.originalPrice && (
+        {product.tags.includes("bestseller") && !isOnSale && (
           <Badge className="absolute left-3 top-3 rounded-sm bg-primary text-primary-foreground font-body text-xs">
             Bestseller
           </Badge>
@@ -60,7 +61,7 @@ export function ProductCard({ product }: { product: Product }) {
             <span className="font-sans text-xl font-semibold text-foreground">
               {isGiftCard ? 'From $25' : `$${product.price}`}
             </span>
-            {!isGiftCard && product.originalPrice && (
+            {!isGiftCard && isOnSale && (
               <span className="text-sm font-body text-muted-foreground line-through">
                 ${product.originalPrice}
               </span>
