@@ -17,6 +17,8 @@ import { GiftCardPurchase, GIFT_CARD_SLUG } from "@/components/products/gift-car
 
 export function ProductDetail({ product }: { product: Product }) {
   const isGiftCard = product.slug === GIFT_CARD_SLUG
+  const isOnSale = Boolean(product.isDiscount && product.originalPrice && product.originalPrice > product.price)
+  const isOutOfStock = !product.inStock
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addItem } = useCart()
@@ -47,7 +49,11 @@ export function ProductDetail({ product }: { product: Product }) {
             sizes="(max-width: 1024px) 100vw, 50vw"
             priority
           />
-          {product.originalPrice && (
+          {isOutOfStock ? (
+            <Badge className="absolute left-4 top-4 rounded-sm bg-muted text-muted-foreground font-body">
+              Out of Stock
+            </Badge>
+          ) : isOnSale && product.originalPrice ? (
             <Badge className="absolute left-4 top-4 rounded-sm bg-destructive text-destructive-foreground font-body">
               {Math.round(
                 ((product.originalPrice - product.price) /
@@ -56,7 +62,7 @@ export function ProductDetail({ product }: { product: Product }) {
               )}
               % Off
             </Badge>
-          )}
+          ) : null}
         </div>
 
         <div className="flex flex-col">
@@ -74,7 +80,7 @@ export function ProductDetail({ product }: { product: Product }) {
               <span className="font-sans text-3xl font-semibold text-foreground">
                 ${product.price.toFixed(2)}
               </span>
-              {product.originalPrice && (
+              {isOnSale && product.originalPrice && (
                 <span className="text-lg font-body text-muted-foreground line-through">
                   ${product.originalPrice.toFixed(2)}
                 </span>
@@ -109,6 +115,15 @@ export function ProductDetail({ product }: { product: Product }) {
           <div className="mt-8">
             {isGiftCard ? (
               <GiftCardPurchase />
+            ) : isOutOfStock ? (
+              <div className="rounded-sm border border-input bg-muted/40 px-6 py-4 text-center">
+                <p className="font-body text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                  Currently Unavailable
+                </p>
+                <p className="mt-1 font-body text-xs text-muted-foreground">
+                  This product is out of stock. Please check back soon.
+                </p>
+              </div>
             ) : (
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center rounded-sm border border-input">
