@@ -14,6 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
   const cartItem = items.find(item => item.product.id === product.id)
   const quantity = cartItem?.quantity || 0
   const isOnSale = Boolean(product.isDiscount && product.originalPrice && product.originalPrice > product.price)
+  const isOutOfStock = !product.inStock
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card transition-all duration-300 hover:shadow-xl hover:border-primary/30">
@@ -28,16 +29,19 @@ export function ProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
-        {isOnSale && (
+        {isOutOfStock ? (
+          <Badge className="absolute left-3 top-3 rounded-sm bg-muted text-muted-foreground font-body text-xs">
+            Out of Stock
+          </Badge>
+        ) : isOnSale ? (
           <Badge className="absolute left-3 top-3 rounded-sm bg-destructive text-destructive-foreground font-body text-xs">
             Sale
           </Badge>
-        )}
-        {product.tags.includes("bestseller") && !isOnSale && (
+        ) : product.tags.includes("bestseller") ? (
           <Badge className="absolute left-3 top-3 rounded-sm bg-primary text-primary-foreground font-body text-xs">
             Bestseller
           </Badge>
-        )}
+        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
@@ -77,6 +81,15 @@ export function ProductCard({ product }: { product: Product }) {
               <ShoppingBag className="h-3.5 w-3.5" />
               Buy
             </Link>
+          ) : isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed rounded-sm bg-muted px-4 py-2 text-xs font-body font-bold tracking-wider text-muted-foreground"
+              aria-label={`${product.name} is out of stock`}
+            >
+              Unavailable
+            </button>
           ) : quantity > 0 ? (
             <div className="flex items-center rounded-sm border border-input bg-background">
               <button
