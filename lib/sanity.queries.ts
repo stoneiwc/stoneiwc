@@ -19,6 +19,8 @@ interface SanityProduct {
     current: string
   }
   price: number
+  isDiscount?: boolean
+  discountedPrice?: number
   originalPrice?: number
   description: string
   shortDescription: string
@@ -37,13 +39,31 @@ interface SanityProduct {
   featured: boolean
 }
 
+function resolveProductPricing(sp: SanityProduct): {
+  price: number
+  originalPrice?: number
+  isDiscount: boolean
+} {
+  // New format: editor toggled "Add Discount" and entered a valid discountedPrice
+  if (sp.isDiscount === true && sp.discountedPrice != null && sp.discountedPrice < sp.price) {
+    return {price: sp.discountedPrice, originalPrice: sp.price, isDiscount: true}
+  }
+  // Legacy format (pre-migration): `price` was the selling price, `originalPrice` the strikethrough
+  if (sp.originalPrice != null && sp.originalPrice > sp.price) {
+    return {price: sp.price, originalPrice: sp.originalPrice, isDiscount: true}
+  }
+  return {price: sp.price, originalPrice: undefined, isDiscount: false}
+}
+
 function transformProduct(sanityProduct: SanityProduct): Product {
+  const pricing = resolveProductPricing(sanityProduct)
   return {
     id: sanityProduct._id,
     name: sanityProduct.name,
     slug: sanityProduct.slug.current,
-    price: sanityProduct.price,
-    originalPrice: sanityProduct.originalPrice,
+    price: pricing.price,
+    isDiscount: pricing.isDiscount,
+    originalPrice: pricing.originalPrice,
     description: sanityProduct.description,
     shortDescription: sanityProduct.shortDescription,
     image: urlFor(sanityProduct.image).width(800).height(800).url(),
@@ -59,6 +79,8 @@ const productProjection = `
   name,
   slug,
   price,
+  isDiscount,
+  discountedPrice,
   originalPrice,
   description,
   shortDescription,

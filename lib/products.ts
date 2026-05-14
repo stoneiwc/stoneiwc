@@ -3,6 +3,7 @@ export interface Product {
   name: string
   slug: string
   price: number
+  isDiscount?: boolean
   originalPrice?: number
   description: string
   shortDescription: string
