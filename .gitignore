@@ -5,6 +5,9 @@ node_modules/
 .vercel
 *.tsbuildinfo
 
+# Claude Code local settings
+.claude/
+
 # Python
 scripts/venv/
 scripts/__pycache__/
