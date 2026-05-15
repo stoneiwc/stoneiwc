@@ -110,7 +110,6 @@ Detailed technical documentation is in `project-documentation/`:
 | [`gift-card.md`](project-documentation/gift-card.md) | Gift card purchase, webhook, redemption, troubleshooting |
 | [`cal-com-booking.md`](project-documentation/cal-com-booking.md) | Booking pages, Cal.com API, slug conventions, scripts |
 | [`resend-email.md`](project-documentation/resend-email.md) | Email templates, rate limiting, adding new email types |
-
 ---
 
 ## License
