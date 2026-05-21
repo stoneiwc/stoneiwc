@@ -2,46 +2,43 @@
 
 ## Overview
 
-The Stone IWC gift card system is built entirely on **Stripe** with no external database. The core idea: when a customer purchases a gift card, a Stripe `PromotionCode` is created and emailed to the recipient. That code can then be applied at checkout as a discount.
+Gift cards at Stone IWC use **Sanity as the source of truth** for state (code, balance, status, redemption history) and **Stripe** for payment processing. Each gift card supports **partial redemption** — buying a $100 card and using $30 leaves a $70 balance under the same code.
 
-No additional database (Sanity or otherwise) is used — Stripe is the single source of truth for all gift card state.
+A purchase collects sender name (required), purchaser email, optional recipient name, recipient email, and an optional 500-char personal note. The recipient receives a styled email with the code and the message; if the recipient differs from the purchaser, the purchaser also receives a confirmation email (no code).
 
 ---
 
 ## Flow Diagram
 
 ```
-[Customer purchases a gift card]
-        │
+[Customer fills the purchase form]
+        │ amount + sender name + emails + (optional note/recipient name)
         ▼
 [create-payment-intent API] ── Creates a Stripe PaymentIntent
         │                       metadata: order_type=gift_card
-        │                                 recipient_email=xxx
-        │
+        │                                 sender_name, recipient_name,
+        │                                 customer_email, recipient_email,
+        │                                 gift_card_note, gift_card_amount
         ▼
 [Stripe processes the payment]
-        │
         ▼
-[Stripe Webhook fires] ── payment_intent.succeeded event
-        │
-        ├── Creates a Stripe Coupon (amount_off = gift card value)
-        ├── Creates a Stripe PromotionCode (STONE-XXXX-XXXX, max_redemptions=1)
-        └── Sends the code to recipient via Resend email
-                │
-                ▼
-        [Recipient receives the code]
-                │
-                ▼
-        [Enters code at checkout]
-                │
-                ▼
-        [validate API] ── Queries Stripe for the code
-                │
-                ▼
-        [If valid, discount is applied to order total]
-                │
-                ▼
-        [After payment, webhook deactivates the promo code]
+[Webhook fires: payment_intent.succeeded]
+        ├── (Idempotent) Create Sanity giftCard document with code, balance,
+        │       purchaser/recipient info, optional note, expiresAt (+1 year)
+        ├── Resend → email to recipient: code + value + note
+        └── If purchaser ≠ recipient → Resend → confirmation email to purchaser
+
+[Recipient enters code at checkout]
+        ▼
+[validate API queries Sanity]
+        ▼
+[If active + has balance + not expired, returns code + balance]
+        ▼
+[Checkout shows applied discount = min(balance, orderTotal)]
+        │ excess balance stays on the card
+        ▼
+[After payment succeeds, webhook deducts the applied amount from Sanity]
+        │ if balance reaches 0, status flips to 'redeemed'
 ```
 
 ---
@@ -52,19 +49,47 @@ No additional database (Sanity or otherwise) is used — Stripe is the single so
 app/
 ├── api/
 │   ├── gift-cards/
-│   │   ├── create-payment-intent/route.ts   ← PaymentIntent for gift card purchase
-│   │   └── validate/route.ts                ← Code validation endpoint
+│   │   ├── create-payment-intent/route.ts   ← Purchase PaymentIntent
+│   │   └── validate/route.ts                ← Looks up code + balance in Sanity
 │   └── webhooks/
-│       └── stripe/route.ts                  ← Stripe webhook handler
+│       └── stripe/route.ts                  ← Creates Sanity doc, deducts on redeem
 │
 components/
 └── products/
-    └── gift-card-purchase.tsx               ← Full purchase flow UI component
+    └── gift-card-purchase.tsx               ← Purchase form (amount, names, note)
 
 lib/
+├── gift-cards.ts                            ← Sanity helpers (create, get, redeem)
 └── email/
-    └── gift-card-template.ts                ← Email HTML/text templates
+    └── gift-card-template.ts                ← Recipient + purchaser email templates
+
+studio/
+└── schemaTypes/
+    └── giftCard.ts                          ← Sanity document type
 ```
+
+---
+
+## Sanity `giftCard` Document
+
+Visible in Sanity Studio under "Gift Card". Fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `code` | string | `STONE-XXXX-XXXX` format, generated server-side |
+| `originalAmount` | number | What the purchaser paid (USD) |
+| `currentBalance` | number | Remaining unspent balance |
+| `status` | `'active'` \| `'redeemed'` \| `'expired'` | Auto-updates when balance reaches 0 |
+| `purchaserName` | string | Required from purchase form |
+| `purchaserEmail` | string | Required |
+| `recipientName` | string? | Optional |
+| `recipientEmail` | string | Required |
+| `note` | text? | Optional, max 500 chars |
+| `paymentIntentId` | string | Stripe PaymentIntent that funded the card |
+| `expiresAt` | datetime | +1 year from purchase |
+| `redemptions` | array | `{ orderId, amount, redeemedAt }` per use |
+
+Studio preview shows `STONE-XXXX-XXXX  ✅  $100 → $40 left · recipient@example.com`.
 
 ---
 
@@ -72,284 +97,132 @@ lib/
 
 ### 1. `app/api/gift-cards/create-payment-intent/route.ts`
 
-**What it does:** Creates a Stripe PaymentIntent specifically for gift card purchases.
-
-**When it's called:** When the user fills in the amount and email fields on the gift card product page and clicks "Continue to Payment".
-
-**Request body (POST):**
-```json
-{
-  "amount": 100,
-  "purchaserEmail": "buyer@example.com",
-  "recipientEmail": "recipient@example.com"
-}
-```
-
-**Validations:**
-- `amount` must be between 1 and 500
-- `purchaserEmail` must be a valid email
-- `recipientEmail` is optional — falls back to `purchaserEmail` if omitted
-
-**Response:**
-```json
-{ "clientSecret": "pi_xxx_secret_xxx" }
-```
-
-**What gets created in Stripe:**
-```
-PaymentIntent {
-  amount: 10000,        // in cents ($100 × 100)
-  currency: "usd",
-  metadata: {
-    order_type: "gift_card",
-    customer_email: "buyer@example.com",
-    recipient_email: "recipient@example.com",
-    gift_card_amount: "100"
-  }
-}
-```
-
-> `order_type: "gift_card"` in the metadata is critical — the webhook uses this to distinguish a gift card purchase from a regular storefront order.
-
----
+Creates a Stripe PaymentIntent for the purchase. Required: `amount` ($1–$500), `senderName`, `purchaserEmail`, `recipientEmail`. Optional: `recipientName`, `note` (≤ 500 chars). Writes everything to PaymentIntent metadata so the webhook has it on success.
 
 ### 2. `app/api/webhooks/stripe/route.ts`
 
-**What it does:** Listens for Stripe events. Handles two distinct scenarios:
+Listens for `payment_intent.succeeded`. Two responsibilities:
 
-**A) Gift card purchase (generating a new code):**
-- Triggered by a `payment_intent.succeeded` event
-- Checks `metadata.order_type === 'gift_card'`
-- Generates a random code in `STONE-XXXX-XXXX` format
-- Creates a Stripe `Coupon`: `amount_off` = gift card value, `max_redemptions: 1`
-- Creates a Stripe `PromotionCode` using that coupon, valid for 1 year
-- Sends the code to the recipient email via Resend
+**A) Gift card purchase** — when `metadata.order_type === 'gift_card'`:
+- Idempotency check: looks up any existing giftCard with this `paymentIntentId`. If found, reuses its `code`.
+- Otherwise calls `createGiftCard()` (which generates a unique `STONE-XXXX-XXXX`).
+- Sends the recipient email (code + note) and, if buyer ≠ recipient, a purchaser confirmation email.
 
-**B) Gift card redemption (invalidating a used code):**
-- Triggered after any successful payment
-- Checks if `metadata.gift_card_promotion_code_id` exists
-- If it does, sets that promo code to `active: false` so it can never be reused
+**B) Gift card redemption** — when `metadata.gift_card_code` and `metadata.gift_card_applied_amount` are present (any order, not just gift card purchases):
+- Calls `redeemGiftCard(code, appliedAmount, paymentIntentId)`.
+- Atomically deducts from `currentBalance`, appends to `redemptions`, and sets `status='redeemed'` if balance reaches 0.
 
-**Security:** Every incoming request is verified using `stripe.webhooks.constructEvent` with the `stripe-signature` header. Requests without a valid signature are rejected immediately.
-
-**Code generation:**
-```ts
-// Visually ambiguous characters (O, I, 0, 1) are excluded
-const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-// Format: STONE-XXXX-XXXX
-// Example: STONE-K7MR-P2BN
-```
-
----
+Signature verification uses `stripe.webhooks.constructEvent` with `STRIPE_WEBHOOK_SECRET`.
 
 ### 3. `app/api/gift-cards/validate/route.ts`
 
-**What it does:** Looks up a gift card code in Stripe and returns its validity status.
+`GET /api/gift-cards/validate?code=STONE-XXXX-XXXX`. Queries Sanity via `getGiftCardByCode()`. Returns `{ valid, code, balance, originalAmount }` on success, or `{ valid: false, error }` if not found / no balance / expired.
 
-**When it's called:** When the customer enters a code at checkout and clicks "Apply".
+### 4. `lib/gift-cards.ts`
 
-**Request (GET):**
-```
-GET /api/gift-cards/validate?code=STONE-K7MR-P2BN
-```
+Server-only helpers wrapping the Sanity client:
 
-**Checks performed:**
-1. Does this code exist in Stripe?
-2. Is it `active: true`?
-3. Has `expires_at` passed?
-4. Is `times_redeemed < max_redemptions`?
+- `generateGiftCardCode()` — random `STONE-XXXX-XXXX` (excludes ambiguous `O/I/0/1`).
+- `createGiftCard(input)` — generates a unique code (5 retries on collision) and writes the document.
+- `getGiftCardByCode(code)` — single GROQ fetch, normalized to uppercase.
+- `redeemGiftCard(code, amount, orderId)` — uses Sanity's `ifRevisionId` for optimistic concurrency. Concurrent redemptions of the same card will surface as a commit error (caller can retry).
 
-**Success response:**
-```json
-{
-  "valid": true,
-  "code": "STONE-K7MR-P2BN",
-  "amount": 100,
-  "promotionCodeId": "promo_xxx"
-}
-```
+### 5. `components/products/gift-card-purchase.tsx`
 
-**Failure response examples:**
-```json
-{ "valid": false, "error": "Gift card not found." }
-{ "valid": false, "error": "This gift card has already been redeemed." }
-{ "valid": false, "error": "This gift card has expired." }
-```
+The purchase UI on `/products/stoneiwc-gift-certificate`. Two steps:
 
-> The `promotionCodeId` is stored in the PaymentIntent metadata when the customer checks out. The webhook uses it after payment to deactivate the code.
+- **Step 1** — amount selector (preset $25/$50/$100/$150/$200 or custom up to $500), "From" block (sender name + purchaser email), "To" block (optional recipient name + recipient email), optional personal note with live character counter.
+- **Step 2** — Stripe Elements payment form.
 
----
+`GIFT_CARD_SLUG = 'stoneiwc-gift-certificate'` lives in `@/lib/constants` and is the single source of truth for the product slug.
 
-### 4. `components/products/gift-card-purchase.tsx`
+### 6. `lib/email/gift-card-template.ts`
 
-**What it does:** Contains the entire gift card purchase UI. Rendered inside `product-detail.tsx` when the gift card product is viewed.
+Two pairs of HTML/text templates:
 
-**Exports:**
-- `GIFT_CARD_SLUG = 'stoneiwc-gift-certificate'` — the single source of truth for the gift card product slug. Both `product-card.tsx` and `product-detail.tsx` import this constant.
-- `GiftCardPurchase` — the main component
+- **Recipient email** (`giftCardEmailHtml` / `giftCardEmailText`) — greeting personalized with `recipientName` when present, `senderName` as the giver, optional note rendered in a gold-bordered block, the code, value and expiry. Mentions that unused balance remains.
+- **Purchaser confirmation** (`giftCardPurchaseConfirmationHtml` / `giftCardPurchaseConfirmationText`) — sent only when purchaser ≠ recipient. Shows recipient name + email and the value. The code is **never** included for security.
 
-**Step-by-step state flow:**
-```
-Step 1: User selects amount + enters emails
-   ↓ Clicks "Continue to Payment"
-Step 2: Calls create-payment-intent → gets clientSecret → Stripe Elements renders
-   ↓ User fills in card details and pays
-Step 3: Success message is shown
-```
-
-**Preset amounts:** $25, $50, $100, $150, $200
-**Custom amount:** any value between $1 and $500
-
-**Inner `PaymentForm` component:**
-- Uses Stripe's `useStripe()` and `useElements()` hooks
-- Flow: `elements.submit()` → `stripe.confirmPayment()`
-- Errors are shown inline
-- On success, calls the `onSuccess` callback to the parent
-
----
-
-### 5. `lib/email/gift-card-template.ts`
-
-**What it does:** Generates the HTML and plain text versions of the gift card email.
-
-**Exports:**
-- `giftCardEmailHtml(data)` — full HTML email sent via Resend
-- `giftCardEmailText(data)` — plain text fallback
-
-**Input data:**
-```ts
-{
-  code: string        // e.g. STONE-K7MR-P2BN
-  amount: number      // e.g. 100
-  recipientEmail: string
-  purchaserEmail: string
-  expiresAt: string   // e.g. "May 5, 2027"
-}
-```
-
-The email design matches the site's color palette: `#1a1a1a` dark background, `#c9a96e` gold accent.
+All HTML interpolation goes through an `escapeHtml` helper.
 
 ---
 
 ## Checkout Integration
 
-Gift card support was added to the existing checkout flow. The following files were modified:
-
 ### `app/checkout/page.tsx`
-- Added `appliedGiftCard` state: `{ code, amount, promotionCodeId } | null`
-- Added `giftCardDiscount` calculation: `Math.min(giftCard.amount, orderTotal)` — the gift card can never reduce the total below zero
-- Final total formula: `subtotal - couponDiscount + shippingCost - giftCardDiscount`
+- `AppliedGiftCard = { code, balance }` (balance is the remaining unspent amount returned by `validate`).
+- `giftCardDiscount = min(balance, subtotal - couponDiscount + shippingCost)` — the card is never charged more than the order total.
+- `finalTotal = subtotal - couponDiscount + shippingCost - giftCardDiscount`.
 
 ### `components/checkout/SelfCheckoutSection.tsx`
-- Added gift card input field (below the shipping method selector)
-- On "Apply": calls the validate API, applies the card if valid, shows error if not
-- Applied card is displayed with a "Remove" button
-- `initializePayment` now includes gift card metadata in the PaymentIntent request:
-  ```ts
-  giftCardCode: appliedGiftCard?.code,
-  giftCardPromotionCodeId: appliedGiftCard?.promotionCodeId
-  ```
-
-### `components/checkout/CheckoutDetailsSection.tsx`
-- Added a gift card discount line to the order summary (below the coupon line)
+- Apply: calls `/api/gift-cards/validate`, on success stores `{ code, balance }`.
+- The applied-amount line shows `-$X applied` plus `· $Y balance remaining` when the card has unspent balance after this order.
+- `initializePayment` sends `giftCardCode` and `giftCardAppliedAmount` (the actual discount, not the balance) to the checkout payment-intent API.
 
 ### `app/api/checkout/create-stripe-payment-intent/route.tsx`
-- Added `giftCardCode` and `giftCardPromotionCodeId` to the accepted request body
-- These values are written to the PaymentIntent metadata
+- Accepts `giftCardCode` and `giftCardAppliedAmount` from the body.
+- Writes them to PaymentIntent metadata as `gift_card_code` and `gift_card_applied_amount`. The webhook reads these on success to deduct the balance.
 
----
-
-## Products Page Integration
-
-### `components/products/product-card.tsx`
-For the product with slug `stoneiwc-gift-certificate`:
-- Displays **"From $25"** instead of a fixed price
-- Shows a **"Buy"** link button instead of "Add to Cart" (navigates to the product detail page)
-- Quantity controls are hidden
-
-### `components/products/product-detail.tsx`
-For the product with slug `stoneiwc-gift-certificate`:
-- Displays **"From $25"** instead of a fixed price
-- Hides the quantity selector and "Add to Cart" button
-- Renders `<GiftCardPurchase />` in their place
-
----
-
-## URL-Based Product Filters (Refactor)
-
-The product filters on `/products` were moved from `useState` to URL query params.
-
-**Before:** Filter state lived only in the client. Refreshing the page or sharing a link lost all filters.
-
-**After:** `/products?category=Hair&sort=price-asc&q=serum`
-
-**Files changed:**
-- `components/products/products-grid.tsx`: replaced `useState` with `useSearchParams` + `router.replace`
-- `app/products/page.tsx`: wrapped `ProductsGrid` in `<Suspense>` (required by `useSearchParams`)
-
-**URL rules:**
-- Default values are never written to the URL (`All`, `featured`, empty search) — keeps URLs clean
-- Filter changes use `scroll: false` so the page doesn't jump to the top
+### `components/checkout/CheckoutDetailsSection.tsx`
+- Shows `Gift Card (CODE)` and `-$X.XX` discount line in the order summary.
 
 ---
 
 ## Environment Variables
 
-No new environment variables are needed. The existing ones cover everything:
-
 ```env
-STRIPE_SECRET_KEY=sk_test_xxx                    # Creating coupons, promo codes, webhook verification
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx   # Initializing Stripe Elements on the client
-STRIPE_WEBHOOK_SECRET=whsec_xxx                  # Verifying webhook signature
-RESEND_API_KEY=re_xxx                            # Sending gift card emails
-RESEND_FROM_EMAIL=noreply@stoneiwc.com           # Sender address
-NEXT_PUBLIC_FRONTEND_URL=https://stoneiwc.com    # "Shop Now" link inside the email
+# Sanity (needed for both read and write — token must allow writes)
+NEXT_PUBLIC_SANITY_PROJECT_ID=
+NEXT_PUBLIC_SANITY_DATASET=
+NEXT_PUBLIC_SANITY_API_VERSION=
+SANITY_API_TOKEN=                      # write-capable token
+
+# Stripe
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# Resend
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+
+# App
+NEXT_PUBLIC_FRONTEND_URL=
 ```
 
 ---
 
 ## Production Deploy Checklist
 
-1. Merge `dev-gift-card` → `development`
-2. `development` deploys to `dev.stoneiwc.com`
-3. Go to Stripe Dashboard (sandbox) → Developers → Webhooks → **Add endpoint**
-   - URL: `https://dev.stoneiwc.com/api/webhooks/stripe`
-   - Event to listen for: `payment_intent.succeeded`
-4. Copy the generated `whsec_xxx` value → add it to Vercel environment variables as `STRIPE_WEBHOOK_SECRET`
-5. Test with a sandbox card: `4242 4242 4242 4242`
-6. Once tests pass, repeat the webhook setup for production (`stoneiwc.com`)
+1. Merge feature branch into `development` (auto-deploys to `dev.stoneiwc.com`).
+2. Stripe Dashboard (test mode) → Webhooks → endpoint:
+   - URL: `https://dev.stoneiwc.com/api/webhooks/stripe?x-vercel-protection-bypass=<bypass-secret>`
+   - Listen for `payment_intent.succeeded`.
+   - Copy the signing secret into Vercel `STRIPE_WEBHOOK_SECRET` (Preview scope).
+3. Verify `SANITY_API_TOKEN` (write-capable) is set on the Preview environment in Vercel.
+4. Test with `4242 4242 4242 4242`: purchase → recipient email arrives → Sanity Studio shows the new gift card → apply at checkout → balance deducts on success.
+5. Repeat the webhook setup for production (live mode → `stoneiwc.com`) before going live.
 
 ---
 
-## Troubleshooting: Gift Card Email Not Arriving After Test Purchase
+## Troubleshooting
 
-If a test payment succeeds but no gift card email arrives, work through these causes in order:
+**Webhook fired but no Sanity doc and no email** — most often `SANITY_API_TOKEN` is missing on the Preview/Production environment, or the token lacks write permission. Check Vercel function logs for `Gift card Sanity creation error:`.
 
-**1. Webhook is not configured (most likely)**
-The email is sent inside the webhook handler, not during the payment itself. If the webhook endpoint hasn't been registered in Stripe Dashboard, `payment_intent.succeeded` never reaches the app and no email is ever triggered. Set up the webhook first — see the Deploy Checklist below.
+**Code applies as $0 at checkout** — happens if the validate API returns a stale or zero balance. Check the giftCard document in Sanity Studio: confirm `currentBalance > 0` and `status === 'active'`.
 
-**2. `STRIPE_WEBHOOK_SECRET` is missing or wrong**
-Even if the webhook fires, the handler immediately rejects any request that fails signature verification. Check that `STRIPE_WEBHOOK_SECRET` in your environment matches the `whsec_xxx` value shown in Stripe Dashboard for that specific endpoint. The secret is unique per endpoint — sandbox and production have different values.
+**Recipient never got the email but Sanity doc exists** — Resend domain not verified, the recipient address bounced, or the message was filtered as spam. Check Resend Dashboard → Emails for the delivery status. Verify SPF/DKIM/DMARC for `RESEND_FROM_EMAIL`.
 
-**3. Resend domain not verified**
-Resend blocks outgoing emails from unverified sender domains. Make sure the domain in `RESEND_FROM_EMAIL` (e.g. `stoneiwc.com`) is verified in the Resend dashboard under Domains. Without verification, `resend.emails.send()` will return an error silently — the webhook still returns 200 but no email goes out.
+**Webhook returns 401** — `dev.stoneiwc.com` is behind Vercel's Deployment Protection. Use the `?x-vercel-protection-bypass=<secret>` query parameter on the Stripe webhook URL. The secret is configured under Project → Settings → Deployment Protection → Protection Bypass for Automation.
 
-**4. `RESEND_API_KEY` missing in the deployed environment**
-The API key might exist in `.env.local` but not in Vercel's environment variables. Check Vercel → Project → Settings → Environment Variables and confirm `RESEND_API_KEY` is present for the correct environment (Preview / Production).
+**Concurrent redemptions race** — `redeemGiftCard` uses Sanity's `ifRevisionId` for optimistic concurrency. If two webhook events deduct the same card simultaneously, one will throw on commit. Stripe will retry the failed webhook; the second attempt will see the updated revision and apply cleanly.
 
-**5. Email arrived but landed in spam**
-Resend delivered the email but it was filtered. Check the spam/junk folder. Long-term fix: set up SPF, DKIM, and DMARC records for the sending domain in Resend.
-
-**6. Webhook fired but email send failed silently**
-The webhook handler logs email errors with `console.error` but does not throw — it still returns `{ received: true }` to Stripe. This means Stripe reports the webhook as successful even if the email failed. To debug: check Vercel function logs for any `"Gift card email send error:"` entries after the payment.
-
-**7. Local development: Stripe CLI not running**
-When testing on `localhost`, Stripe cannot reach your local server directly. You must run `stripe listen --forward-to localhost:3000/api/webhooks/stripe` in a separate terminal to forward events. The `whsec_xxx` printed by the CLI is different from the Dashboard one — update `.env.local` accordingly each session.
+**Local development: Stripe CLI** — run `stripe listen --forward-to localhost:3000/api/webhooks/stripe` and put the printed `whsec_...` in `.env.local` as `STRIPE_WEBHOOK_SECRET`. Restart `pnpm dev` after the change.
 
 ---
 
-## Known Limitations
+## Design Notes
 
-- **No partial balance:** A gift card is fully consumed on first use. A $100 gift card used on a $60 order loses the remaining $40. Partial balance tracking would require Stripe Customer Balance (future sprint).
-- **Webhook is required for code delivery:** Code generation happens inside the webhook handler. If the webhook is not configured before going live, payments will succeed but no code will be sent. Do not go live without setting up the webhook.
-- **No race conditions:** `max_redemptions: 1` is enforced by Stripe server-side. Even if two people try to redeem the same code simultaneously, only one will succeed.
+- **Why Sanity, not a relational DB?** The project already runs Sanity for content. Adding a single document type avoids introducing a new dependency, gives non-engineers Studio access for support cases, and the redemption volume is low enough that Sanity's mutation API is more than adequate.
+- **Why drop the Stripe Coupon/PromotionCode?** Stripe Coupons have a fixed `amount_off` that can't be changed after creation, which is incompatible with balance-based redemption. We now use Stripe purely for payment processing.
+- **Why an `escapeHtml` helper in the email template?** The personal note is free-form user input that goes directly into an HTML email body. Without escaping, a malicious or accidental `<script>` would execute in some mail clients.
