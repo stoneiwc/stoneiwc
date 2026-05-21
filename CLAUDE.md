@@ -117,6 +117,7 @@ public/               Static assets
 
 | File | Covers |
 |------|--------|
+| [`project-documentation/orders.md`](project-documentation/orders.md) | Storefront orders, Sanity tracking, fulfillment workflow |
 | [`project-documentation/gift-card.md`](project-documentation/gift-card.md) | Gift card purchase, webhook, redemption, troubleshooting |
 | [`project-documentation/checkout-and-payments.md`](project-documentation/checkout-and-payments.md) | Cart, checkout flow, Stripe, coupons |
 | [`project-documentation/cal-com-booking.md`](project-documentation/cal-com-booking.md) | Booking page, Cal.com API, slug conventions, provisioning scripts |
