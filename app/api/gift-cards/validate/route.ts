@@ -16,7 +16,11 @@ export async function GET(request: Request) {
 
   const stripe = new Stripe(stripeSecretKey)
 
-  const promoCodes = await stripe.promotionCodes.list({ code, limit: 1 })
+  const promoCodes = await stripe.promotionCodes.list({
+    code,
+    limit: 1,
+    expand: ['data.promotion.coupon'],
+  })
 
   if (promoCodes.data.length === 0) {
     return NextResponse.json({ valid: false, error: 'Gift card not found.' }, { status: 404 })
