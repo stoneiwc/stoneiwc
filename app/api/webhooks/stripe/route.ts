@@ -9,6 +9,7 @@ import {
 } from '@/lib/email/gift-card-template'
 import { client as sanityClient } from '@/lib/sanity.client'
 import { createGiftCard, redeemGiftCard } from '@/lib/gift-cards'
+import { markOrderFailed, markOrderPaid } from '@/lib/orders'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -39,12 +40,38 @@ export async function POST(request: Request) {
     )
   }
 
-  if (event.type !== 'payment_intent.succeeded') {
+  if (
+    event.type !== 'payment_intent.succeeded' &&
+    event.type !== 'payment_intent.payment_failed'
+  ) {
     return NextResponse.json({ received: true })
   }
 
   const paymentIntent = event.data.object as Stripe.PaymentIntent
   const meta = paymentIntent.metadata ?? {}
+
+  // Handle payment failures: flip the corresponding pending order to 'failed'.
+  if (event.type === 'payment_intent.payment_failed') {
+    if (meta.order_type === 'storefront') {
+      try {
+        await markOrderFailed(paymentIntent.id)
+      } catch (err) {
+        console.error('Failed to mark order as failed:', err)
+      }
+    }
+    return NextResponse.json({ received: true })
+  }
+
+  // payment_intent.succeeded from here on.
+
+  // Mark the matching Sanity order as paid for storefront purchases.
+  if (meta.order_type === 'storefront') {
+    try {
+      await markOrderPaid(paymentIntent.id)
+    } catch (err) {
+      console.error('Failed to mark order as paid:', err)
+    }
+  }
 
   // Deduct balance for any gift card redeemed in this order.
   const redeemedCode = meta.gift_card_code

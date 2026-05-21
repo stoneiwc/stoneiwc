@@ -72,6 +72,9 @@ export default function CheckoutPage() {
 					{/* Left Column: Checkout Form */}
 					<SelfCheckoutSection
 						items={items}
+						subtotal={subtotal}
+						appliedCoupon={appliedCoupon}
+						discountAmount={discountAmount}
 						totalPrice={finalTotal}
 						onShippingMethodChange={handleShippingMethodChange}
 						shippingCost={shippingCost}

@@ -124,6 +124,9 @@ function PaymentForm({ clientSecret, total, onSuccess }: PaymentFormProps) {
 
 interface SelfCheckoutSectionProps {
   items: CartItem[]
+  subtotal: number
+  appliedCoupon: { code?: string } | null
+  discountAmount: number
   totalPrice: number
   onShippingMethodChange: (method: string, cost: number) => void
   shippingCost: number
@@ -134,6 +137,9 @@ interface SelfCheckoutSectionProps {
 
 export default function SelfCheckoutSection({
   items,
+  subtotal,
+  appliedCoupon,
+  discountAmount,
   totalPrice,
   onShippingMethodChange,
   shippingCost,
@@ -287,19 +293,29 @@ export default function SelfCheckoutSection({
           items: items.map((item) => ({
             id: item.product.id,
             name: item.product.name,
+            slug: item.product.slug,
+            image: item.product.image,
             price: item.product.price,
             quantity: item.quantity,
           })),
+          subtotal,
+          couponCode: appliedCoupon?.code,
+          couponDiscount: discountAmount,
           shippingMethod: form.shippingMethod,
           shippingCost,
           totalAmount: totalPrice,
           email: form.email,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          phone: form.phone,
           giftCardCode: appliedGiftCard?.code,
           giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
+          billingSameAsShipping: form.shippingSameAsBilling,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
             lastName: form.shippingSameAsBilling ? form.lastName : form.lastName,
             address: form.shippingSameAsBilling ? form.addressLine1 : form.shippingAddressLine1,
+            addressLine2: form.shippingSameAsBilling ? form.addressLine2 : form.shippingAddressLine2,
             city: form.shippingSameAsBilling ? form.city : form.shippingCity,
             state: form.shippingSameAsBilling ? form.state : form.shippingState,
             zipCode: form.shippingSameAsBilling ? form.postalCode : form.shippingPostalCode,
@@ -309,6 +325,7 @@ export default function SelfCheckoutSection({
             firstName: form.firstName,
             lastName: form.lastName,
             address: form.addressLine1,
+            addressLine2: form.addressLine2,
             city: form.city,
             state: form.state,
             zipCode: form.postalCode,
