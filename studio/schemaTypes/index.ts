@@ -20,6 +20,7 @@ import {mediaItemType} from './mediaItem'
 import {qcShowFlyerType} from './qcShowFlyer'
 import {qcShowEpisodeType} from './qcShowEpisode'
 import {couponType} from './coupon'
+import {giftCardType} from './giftCard'
 import {shippingMethodType} from './shippingMethod'
 import {awardItemType} from './awardItem'
 
@@ -46,6 +47,7 @@ export const schemaTypes = [
   qcShowFlyerType,
   qcShowEpisodeType,
   couponType,
+  giftCardType,
   shippingMethodType,
   awardItemType,
 ]
