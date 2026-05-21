@@ -265,31 +265,6 @@ export default function SelfCheckoutSection({
       setIsLoading(true)
       setError(null)
 
-      // Zero-total checkout (gift card covers everything): skip Stripe entirely.
-      if (totalPrice <= 0 && appliedGiftCard && giftCardDiscount > 0) {
-        const res = await fetch('/api/checkout/redeem-gift-card-only', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            giftCardCode: appliedGiftCard.code,
-            appliedAmount: giftCardDiscount,
-            email: form.email,
-          }),
-        })
-        const data = await res.json()
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || 'Failed to finalize order.')
-        }
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('selectedShippingMethod')
-          sessionStorage.setItem('checkoutEmail', form.email)
-          window.location.href = `/checkout/success?gift_card_only=1&order=${encodeURIComponent(
-            data.orderId,
-          )}`
-        }
-        return
-      }
-
       // Fetch Stripe publishable key
       const keyResponse = await fetch('/api/checkout/retrieve-stripe-publishable-key', {
         method: 'POST',
@@ -719,6 +694,9 @@ export default function SelfCheckoutSection({
           {/* Gift Card */}
           <div>
             <h3 className="font-sans text-lg font-semibold text-foreground">Gift Card</h3>
+            <p className="mt-1 text-xs font-body text-muted-foreground">
+              Applies to merchandise only. Shipping is paid separately.
+            </p>
             {appliedGiftCard ? (
               <div className="mt-4 flex items-center justify-between rounded-sm border border-border bg-background p-4">
                 <div>

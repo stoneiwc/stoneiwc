@@ -53,17 +53,8 @@ export default function CheckoutSuccessPage() {
     const queryString = window.location.search
     const urlParams = new URLSearchParams(queryString)
     const paymentIntent = urlParams.get('payment_intent')
-    const giftCardOnly = urlParams.get('gift_card_only')
     const email = sessionStorage.getItem('checkoutEmail') || ''
     sessionStorage.removeItem('checkoutEmail')
-
-    // Gift-card-only checkout: no Stripe involved.
-    if (giftCardOnly === '1') {
-      setStatus('complete')
-      setCustomerEmail(email)
-      setIsLoading(false)
-      return
-    }
 
     // If no payment intent, not a valid success page
     if (!paymentIntent) {

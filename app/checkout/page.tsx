@@ -28,19 +28,13 @@ export default function CheckoutPage() {
 		setShippingCost(cost)
 	}, [])
 
-	const orderTotalBeforeGiftCard = subtotal - discountAmount + shippingCost
-	const STRIPE_MIN = 0.5
-	const rawGiftCardDiscount = appliedGiftCard
-		? Math.min(appliedGiftCard.balance, orderTotalBeforeGiftCard)
+	// Gift cards apply to merchandise only — shipping is always paid by the customer.
+	// This guarantees every order produces a Stripe charge (no zero-total dead zone).
+	const merchandiseTotal = Math.max(0, subtotal - discountAmount)
+	const giftCardDiscount = appliedGiftCard
+		? Math.min(appliedGiftCard.balance, merchandiseTotal)
 		: 0
-	const remainder = orderTotalBeforeGiftCard - rawGiftCardDiscount
-	// If the remainder lands between $0 (exclusive) and Stripe's $0.50 minimum,
-	// reduce the gift card discount so the customer can still complete the charge.
-	const giftCardDiscount =
-		remainder > 0 && remainder < STRIPE_MIN
-			? Math.max(0, orderTotalBeforeGiftCard - STRIPE_MIN)
-			: rawGiftCardDiscount
-	const finalTotal = Math.max(0, orderTotalBeforeGiftCard - giftCardDiscount)
+	const finalTotal = Math.max(0, merchandiseTotal + shippingCost - giftCardDiscount)
 
 	if (items.length === 0) {
 		return (
