@@ -8,8 +8,9 @@ node_modules/
 # Claude Code local settings
 .claude/
 
-# Markdown files
-cal-events.md
+# Local session notes (kept out of the repo)
+project-documentation/last-point.md
+project-documentation/execution-map.md
 
 # Python
 scripts/venv/
