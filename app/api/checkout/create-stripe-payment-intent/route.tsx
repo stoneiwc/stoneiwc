@@ -156,6 +156,7 @@ export async function POST(request: Request) {
     // Mirror the order into Sanity so admins can manage fulfillment in Studio.
     // Errors here don't break checkout — the customer can still pay; we just
     // log and rely on the Stripe Dashboard fallback for that PaymentIntent.
+    let orderNumber: string | undefined
     try {
       const orderItems = items.map((item) => {
         const quantity = Number(item.quantity ?? 1)
@@ -176,7 +177,7 @@ export async function POST(request: Request) {
           ? Number(subtotal)
           : orderItems.reduce((sum, item) => sum + item.lineTotal, 0)
 
-      await createPendingOrder({
+      const order = await createPendingOrder({
         stripePaymentIntentId: paymentIntent.id,
         customer: {
           email: email ?? '',
@@ -216,6 +217,16 @@ export async function POST(request: Request) {
           giftCardAppliedAmount !== undefined ? Number(giftCardAppliedAmount) : undefined,
         total: Number(totalAmount),
       })
+      orderNumber = order.orderNumber
+
+      // Echo the order number into Stripe so the Dashboard links back to Sanity.
+      try {
+        await stripe.paymentIntents.update(paymentIntent.id, {
+          metadata: { ...metadata, order_number: orderNumber },
+        })
+      } catch (updateErr) {
+        console.error('Failed to update Stripe metadata with order_number', updateErr)
+      }
     } catch (err) {
       console.error('Sanity order creation failed for PaymentIntent', paymentIntent.id, err)
       // intentionally do not throw — checkout continues
@@ -224,6 +235,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
+      orderNumber,
     })
   } catch (error) {
     console.error('Payment Intent creation error:', error)

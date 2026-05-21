@@ -4,6 +4,8 @@
 
 Gift cards at Stone IWC use **Sanity as the source of truth** for state (code, balance, status, redemption history) and **Stripe** for payment processing. Each gift card supports **partial redemption** — buying a $100 card and using $30 leaves a $70 balance under the same code.
 
+Gift cards apply to **merchandise only** (`subtotal - couponDiscount`). Shipping is always paid by the customer, which guarantees every order produces a Stripe charge above the $0.50 minimum. Storefront orders are mirrored into Sanity for fulfillment — see [orders.md](orders.md).
+
 A purchase collects sender name (required), purchaser email, optional recipient name, recipient email, and an optional 500-char personal note. The recipient receives a styled email with the code and the message; if the recipient differs from the purchaser, the purchaser also receives a confirmation email (no code).
 
 ---
