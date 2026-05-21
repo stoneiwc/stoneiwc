@@ -7,6 +7,10 @@ import {
   giftCardPurchaseConfirmationHtml,
   giftCardPurchaseConfirmationText,
 } from '@/lib/email/gift-card-template'
+import {
+  orderConfirmationEmailHtml,
+  orderConfirmationEmailText,
+} from '@/lib/email/order-confirmation-template'
 import { client as sanityClient } from '@/lib/sanity.client'
 import { createGiftCard, redeemGiftCard } from '@/lib/gift-cards'
 import { markOrderFailed, markOrderPaid } from '@/lib/orders'
@@ -64,10 +68,52 @@ export async function POST(request: Request) {
 
   // payment_intent.succeeded from here on.
 
-  // Mark the matching Sanity order as paid for storefront purchases.
+  // Mark the matching Sanity order as paid for storefront purchases and send
+  // the customer a confirmation email (only on the actual pending→paid
+  // transition, so Stripe retries don't fan out duplicate emails).
   if (meta.order_type === 'storefront') {
     try {
-      await markOrderPaid(paymentIntent.id)
+      const result = await markOrderPaid(paymentIntent.id)
+      if (result.transitioned && result.order) {
+        const order = result.order
+        const customerEmail = order.customer?.email
+        if (customerEmail) {
+          const emailData = {
+            orderNumber: order.orderNumber,
+            firstName: order.customer?.firstName,
+            items: (order.items ?? []).map((it) => ({
+              name: it.name,
+              quantity: Number(it.quantity ?? 0),
+              unitPrice: Number(it.unitPrice ?? 0),
+              lineTotal: Number(it.lineTotal ?? 0),
+            })),
+            subtotal: Number(order.subtotal ?? 0),
+            couponCode: order.couponCode,
+            couponDiscount:
+              order.couponDiscount != null ? Number(order.couponDiscount) : undefined,
+            shippingMethod: order.shippingMethod ?? 'standard',
+            shippingCost: Number(order.shippingCost ?? 0),
+            giftCardCode: order.giftCardCode,
+            giftCardApplied:
+              order.giftCardApplied != null ? Number(order.giftCardApplied) : undefined,
+            total: Number(order.total ?? 0),
+            shippingAddress: order.shippingAddress ?? {},
+          }
+
+          const { error: emailError } = await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL!,
+            to: customerEmail,
+            subject: `Order ${order.orderNumber} confirmed`,
+            html: orderConfirmationEmailHtml(emailData),
+            text: orderConfirmationEmailText(emailData),
+          })
+          if (emailError) {
+            console.error('Order confirmation email send error:', emailError)
+          }
+        } else {
+          console.error('Order paid but no customer email to send confirmation', order._id)
+        }
+      }
     } catch (err) {
       console.error('Failed to mark order as paid:', err)
     }

@@ -114,23 +114,51 @@ export async function createPendingOrder(
   throw new Error('Failed to generate a unique order number after 5 attempts.')
 }
 
-export async function markOrderPaid(stripePaymentIntentId: string): Promise<void> {
-  const order = await client.fetch<{ _id: string; status: OrderStatus } | null>(
-    `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, status }`,
+export interface PaidOrderSnapshot {
+  _id: string
+  orderNumber: string
+  customer: OrderCustomer
+  shippingAddress: OrderAddress
+  items: OrderLineItem[]
+  subtotal: number
+  couponCode?: string
+  couponDiscount?: number
+  shippingMethod: string
+  shippingCost: number
+  giftCardCode?: string
+  giftCardApplied?: number
+  total: number
+}
+
+export async function markOrderPaid(
+  stripePaymentIntentId: string,
+): Promise<{ transitioned: boolean; order: PaidOrderSnapshot | null }> {
+  const order = await client.fetch<
+    (PaidOrderSnapshot & { status: OrderStatus }) | null
+  >(
+    `*[_type == "order" && stripePaymentIntentId == $pid][0]{
+      _id, orderNumber, status, customer, shippingAddress,
+      items, subtotal, couponCode, couponDiscount,
+      shippingMethod, shippingCost, giftCardCode, giftCardApplied, total
+    }`,
     { pid: stripePaymentIntentId },
   )
   if (!order) {
     console.error(`markOrderPaid: no order for PaymentIntent ${stripePaymentIntentId}`)
-    return
+    return { transitioned: false, order: null }
   }
-  // Idempotent: only advance from pending to paid. Don't downgrade from
-  // shipped/delivered if those were set manually before the webhook arrived.
-  if (order.status !== 'pending' && order.status !== 'failed') return
+  // Idempotent: only advance from pending or failed to paid. Don't downgrade
+  // from shipped/delivered if those were set manually before the webhook arrived.
+  if (order.status !== 'pending' && order.status !== 'failed') {
+    return { transitioned: false, order }
+  }
 
   await client
     .patch(order._id)
     .set({ status: 'paid', paidAt: new Date().toISOString() })
     .commit()
+
+  return { transitioned: true, order }
 }
 
 export async function markOrderFailed(stripePaymentIntentId: string): Promise<void> {
