@@ -78,12 +78,17 @@ function PaymentForm({ amount, onSuccess }: { amount: number; onSuccess: () => v
   )
 }
 
+const NOTE_MAX_LENGTH = 500
+
 export function GiftCardPurchase() {
   const [selectedAmount, setSelectedAmount] = useState(100)
   const [customAmount, setCustomAmount] = useState('')
   const [isCustom, setIsCustom] = useState(false)
+  const [senderName, setSenderName] = useState('')
   const [purchaserEmail, setPurchaserEmail] = useState('')
+  const [recipientName, setRecipientName] = useState('')
   const [recipientEmail, setRecipientEmail] = useState('')
+  const [note, setNote] = useState('')
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [stripePromise, setStripePromise] = useState<ReturnType<typeof loadStripe> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -96,8 +101,10 @@ export function GiftCardPurchase() {
     finalAmount >= 1 &&
     finalAmount <= 500 &&
     !isNaN(finalAmount) &&
+    senderName.trim().length > 0 &&
     isValidEmail(purchaserEmail) &&
-    (recipientEmail === '' || isValidEmail(recipientEmail))
+    isValidEmail(recipientEmail) &&
+    note.length <= NOTE_MAX_LENGTH
 
   const handleProceed = async () => {
     setError(null)
@@ -112,8 +119,11 @@ export function GiftCardPurchase() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: finalAmount,
+          senderName: senderName.trim(),
           purchaserEmail,
-          recipientEmail: recipientEmail || purchaserEmail,
+          recipientName: recipientName.trim() || undefined,
+          recipientEmail,
+          note: note.trim() || undefined,
         }),
       })
       const data = await res.json()
@@ -139,7 +149,7 @@ export function GiftCardPurchase() {
         <h3 className="font-sans text-xl font-semibold text-foreground">Gift Card Sent!</h3>
         <p className="mt-2 font-body text-sm text-muted-foreground">
           The gift card code will be delivered to{' '}
-          <strong className="text-foreground">{recipientEmail || purchaserEmail}</strong> shortly.
+          <strong className="text-foreground">{recipientEmail}</strong> shortly.
         </p>
       </div>
     )
@@ -198,8 +208,23 @@ export function GiftCardPurchase() {
             )}
           </div>
 
-          {/* Emails */}
+          {/* Sender */}
           <div className="space-y-3">
+            <p className="text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              From
+            </p>
+            <div>
+              <label className="mb-1.5 block text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                Your Name *
+              </label>
+              <input
+                type="text"
+                value={senderName}
+                onChange={(e) => setSenderName(e.target.value)}
+                placeholder="John Doe"
+                className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-body text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              />
+            </div>
             <div>
               <label className="mb-1.5 block text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
                 Your Email *
@@ -212,10 +237,29 @@ export function GiftCardPurchase() {
                 className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-body text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
+          </div>
+
+          {/* Recipient */}
+          <div className="space-y-3">
+            <p className="text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              To
+            </p>
             <div>
               <label className="mb-1.5 block text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                Recipient Email{' '}
+                Recipient Name{' '}
                 <span className="normal-case font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+                placeholder="Jane Smith"
+                className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-body text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                Recipient Email *
               </label>
               <input
                 type="email"
@@ -224,7 +268,28 @@ export function GiftCardPurchase() {
                 placeholder="recipient@example.com"
                 className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm font-body text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               />
+              <p className="mt-1 text-xs font-body text-muted-foreground">
+                Buying for yourself? Use your own email.
+              </p>
             </div>
+          </div>
+
+          {/* Personal note */}
+          <div>
+            <label className="mb-1.5 block text-xs font-body font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              Personal Note{' '}
+              <span className="normal-case font-normal">(optional)</span>
+            </label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, NOTE_MAX_LENGTH))}
+              placeholder="Add a personal message that will appear in the gift card email"
+              rows={4}
+              className="w-full resize-none rounded-sm border border-input bg-background px-3 py-2 text-sm font-body text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+            />
+            <p className="mt-1 text-right text-xs font-body text-muted-foreground">
+              {note.length} / {NOTE_MAX_LENGTH}
+            </p>
           </div>
 
           {error && (
@@ -248,7 +313,7 @@ export function GiftCardPurchase() {
             <div>
               <p className="font-sans font-semibold text-foreground">${finalAmount} Gift Card</p>
               <p className="text-xs font-body text-muted-foreground">
-                To: {recipientEmail || purchaserEmail}
+                To: {recipientName ? `${recipientName} (${recipientEmail})` : recipientEmail}
               </p>
             </div>
             <button
