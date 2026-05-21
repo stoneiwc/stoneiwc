@@ -124,25 +124,21 @@ function PaymentForm({ clientSecret, total, onSuccess }: PaymentFormProps) {
 
 interface SelfCheckoutSectionProps {
   items: CartItem[]
-  subtotal: number
-  appliedCoupon: any
-  discountAmount: number
   totalPrice: number
   onShippingMethodChange: (method: string, cost: number) => void
   shippingCost: number
   appliedGiftCard: AppliedGiftCard | null
+  giftCardDiscount: number
   onGiftCardChange: (giftCard: AppliedGiftCard | null) => void
 }
 
 export default function SelfCheckoutSection({
   items,
-  subtotal,
-  appliedCoupon,
-  discountAmount,
   totalPrice,
   onShippingMethodChange,
   shippingCost,
   appliedGiftCard,
+  giftCardDiscount,
   onGiftCardChange,
 }: SelfCheckoutSectionProps) {
   // Initialize form with saved shipping method or default to 'standard'
@@ -269,6 +265,31 @@ export default function SelfCheckoutSection({
       setIsLoading(true)
       setError(null)
 
+      // Zero-total checkout (gift card covers everything): skip Stripe entirely.
+      if (totalPrice <= 0 && appliedGiftCard && giftCardDiscount > 0) {
+        const res = await fetch('/api/checkout/redeem-gift-card-only', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            giftCardCode: appliedGiftCard.code,
+            appliedAmount: giftCardDiscount,
+            email: form.email,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || 'Failed to finalize order.')
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('selectedShippingMethod')
+          sessionStorage.setItem('checkoutEmail', form.email)
+          window.location.href = `/checkout/success?gift_card_only=1&order=${encodeURIComponent(
+            data.orderId,
+          )}`
+        }
+        return
+      }
+
       // Fetch Stripe publishable key
       const keyResponse = await fetch('/api/checkout/retrieve-stripe-publishable-key', {
         method: 'POST',
@@ -299,9 +320,7 @@ export default function SelfCheckoutSection({
           totalAmount: totalPrice,
           email: form.email,
           giftCardCode: appliedGiftCard?.code,
-          giftCardAppliedAmount: appliedGiftCard
-            ? Math.min(appliedGiftCard.balance, subtotal - discountAmount + shippingCost)
-            : undefined,
+          giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
             lastName: form.shippingSameAsBilling ? form.lastName : form.lastName,
@@ -705,9 +724,9 @@ export default function SelfCheckoutSection({
                 <div>
                   <p className="font-body font-semibold text-foreground">{appliedGiftCard.code}</p>
                   <p className="text-xs text-primary">
-                    -${Math.min(appliedGiftCard.balance, subtotal - discountAmount + shippingCost).toFixed(2)} applied
-                    {appliedGiftCard.balance > subtotal - discountAmount + shippingCost && (
-                      <span className="text-muted-foreground"> · ${(appliedGiftCard.balance - (subtotal - discountAmount + shippingCost)).toFixed(2)} balance remaining</span>
+                    -${giftCardDiscount.toFixed(2)} applied
+                    {appliedGiftCard.balance > giftCardDiscount && (
+                      <span className="text-muted-foreground"> · ${(appliedGiftCard.balance - giftCardDiscount).toFixed(2)} balance remaining</span>
                     )}
                   </p>
                 </div>
