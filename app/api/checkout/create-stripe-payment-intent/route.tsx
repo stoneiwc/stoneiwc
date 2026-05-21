@@ -30,7 +30,7 @@ type CreateStripePaymentIntentBody = {
     totalAmount?: number | string;
     email?: string;
     giftCardCode?: string;
-    giftCardPromotionCodeId?: string;
+    giftCardAppliedAmount?: number;
 };
 
 /**
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
             totalAmount,
             email,
             giftCardCode,
-            giftCardPromotionCodeId,
+            giftCardAppliedAmount,
         } = body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
@@ -98,7 +98,10 @@ export async function POST(request: Request) {
             shipping_cost: shippingCost ? Number(shippingCost).toFixed(2) : '0.00',
             tax_amount: taxAmount ? Number(taxAmount).toFixed(2) : '0.00',
             ...(giftCardCode && { gift_card_code: giftCardCode }),
-            ...(giftCardPromotionCodeId && { gift_card_promotion_code_id: giftCardPromotionCodeId }),
+            ...(giftCardAppliedAmount !== undefined &&
+                giftCardAppliedAmount > 0 && {
+                    gift_card_applied_amount: Number(giftCardAppliedAmount).toFixed(2),
+                }),
         };
 
         const paymentIntent = await stripe.paymentIntents.create({

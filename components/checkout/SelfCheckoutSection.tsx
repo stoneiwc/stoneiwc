@@ -188,7 +188,7 @@ export default function SelfCheckoutSection({
       if (!data.valid) {
         setGiftCardError(data.error || 'Invalid gift card code.')
       } else {
-        onGiftCardChange({ code: data.code, amount: data.amount, promotionCodeId: data.promotionCodeId })
+        onGiftCardChange({ code: data.code, balance: data.balance })
         setGiftCardInput('')
       }
     } catch {
@@ -299,7 +299,9 @@ export default function SelfCheckoutSection({
           totalAmount: totalPrice,
           email: form.email,
           giftCardCode: appliedGiftCard?.code,
-          giftCardPromotionCodeId: appliedGiftCard?.promotionCodeId,
+          giftCardAppliedAmount: appliedGiftCard
+            ? Math.min(appliedGiftCard.balance, subtotal - discountAmount + shippingCost)
+            : undefined,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
             lastName: form.shippingSameAsBilling ? form.lastName : form.lastName,
@@ -702,7 +704,12 @@ export default function SelfCheckoutSection({
               <div className="mt-4 flex items-center justify-between rounded-sm border border-border bg-background p-4">
                 <div>
                   <p className="font-body font-semibold text-foreground">{appliedGiftCard.code}</p>
-                  <p className="text-xs text-primary">-${appliedGiftCard.amount.toFixed(2)} applied</p>
+                  <p className="text-xs text-primary">
+                    -${Math.min(appliedGiftCard.balance, subtotal - discountAmount + shippingCost).toFixed(2)} applied
+                    {appliedGiftCard.balance > subtotal - discountAmount + shippingCost && (
+                      <span className="text-muted-foreground"> · ${(appliedGiftCard.balance - (subtotal - discountAmount + shippingCost)).toFixed(2)} balance remaining</span>
+                    )}
+                  </p>
                 </div>
                 <button
                   type="button"

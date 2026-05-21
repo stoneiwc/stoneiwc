@@ -1,13 +1,40 @@
 interface GiftCardEmailData {
   code: string
   amount: number
+  senderName: string
+  recipientName?: string
   recipientEmail: string
   purchaserEmail: string
+  note?: string
   expiresAt: string
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export function giftCardEmailHtml(data: GiftCardEmailData): string {
-  const { code, amount, expiresAt } = data
+  const { code, amount, senderName, recipientName, note, expiresAt } = data
+
+  const greeting = recipientName ? `Hello ${escapeHtml(recipientName)},` : 'Hello,'
+  const intro = `${escapeHtml(senderName)} has sent you a Stone IWC gift card.`
+
+  const noteBlock = note
+    ? `
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-left:3px solid #c9a96e;background:#faf8f3;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:18px 22px;">
+                    <p style="margin:0 0 6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">Message from ${escapeHtml(senderName)}</p>
+                    <p style="margin:0;font-size:15px;color:#333;line-height:1.6;font-style:italic;">${escapeHtml(note).replace(/\n/g, '<br/>')}</p>
+                  </td>
+                </tr>
+              </table>`
+    : ''
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -26,7 +53,7 @@ export function giftCardEmailHtml(data: GiftCardEmailData): string {
           <tr>
             <td style="background:#1a1a1a;padding:32px 40px;text-align:center;">
               <p style="margin:0;font-family:Georgia,serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9a96e;">Stone International Wellness Center</p>
-              <h1 style="margin:12px 0 0;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:#ffffff;letter-spacing:1px;">Your Gift Card</h1>
+              <h1 style="margin:12px 0 0;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:#ffffff;letter-spacing:1px;">A Gift For You</h1>
             </td>
           </tr>
 
@@ -38,9 +65,10 @@ export function giftCardEmailHtml(data: GiftCardEmailData): string {
           <!-- Body -->
           <tr>
             <td style="padding:40px;">
-              <p style="margin:0 0 28px;font-size:15px;color:#555;line-height:1.7;text-align:center;">
-                A gift of wellness awaits you. Present this code at checkout to redeem your gift card.
-              </p>
+              <p style="margin:0 0 12px;font-size:16px;color:#1a1a1a;line-height:1.6;">${greeting}</p>
+              <p style="margin:0 0 28px;font-size:15px;color:#555;line-height:1.7;">${intro} Use the code below at checkout to redeem.</p>
+
+              ${noteBlock}
 
               <!-- Gift Card Box -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;margin-bottom:32px;">
@@ -65,7 +93,7 @@ export function giftCardEmailHtml(data: GiftCardEmailData): string {
                 <tr>
                   <td style="padding:14px 20px;">
                     <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">How to Use</p>
-                    <p style="margin:4px 0 0;font-size:15px;color:#555;line-height:1.6;">Enter the code above during checkout on stoneiwc.com to apply the gift card to your order.</p>
+                    <p style="margin:4px 0 0;font-size:15px;color:#555;line-height:1.6;">Enter the code above during checkout on stoneiwc.com. Any unused balance stays on your card for next time.</p>
                   </td>
                 </tr>
               </table>
@@ -101,28 +129,44 @@ export function giftCardEmailHtml(data: GiftCardEmailData): string {
 }
 
 export function giftCardEmailText(data: GiftCardEmailData): string {
-  const { code, amount, expiresAt } = data
-  return [
-    'Your Stone IWC Gift Card',
-    '='.repeat(40),
-    `Value:      $${amount}`,
-    `Code:       ${code}`,
-    `Valid Until: ${expiresAt}`,
+  const { code, amount, senderName, recipientName, note, expiresAt } = data
+  const greeting = recipientName ? `Hello ${recipientName},` : 'Hello,'
+  const lines = [
+    greeting,
     '',
-    'Enter the code during checkout at stoneiwc.com to redeem.',
+    `${senderName} has sent you a Stone IWC gift card.`,
+    '',
+  ]
+  if (note) {
+    lines.push(`Message from ${senderName}:`, note, '')
+  }
+  lines.push(
+    '='.repeat(40),
+    `Value:       $${amount}`,
+    `Code:        ${code}`,
+    `Valid Until: ${expiresAt}`,
+    '='.repeat(40),
+    '',
+    'Enter the code during checkout at stoneiwc.com. Any unused balance stays on your card for next time.',
     '',
     'Questions? Contact support@stoneiwc.com',
-  ].join('\n')
+  )
+  return lines.join('\n')
 }
 
 interface GiftCardPurchaseConfirmationData {
   amount: number
+  senderName: string
+  recipientName?: string
   recipientEmail: string
   expiresAt: string
 }
 
 export function giftCardPurchaseConfirmationHtml(data: GiftCardPurchaseConfirmationData): string {
-  const { amount, recipientEmail, expiresAt } = data
+  const { amount, recipientName, recipientEmail, expiresAt } = data
+  const sentToLabel = recipientName
+    ? `${escapeHtml(recipientName)} (${escapeHtml(recipientEmail)})`
+    : escapeHtml(recipientEmail)
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -168,7 +212,7 @@ export function giftCardPurchaseConfirmationHtml(data: GiftCardPurchaseConfirmat
                 <tr>
                   <td style="padding:14px 20px;border-bottom:1px solid #e0ddd5;">
                     <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">Sent To</p>
-                    <p style="margin:4px 0 0;font-size:16px;color:#1a1a1a;">${recipientEmail}</p>
+                    <p style="margin:4px 0 0;font-size:16px;color:#1a1a1a;">${sentToLabel}</p>
                   </td>
                 </tr>
                 <tr>
@@ -204,12 +248,13 @@ export function giftCardPurchaseConfirmationHtml(data: GiftCardPurchaseConfirmat
 }
 
 export function giftCardPurchaseConfirmationText(data: GiftCardPurchaseConfirmationData): string {
-  const { amount, recipientEmail, expiresAt } = data
+  const { amount, recipientName, recipientEmail, expiresAt } = data
+  const sentTo = recipientName ? `${recipientName} (${recipientEmail})` : recipientEmail
   return [
     'Stone IWC — Gift Card Purchase Confirmation',
     '='.repeat(40),
-    `Value:      $${amount}`,
-    `Sent To:    ${recipientEmail}`,
+    `Value:       $${amount}`,
+    `Sent To:     ${sentTo}`,
     `Valid Until: ${expiresAt}`,
     '',
     'Thank you for your purchase. The gift card code has been emailed directly to the recipient.',

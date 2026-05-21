@@ -9,8 +9,7 @@ import CheckoutDetailsSection from "@/components/checkout/CheckoutDetailsSection
 
 export interface AppliedGiftCard {
   code: string
-  amount: number
-  promotionCodeId: string
+  balance: number
 }
 
 export default function CheckoutPage() {
@@ -31,7 +30,7 @@ export default function CheckoutPage() {
 		setShippingCost(cost)
 	}, [])
 
-	const giftCardDiscount = appliedGiftCard ? Math.min(appliedGiftCard.amount, subtotal - discountAmount + shippingCost) : 0
+	const giftCardDiscount = appliedGiftCard ? Math.min(appliedGiftCard.balance, subtotal - discountAmount + shippingCost) : 0
 	const finalTotal = Math.max(0, subtotal - discountAmount + shippingCost - giftCardDiscount)
 
 	if (items.length === 0) {

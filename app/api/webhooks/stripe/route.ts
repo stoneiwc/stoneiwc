@@ -7,15 +7,10 @@ import {
   giftCardPurchaseConfirmationHtml,
   giftCardPurchaseConfirmationText,
 } from '@/lib/email/gift-card-template'
+import { client as sanityClient } from '@/lib/sanity.client'
+import { createGiftCard, redeemGiftCard } from '@/lib/gift-cards'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-
-function generateGiftCardCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  const segment = () =>
-    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  return `STONE-${segment()}-${segment()}`
-}
 
 export async function POST(request: Request) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -38,7 +33,10 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: `Webhook signature verification failed: ${message}` }, { status: 400 })
+    return NextResponse.json(
+      { error: `Webhook signature verification failed: ${message}` },
+      { status: 400 },
+    )
   }
 
   if (event.type !== 'payment_intent.succeeded') {
@@ -46,58 +44,73 @@ export async function POST(request: Request) {
   }
 
   const paymentIntent = event.data.object as Stripe.PaymentIntent
+  const meta = paymentIntent.metadata ?? {}
 
-  // Deactivate gift card promo code if one was redeemed in this order
-  const redeemedPromoCodeId = paymentIntent.metadata?.gift_card_promotion_code_id
-  if (redeemedPromoCodeId) {
-    try {
-      await stripe.promotionCodes.update(redeemedPromoCodeId, { active: false })
-    } catch (err) {
-      console.error('Failed to deactivate gift card promo code:', err)
+  // Deduct balance for any gift card redeemed in this order.
+  const redeemedCode = meta.gift_card_code
+  const appliedAmountRaw = meta.gift_card_applied_amount
+  if (redeemedCode && appliedAmountRaw) {
+    const appliedAmount = parseFloat(appliedAmountRaw)
+    if (appliedAmount > 0) {
+      try {
+        await redeemGiftCard(redeemedCode, appliedAmount, paymentIntent.id)
+      } catch (err) {
+        console.error('Gift card redemption failed:', err)
+      }
     }
   }
 
-  if (paymentIntent.metadata?.order_type !== 'gift_card') {
+  if (meta.order_type !== 'gift_card') {
     return NextResponse.json({ received: true })
   }
 
-  const customerEmail = paymentIntent.receipt_email ?? paymentIntent.metadata?.customer_email
-  const recipientEmail = paymentIntent.metadata?.recipient_email || customerEmail
+  const customerEmail = paymentIntent.receipt_email ?? meta.customer_email
+  const recipientEmail = meta.recipient_email || customerEmail
+  const senderName = meta.sender_name
+  const recipientName = meta.recipient_name
+  const note = meta.gift_card_note
   const amountDollars = paymentIntent.amount / 100
 
-  if (!customerEmail || !recipientEmail) {
-    console.error('Gift card webhook: missing email in payment intent', paymentIntent.id)
-    return NextResponse.json({ error: 'Missing customer email.' }, { status: 400 })
+  if (!customerEmail || !recipientEmail || !senderName) {
+    console.error('Gift card webhook: required metadata missing', paymentIntent.id)
+    return NextResponse.json({ error: 'Required gift card metadata missing.' }, { status: 400 })
   }
 
-  const code = generateGiftCardCode()
+  // Idempotency — if Stripe retries the webhook, skip re-creating the card.
+  const existing = await sanityClient.fetch<{ code: string } | null>(
+    `*[_type == "giftCard" && paymentIntentId == $pid][0]{ code }`,
+    { pid: paymentIntent.id },
+  )
 
-  const expiryDate = new Date()
-  expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+  let code: string
+  let expiryDate: Date
 
-  try {
-    const coupon = await stripe.coupons.create({
-      amount_off: paymentIntent.amount,
-      currency: 'usd',
-      name: `Gift Card $${amountDollars}`,
-      max_redemptions: 1,
-    })
+  if (existing) {
+    code = existing.code
+    // Re-derive expiry for email rendering. The exact value isn't critical here —
+    // the card itself in Sanity holds the source of truth.
+    expiryDate = new Date()
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+  } else {
+    expiryDate = new Date()
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1)
 
-    await stripe.promotionCodes.create({
-      promotion: { type: 'coupon', coupon: coupon.id },
-      code,
-      max_redemptions: 1,
-      expires_at: Math.floor(expiryDate.getTime() / 1000),
-      metadata: {
-        payment_intent_id: paymentIntent.id,
-        purchaser_email: customerEmail,
-        recipient_email: recipientEmail,
-        amount: String(amountDollars),
-      },
-    })
-  } catch (err) {
-    console.error('Gift card Stripe creation error:', err)
-    return NextResponse.json({ error: 'Failed to create gift card in Stripe.' }, { status: 500 })
+    try {
+      const created = await createGiftCard({
+        amount: amountDollars,
+        purchaserName: senderName,
+        purchaserEmail: customerEmail,
+        recipientName,
+        recipientEmail,
+        note,
+        paymentIntentId: paymentIntent.id,
+        expiresAt: expiryDate,
+      })
+      code = created.code
+    } catch (err) {
+      console.error('Gift card Sanity creation error:', err)
+      return NextResponse.json({ error: 'Failed to create gift card.' }, { status: 500 })
+    }
   }
 
   const expiresAt = expiryDate.toLocaleDateString('en-US', {
@@ -109,15 +122,18 @@ export async function POST(request: Request) {
   const emailData = {
     code,
     amount: amountDollars,
+    senderName,
+    recipientName,
     recipientEmail,
     purchaserEmail: customerEmail,
+    note,
     expiresAt,
   }
 
   const { error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: recipientEmail,
-    subject: `Your $${amountDollars} Stone IWC Gift Card`,
+    subject: `${senderName} sent you a $${amountDollars} Stone IWC gift card`,
     html: giftCardEmailHtml(emailData),
     text: giftCardEmailText(emailData),
   })
@@ -129,6 +145,8 @@ export async function POST(request: Request) {
   if (recipientEmail.toLowerCase() !== customerEmail.toLowerCase()) {
     const confirmationData = {
       amount: amountDollars,
+      senderName,
+      recipientName,
       recipientEmail,
       expiresAt,
     }
