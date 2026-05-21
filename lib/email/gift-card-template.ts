@@ -102,7 +102,7 @@ export function giftCardEmailHtml(data: GiftCardEmailData): string {
               <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                 <tr>
                   <td style="background:#1a1a1a;padding:14px 32px;">
-                    <a href="${process.env.NEXT_PUBLIC_FRONTEND_URL}/products" style="font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#c9a96e;text-decoration:none;">
+                    <a href="https://stoneiwc.com/products" style="font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#c9a96e;text-decoration:none;">
                       Shop Now →
                     </a>
                   </td>
@@ -115,7 +115,7 @@ export function giftCardEmailHtml(data: GiftCardEmailData): string {
           <tr>
             <td style="background:#f9f8f5;border-top:1px solid #e0ddd5;padding:24px 40px;text-align:center;">
               <p style="margin:0;font-size:12px;color:#aaa;">
-                Questions? Contact us at support@stoneiwc.com
+                Questions? Contact us at info@stoneiwc.com
               </p>
             </td>
           </tr>
@@ -149,7 +149,7 @@ export function giftCardEmailText(data: GiftCardEmailData): string {
     '',
     'Enter the code during checkout at stoneiwc.com. Any unused balance stays on your card for next time.',
     '',
-    'Questions? Contact support@stoneiwc.com',
+    'Questions? Contact info@stoneiwc.com',
   )
   return lines.join('\n')
 }
@@ -234,7 +234,7 @@ export function giftCardPurchaseConfirmationHtml(data: GiftCardPurchaseConfirmat
           <tr>
             <td style="background:#f9f8f5;border-top:1px solid #e0ddd5;padding:24px 40px;text-align:center;">
               <p style="margin:0;font-size:12px;color:#aaa;">
-                Questions? Contact us at support@stoneiwc.com
+                Questions? Contact us at info@stoneiwc.com
               </p>
             </td>
           </tr>
@@ -259,6 +259,6 @@ export function giftCardPurchaseConfirmationText(data: GiftCardPurchaseConfirmat
     '',
     'Thank you for your purchase. The gift card code has been emailed directly to the recipient.',
     '',
-    'Questions? Contact support@stoneiwc.com',
+    'Questions? Contact info@stoneiwc.com',
   ].join('\n')
 }
