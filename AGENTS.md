@@ -117,9 +117,25 @@ public/               Static assets
 
 | File | Covers |
 |------|--------|
+| [`project-documentation/orders.md`](project-documentation/orders.md) | Storefront orders, Sanity tracking, fulfillment workflow |
 | [`project-documentation/gift-card.md`](project-documentation/gift-card.md) | Gift card purchase, webhook, redemption, troubleshooting |
 | [`project-documentation/checkout-and-payments.md`](project-documentation/checkout-and-payments.md) | Cart, checkout flow, Stripe, coupons |
 | [`project-documentation/cal-com-booking.md`](project-documentation/cal-com-booking.md) | Booking page, Cal.com API, slug conventions, provisioning scripts |
 | [`project-documentation/sanity-cms.md`](project-documentation/sanity-cms.md) | Content schemas, GROQ queries, ISR, image handling, products |
 | [`project-documentation/resend-email.md`](project-documentation/resend-email.md) | Email templates, rate limiting, adding new email types |
 | [`project-documentation/seo.md`](project-documentation/seo.md) | Sitemap, robots, JSON-LD, metadata strategy, post-deploy steps, remaining work |
+
+---
+
+## Session continuity notes
+
+Two files in `project-documentation/` are **gitignored** and exist only on the maintainer's local machine. Treat them as a private notebook between sessions:
+
+| File | Purpose |
+|------|---------|
+| [`project-documentation/last-point.md`](project-documentation/last-point.md) | What was done in the previous session + open test cases / follow-ups. Read this at the **start** of every session to recover context. |
+| [`project-documentation/execution-map.md`](project-documentation/execution-map.md) | Plan for upcoming sessions: what to tackle next, blockers, reminders. Read alongside `last-point.md`. |
+
+If either file is missing locally, that's expected — they're regenerated each session. Don't commit them; the `.gitignore` entries are intentional. When closing out a working session, update both: refresh `last-point.md` with the new state and amend `execution-map.md` with any new items uncovered during the session.
+
+(Planned: dedicated Claude Code skills — `last-point`, `execution-map`, `commit-style` — to automate this maintenance. To be authored via the Superpowers plugin's `writing-skills` skill.)
