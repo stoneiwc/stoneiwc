@@ -114,3 +114,106 @@ export function giftCardEmailText(data: GiftCardEmailData): string {
     'Questions? Contact support@stoneiwc.com',
   ].join('\n')
 }
+
+interface GiftCardPurchaseConfirmationData {
+  amount: number
+  recipientEmail: string
+  expiresAt: string
+}
+
+export function giftCardPurchaseConfirmationHtml(data: GiftCardPurchaseConfirmationData): string {
+  const { amount, recipientEmail, expiresAt } = data
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gift Card Purchase Confirmation</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f0;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e0ddd5;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#1a1a1a;padding:32px 40px;text-align:center;">
+              <p style="margin:0;font-family:Georgia,serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9a96e;">Stone International Wellness Center</p>
+              <h1 style="margin:12px 0 0;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:#ffffff;letter-spacing:1px;">Gift Card Sent</h1>
+            </td>
+          </tr>
+
+          <!-- Accent -->
+          <tr>
+            <td style="height:4px;background:linear-gradient(90deg,#c9a96e,#e8d5a3,#c9a96e);"></td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+              <p style="margin:0 0 28px;font-size:15px;color:#555;line-height:1.7;text-align:center;">
+                Thank you for your purchase. Your gift card has been delivered to the recipient.
+              </p>
+
+              <!-- Summary -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e0ddd5;margin-bottom:28px;">
+                <tr>
+                  <td style="padding:14px 20px;background:#f9f8f5;border-bottom:1px solid #e0ddd5;">
+                    <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">Gift Card Value</p>
+                    <p style="margin:4px 0 0;font-size:18px;color:#1a1a1a;">$${amount}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e0ddd5;">
+                    <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">Sent To</p>
+                    <p style="margin:4px 0 0;font-size:16px;color:#1a1a1a;">${recipientEmail}</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;">
+                    <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#999;">Valid Until</p>
+                    <p style="margin:4px 0 0;font-size:16px;color:#1a1a1a;">${expiresAt}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 24px;font-size:14px;color:#777;line-height:1.6;text-align:center;">
+                For security, the gift card code is sent only to the recipient. If they did not receive it, please ask them to check their spam folder before contacting us.
+              </p>
+
+              <!-- Footer -->
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#f9f8f5;border-top:1px solid #e0ddd5;padding:24px 40px;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#aaa;">
+                Questions? Contact us at support@stoneiwc.com
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
+export function giftCardPurchaseConfirmationText(data: GiftCardPurchaseConfirmationData): string {
+  const { amount, recipientEmail, expiresAt } = data
+  return [
+    'Stone IWC — Gift Card Purchase Confirmation',
+    '='.repeat(40),
+    `Value:      $${amount}`,
+    `Sent To:    ${recipientEmail}`,
+    `Valid Until: ${expiresAt}`,
+    '',
+    'Thank you for your purchase. The gift card code has been emailed directly to the recipient.',
+    '',
+    'Questions? Contact support@stoneiwc.com',
+  ].join('\n')
+}

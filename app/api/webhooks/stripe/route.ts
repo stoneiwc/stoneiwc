@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
-import { giftCardEmailHtml, giftCardEmailText } from '@/lib/email/gift-card-template'
+import {
+  giftCardEmailHtml,
+  giftCardEmailText,
+  giftCardPurchaseConfirmationHtml,
+  giftCardPurchaseConfirmationText,
+} from '@/lib/email/gift-card-template'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -119,6 +124,26 @@ export async function POST(request: Request) {
 
   if (emailError) {
     console.error('Gift card email send error:', emailError)
+  }
+
+  if (recipientEmail.toLowerCase() !== customerEmail.toLowerCase()) {
+    const confirmationData = {
+      amount: amountDollars,
+      recipientEmail,
+      expiresAt,
+    }
+
+    const { error: confirmationError } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL!,
+      to: customerEmail,
+      subject: `Your $${amountDollars} Stone IWC gift card has been sent`,
+      html: giftCardPurchaseConfirmationHtml(confirmationData),
+      text: giftCardPurchaseConfirmationText(confirmationData),
+    })
+
+    if (confirmationError) {
+      console.error('Gift card purchase confirmation email error:', confirmationError)
+    }
   }
 
   return NextResponse.json({ received: true })
