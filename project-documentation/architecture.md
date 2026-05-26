@@ -222,7 +222,7 @@ public/                           Static assets, favicons, OG images
 | Branch | Vercel scope | Domain | Stripe mode | Purpose |
 |---|---|---|---|---|
 | `development` | Preview (aliased) | `dev.stoneiwc.com` | Test (`sk_test_…`) | Integration / staging |
-| `main` | Production | `stoneiwc.com` | Live (`sk_live_…`) | Customer-facing |
+| `production` | Production | `stoneiwc.com` | Live (`sk_live_…`) | Customer-facing |
 | feature branch | Preview (auto URL) | `…vercel.app` | Test | PR previews |
 
 Vercel env vars are scoped: each variable can hold different values per scope. See [environments-and-deployments.md](environments-and-deployments.md) for the full matrix and setup steps.

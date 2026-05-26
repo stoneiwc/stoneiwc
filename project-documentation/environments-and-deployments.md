@@ -10,7 +10,7 @@ There are three environments. They differ in **Vercel scope**, **Stripe mode**, 
 
 | Vercel scope | Git source | URL | Stripe | Purpose |
 |---|---|---|---|---|
-| **Production** | `main` branch | `https://stoneiwc.com` | Live (`sk_live_…`) | Real customers, real money |
+| **Production** | `production` branch | `https://stoneiwc.com` | Live (`sk_live_…`) | Real customers, real money |
 | **Preview** | `development` branch (aliased) + any PR branch | `https://dev.stoneiwc.com` (alias) or auto-generated `*.vercel.app` | Test (`sk_test_…`) | Staging + per-PR previews |
 | **Development** | None (Vercel scope used by `vercel dev` locally) | `localhost:3000` | Test | Used rarely; `vercel dev` reads this scope when needed |
 
@@ -106,7 +106,7 @@ If Production deployments are getting 401 from Stripe, double-check that Deploym
 
 ## Production merge checklist
 
-Before merging `development` → `main`, walk through this list. Skipping any item has bitten us before.
+Before merging `development` → `production`, walk through this list. Skipping any item has bitten us before.
 
 ### Pre-merge
 

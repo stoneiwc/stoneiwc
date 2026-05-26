@@ -181,7 +181,7 @@ These are the things you'll trip over in week 1 if you don't know them:
 
 | Branch | Purpose |
 |---|---|
-| `main` | Production — deploys to `stoneiwc.com` |
+| `production` | Production — deploys to `stoneiwc.com` |
 | `development` | Staging — deploys to `dev.stoneiwc.com` |
 | feature branches | PR previews (auto Vercel URL) |
 
@@ -195,7 +195,7 @@ git push -u origin feat/my-thing
 gh pr create --base development
 ```
 
-Production: merge `development` → `main` only after `dev.stoneiwc.com` smoke test. See [environments-and-deployments.md](environments-and-deployments.md#production-merge-checklist).
+Production: merge `development` → `production` only after `dev.stoneiwc.com` smoke test. See [environments-and-deployments.md](environments-and-deployments.md#production-merge-checklist).
 
 Commit style (observed from history): Conventional commits — `feat(scope):`, `fix(scope):`, `docs(scope):`. Body explains the "why", wrapped at ~72 chars. No "Co-Authored-By" trailer.
 
