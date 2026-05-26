@@ -6,7 +6,8 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docs:pdf": "node scripts/build-docs-pdf.mjs"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
