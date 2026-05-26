@@ -2,6 +2,8 @@
 
 Stone International Wellness Center is a Next.js 16 (App Router) full-stack web application. It covers a product storefront, service appointment booking, educational content, and contact — all backed by Sanity CMS, Stripe, Cal.com, and Resend.
 
+> **New to this codebase?** Start with [`project-documentation/architecture.md`](project-documentation/architecture.md) for the system overview, then [`project-documentation/onboarding.md`](project-documentation/onboarding.md) to get running locally.
+
 ---
 
 ## Tech Stack
@@ -60,18 +62,20 @@ CAL_API_KEY=
 NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
 ```
 
+Per-scope value matrix (Production vs. Preview vs. Development), webhook URLs, and rotation steps: [`project-documentation/environments-and-deployments.md`](project-documentation/environments-and-deployments.md).
+
 ---
 
 ## Project Structure
 
 ```
-app/                  Next.js App Router pages + API routes
-components/           React components
-lib/                  Business logic, API clients, utilities
-studio/               Sanity CMS Studio
-scripts/              Python scripts for Cal.com event provisioning
-project-documentation/ Technical documentation
-public/               Static assets
+app/                   Next.js App Router pages + API routes
+components/            React components
+lib/                   Business logic, API clients, utilities
+studio/                Sanity CMS Studio
+scripts/               Python scripts for Cal.com event provisioning
+project-documentation/ Technical documentation (this index)
+public/                Static assets
 ```
 
 ### Key Pages
@@ -97,7 +101,7 @@ public/               Static assets
 | `POST /api/webhooks/stripe` | Stripe event handler |
 | `POST /api/validate-coupon` | Validate a Sanity coupon code |
 | `GET  /api/shipping-methods` | Fetch active shipping methods |
-| `POST /api/contact` | Send contact form email |
+| `POST /api/contact` | Contact form + auto-reply |
 | `POST /api/revalidate` | Trigger ISR cache revalidation |
 
 ---
@@ -108,22 +112,68 @@ public/               Static assets
 - **Free Cal.com services:** slugs ending in `-free` display "Free" pricing on the booking page.
 - **Consultation-required services:** slugs containing `-consultation-` show a badge and "Price for Consultation" label.
 - **Product filters:** stored in URL query params (`?category=X&sort=Y&q=Z`). Default values are not written to the URL.
-- **Prices in Stripe:** always in cents (e.g. `$100 → 10000`).
+- **Prices in Stripe:** always in cents (e.g. `$100 → 10000`). Sanity and the cart use dollars.
 - **ISR revalidation:** all Sanity queries are tagged. Pages use `export const revalidate = 60`.
+- **Webhook idempotency:** Stripe events are de-duplicated by `stripePaymentIntentId` before any Sanity write or email send.
+- **Email reply-to:** all transactional emails set `replyTo: CONTACT_EMAIL_TO` so customer replies land in the team inbox.
 
 ---
 
 ## Documentation Index
 
+Foundation:
+
 | File | Covers |
 |------|--------|
-| [`project-documentation/orders.md`](project-documentation/orders.md) | Storefront orders, Sanity tracking, fulfillment workflow |
-| [`project-documentation/gift-card.md`](project-documentation/gift-card.md) | Gift card purchase, webhook, redemption, troubleshooting |
-| [`project-documentation/checkout-and-payments.md`](project-documentation/checkout-and-payments.md) | Cart, checkout flow, Stripe, coupons |
-| [`project-documentation/cal-com-booking.md`](project-documentation/cal-com-booking.md) | Booking page, Cal.com API, slug conventions, provisioning scripts |
-| [`project-documentation/sanity-cms.md`](project-documentation/sanity-cms.md) | Content schemas, GROQ queries, ISR, image handling, products |
-| [`project-documentation/resend-email.md`](project-documentation/resend-email.md) | Email templates, rate limiting, adding new email types |
-| [`project-documentation/seo.md`](project-documentation/seo.md) | Sitemap, robots, JSON-LD, metadata strategy, post-deploy steps, remaining work |
+| [`architecture.md`](project-documentation/architecture.md) | System map, data flow, integrations, what each service owns |
+| [`onboarding.md`](project-documentation/onboarding.md) | First-day setup: clone, install, env, run dev, first test purchase |
+| [`environments-and-deployments.md`](project-documentation/environments-and-deployments.md) | Vercel scopes, env var matrix, Stripe test/live split, deploy + rollback |
+| [`runbook.md`](project-documentation/runbook.md) | Troubleshooting playbook — common incidents and how to triage |
+
+Integrations:
+
+| File | Covers |
+|------|--------|
+| [`sanity-cms.md`](project-documentation/sanity-cms.md) | Schemas, GROQ queries, ISR, image handling |
+| [`checkout-and-payments.md`](project-documentation/checkout-and-payments.md) | Cart, checkout flow, Stripe Elements, coupons |
+| [`orders.md`](project-documentation/orders.md) | Storefront order lifecycle, Sanity tracking, fulfillment |
+| [`gift-card.md`](project-documentation/gift-card.md) | Gift card purchase + redemption, balance management |
+| [`cal-com-booking.md`](project-documentation/cal-com-booking.md) | Booking page, Cal.com API, slug conventions |
+| [`cal-events.md`](project-documentation/cal-events.md) | Provisioning events via Python script |
+| [`resend-email.md`](project-documentation/resend-email.md) | Templates, rate limiting, deliverability |
+| [`webhooks.md`](project-documentation/webhooks.md) | Stripe webhook handler — events, idempotency, debugging |
+| [`seo.md`](project-documentation/seo.md) | Sitemap, robots, JSON-LD, metadata, Search Console |
+
+Workflows & frontend:
+
+| File | Covers |
+|------|--------|
+| [`content-workflows.md`](project-documentation/content-workflows.md) | Studio user guide: add products/services/images, manage orders + gift cards |
+| [`frontend-ui.md`](project-documentation/frontend-ui.md) | Component conventions, Tailwind tokens, fonts, adding pages, forms |
+
+Operational:
+
+| File | Covers |
+|------|--------|
+| [`security-and-compliance.md`](project-documentation/security-and-compliance.md) | Secrets, PII, rotation, threat model, dependency security |
+| [`open-backlog.md`](project-documentation/open-backlog.md) | Known limitations, planned but not built, intentional omissions |
+
+---
+
+## Where to start for common tasks
+
+| If you want to… | Read |
+|---|---|
+| Understand the system | [`architecture.md`](project-documentation/architecture.md) |
+| Set up locally | [`onboarding.md`](project-documentation/onboarding.md) |
+| Deploy / manage env vars | [`environments-and-deployments.md`](project-documentation/environments-and-deployments.md) |
+| Fix something broken in production | [`runbook.md`](project-documentation/runbook.md) |
+| Add a product / service / image | [`content-workflows.md`](project-documentation/content-workflows.md) |
+| Modify checkout, payment, or order code | [`checkout-and-payments.md`](project-documentation/checkout-and-payments.md), [`orders.md`](project-documentation/orders.md) |
+| Touch the UI / add a page | [`frontend-ui.md`](project-documentation/frontend-ui.md) |
+| Debug a webhook | [`webhooks.md`](project-documentation/webhooks.md) + [`runbook.md`](project-documentation/runbook.md) |
+| Rotate secrets / handle an incident | [`security-and-compliance.md`](project-documentation/security-and-compliance.md) |
+| See what's deliberately not built | [`open-backlog.md`](project-documentation/open-backlog.md) |
 
 ---
 
