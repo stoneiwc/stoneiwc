@@ -161,14 +161,18 @@ type SanityImageField = { asset: { _ref: string; _type: string }; alt?: string }
 export interface SanityHomePageImages {
   aboutImage?: SanityImageField
   culinaryImage?: SanityImageField
+  servicesConciergeImage?: SanityImageField
+  servicesTreatmentRoomImage?: SanityImageField
 }
 
 export async function getHomePageImages(): Promise<SanityHomePageImages | null> {
   const query = `*[_type == "homePageImages" && _id == "homePageImages"][0] {
     aboutImage,
-    culinaryImage
+    culinaryImage,
+    servicesConciergeImage,
+    servicesTreatmentRoomImage
   }`
-  return client.fetch<SanityHomePageImages | null>(query)
+  return client.fetch<SanityHomePageImages | null>(query, {}, { next: { tags: ["homePageImages"] } })
 }
 
 // ─── About Page ──────────────────────────────────────────────────────────────

@@ -1,25 +1,38 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { urlFor } from "@/lib/sanity.image"
+import type { SanityHomePageImages } from "@/lib/sanity.queries"
 
-const services = [
-  {
-    title: "Concierge Holistic Treatments",
-    description:
-      "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, refined semi-permanent aesthetics, and 100+ more services -- delivered directly to your location.",
-    image: "/images/concierge.jpg",
-    href: "/services/concierge",
-  },
-  {
-    title: "In-Facility at The Source of Hope",
-    description:
-      "When an in-person location is required, we see patients at The Source of Hope facility in Plano, TX -- home to our advanced holistic education center and full treatment rooms.",
-    image: "/images/treatment-room.jpg",
-    href: "/services/treatments",
-  },
-]
+interface ServicesPreviewProps {
+  conciergeImage?: SanityHomePageImages["servicesConciergeImage"]
+  treatmentRoomImage?: SanityHomePageImages["servicesTreatmentRoomImage"]
+}
 
-export function ServicesPreview() {
+export function ServicesPreview({ conciergeImage, treatmentRoomImage }: ServicesPreviewProps = {}) {
+  const services = [
+    {
+      title: "Concierge Holistic Treatments",
+      description:
+        "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, refined semi-permanent aesthetics, and 100+ more services -- delivered directly to your location.",
+      image: conciergeImage?.asset
+        ? urlFor(conciergeImage).width(1600).height(1200).url()
+        : "/images/concierge.jpg",
+      alt: conciergeImage?.alt ?? "Concierge holistic treatments delivered at your home or office",
+      href: "/services/concierge",
+    },
+    {
+      title: "In-Facility at The Source of Hope",
+      description:
+        "When an in-person location is required, we see patients at The Source of Hope facility in Plano, TX -- home to our advanced holistic education center and full treatment rooms.",
+      image: treatmentRoomImage?.asset
+        ? urlFor(treatmentRoomImage).width(1600).height(1200).url()
+        : "/images/treatment-room.jpg",
+      alt: treatmentRoomImage?.alt ?? "The Source of Hope treatment room in Plano, TX",
+      href: "/services/treatments",
+    },
+  ]
+
   return (
     <section className="bg-foreground py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-6">
@@ -51,7 +64,7 @@ export function ServicesPreview() {
               <div className="aspect-[4/3] overflow-hidden">
                 <Image
                   src={service.image}
-                  alt={service.title}
+                  alt={service.alt}
                   width={800}
                   height={600}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"

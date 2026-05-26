@@ -24,7 +24,10 @@ export default async function HomePage() {
       <Hero slides={heroSlides} />
       <Philosophy />
       <AboutSection image={homePageImages?.aboutImage} />
-      <ServicesPreview />
+      <ServicesPreview
+        conciergeImage={homePageImages?.servicesConciergeImage}
+        treatmentRoomImage={homePageImages?.servicesTreatmentRoomImage}
+      />
       <WhereWeServe />
       <CulinaryWellness image={homePageImages?.culinaryImage} />
       <ProductsSection />
