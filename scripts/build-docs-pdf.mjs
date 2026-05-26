@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Bundles all project-documentation/*.md files into a single PDF.
-// Output: project-documentation/documentation.pdf
+// Output: project-documentation/stoneiwc-web-app-documentation.pdf
 //
 // Requirements:
 //   - Google Chrome installed (uses headless --print-to-pdf)
@@ -17,7 +17,7 @@ import { tmpdir } from "node:os"
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const docsDir = join(__dirname, "..", "project-documentation")
 const repoRoot = join(__dirname, "..")
-const outputPdf = join(docsDir, "documentation.pdf")
+const outputPdf = join(docsDir, "stoneiwc-web-app-documentation.pdf")
 
 // Reading order — matches the index in CLAUDE.md.
 const sections = [
