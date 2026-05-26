@@ -7,10 +7,15 @@ import { ArrowRight, Stethoscope, MapPin, Utensils } from "lucide-react"
 import { getServicesPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
+const DESCRIPTION =
+  "Over 100 holistic wellness services delivered to your location -- treatments, culinary wellness, and nutritional programs."
+
 export const metadata: Metadata = {
   title: "Services",
-  description:
-    "Over 100 holistic wellness services delivered to your location -- treatments, culinary wellness, and nutritional programs.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/services" },
+  openGraph: { title: "Services | Stone IWC", description: DESCRIPTION, url: "/services", type: "website" },
+  twitter: { card: "summary_large_image", title: "Services | Stone IWC", description: DESCRIPTION },
 }
 
 export const revalidate = 60
@@ -139,14 +144,12 @@ export default async function ServicesPage() {
             Schedule a consultation and let us create a personalized
             treatment plan for your needs. We come to you.
           </p>
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="mt-8 inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
           >
             Schedule a Consultation
-          </a>
+          </Link>
         </div>
       </section>
     </>

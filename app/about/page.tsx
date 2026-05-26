@@ -3,12 +3,21 @@ import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { ArrowRight, BookOpen, Users, Handshake } from "lucide-react"
+import { getAboutPageImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
+
+const DESCRIPTION =
+  "Learn about Stone International Wellness Center -- holistic practitioners with over five decades of experience, honoring both Eastern and Western medicine."
 
 export const metadata: Metadata = {
   title: "About Us",
-  description:
-    "Learn about Stone International Wellness Center -- holistic practitioners with over five decades of experience, honoring both Eastern and Western medicine.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/about" },
+  openGraph: { title: "About Us | Stone IWC", description: DESCRIPTION, url: "/about", type: "website" },
+  twitter: { card: "summary_large_image", title: "About Us | Stone IWC", description: DESCRIPTION },
 }
+
+export const revalidate = 60
 
 const subPages = [
   {
@@ -34,7 +43,14 @@ const subPages = [
   },
 ]
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const images = await getAboutPageImages()
+
+  const heroImageUrl = images?.heroImage?.asset
+    ? urlFor(images.heroImage).width(900).height(675).url()
+    : "/images/our-story.jpg"
+  const heroImageAlt = images?.heroImage?.alt ?? "Stone International Wellness Center practitioners"
+
   return (
     <>
       <PageHeader
@@ -47,8 +63,8 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/our-story.jpg"
-                alt="Stone International Wellness Center practitioners"
+                src={heroImageUrl}
+                alt={heroImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

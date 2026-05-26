@@ -65,11 +65,18 @@ export function Footer() {
                 {CONTACT_INFO.email}
               </a>
               <a
-                href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`}
+                href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
                 className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary"
               >
                 <Phone className="h-4 w-4 text-primary" />
-                {CONTACT_INFO.phone}
+                General Info: {CONTACT_INFO.phoneGeneral}
+              </a>
+              <a
+                href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
+                className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary"
+              >
+                <Phone className="h-4 w-4 text-primary" />
+                Concierge Services: {CONTACT_INFO.phoneConcierge}
               </a>
               <div className="flex items-start gap-3 text-background/70">
                 <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
@@ -104,14 +111,12 @@ export function Footer() {
             <SocialIcons />
           </div>
 
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="rounded-sm border border-primary px-8 py-2.5 text-sm font-body font-bold tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground"
           >
             Book an Appointment
-          </a>
+          </Link>
 
           <p className="text-xs font-body text-background/50">
             &copy; {new Date().getFullYear()} Stone International Wellness

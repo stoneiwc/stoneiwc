@@ -1,12 +1,18 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { PageHeader } from "@/components/page-header"
 import { ProductsGrid } from "@/components/products/products-grid"
 import { getAllProducts, getAllCategories } from "@/lib/sanity.queries"
 
+const DESCRIPTION =
+  "Premium wellness products curated by Stone International Wellness Center practitioners."
+
 export const metadata: Metadata = {
   title: "Products",
-  description:
-    "Premium wellness products curated by Stone International Wellness Center practitioners.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/products" },
+  openGraph: { title: "Products | Stone IWC", description: DESCRIPTION, url: "/products", type: "website" },
+  twitter: { card: "summary_large_image", title: "Products | Stone IWC", description: DESCRIPTION },
 }
 
 export const revalidate = 60
@@ -27,7 +33,9 @@ export default async function ProductsPage() {
         subtitle="Premium wellness essentials hand-selected by our practitioners to complement your healing journey."
       />
       <section className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
-        <ProductsGrid products={products} categories={categories} />
+        <Suspense>
+          <ProductsGrid products={products} categories={categories} />
+        </Suspense>
       </section>
     </>
   )

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useMemo, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { type Category, type Product } from "@/lib/products"
 import { ProductCard } from "@/components/products/product-card"
 import {
@@ -14,9 +15,28 @@ interface ProductsGridProps {
 }
 
 export function ProductsGrid({ products, categories }: ProductsGridProps) {
-  const [search, setSearch] = useState("")
-  const [category, setCategory] = useState<string>("All")
-  const [sort, setSort] = useState<SortOption>("featured")
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const search = searchParams.get("q") ?? ""
+  const category = searchParams.get("category") ?? "All"
+  const sort = (searchParams.get("sort") ?? "featured") as SortOption
+
+  const updateParams = useCallback(
+    (updates: Record<string, string>) => {
+      const params = new URLSearchParams(searchParams.toString())
+      for (const [key, value] of Object.entries(updates)) {
+        if (!value || value === "All" || value === "featured") {
+          params.delete(key)
+        } else {
+          params.set(key, value)
+        }
+      }
+      const qs = params.toString()
+      router.replace(`/products${qs ? `?${qs}` : ""}`, { scroll: false })
+    },
+    [router, searchParams]
+  )
 
   const filtered = useMemo(() => {
     let result = [...products]
@@ -56,11 +76,11 @@ export function ProductsGrid({ products, categories }: ProductsGridProps) {
     <div className="flex flex-col gap-10">
       <ProductFilters
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={(v) => updateParams({ q: v })}
         category={category}
-        onCategoryChange={setCategory}
+        onCategoryChange={(v) => updateParams({ category: v })}
         sort={sort}
-        onSortChange={setSort}
+        onSortChange={(v) => updateParams({ sort: v })}
         resultCount={filtered.length}
         categories={categories}
       />
@@ -74,10 +94,7 @@ export function ProductsGrid({ products, categories }: ProductsGridProps) {
             Try adjusting your search or filter criteria.
           </p>
           <button
-            onClick={() => {
-              setSearch("")
-              setCategory("All")
-            }}
+            onClick={() => router.replace("/products", { scroll: false })}
             className="mt-6 rounded-sm border border-primary px-6 py-2.5 text-sm font-body font-bold tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground"
           >
             Clear Filters

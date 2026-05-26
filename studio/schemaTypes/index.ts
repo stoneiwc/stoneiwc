@@ -5,7 +5,10 @@ import {homePageImagesType} from './homePageImages'
 import {ourStoryImagesType} from './ourStoryImages'
 import {teamMemberType} from './teamMember'
 import {partnerType} from './partner'
+import {aboutPageImagesType} from './aboutPageImages'
 import {servicesPageImagesType} from './servicesPageImages'
+import {educationPageImagesType} from './educationPageImages'
+import {featuredPageImagesType} from './featuredPageImages'
 import {conciergeImagesType} from './conciergeImages'
 import {virtualConsultationsImagesType} from './virtualConsultationsImages'
 import {certificationImagesType} from './certificationImages'
@@ -16,6 +19,11 @@ import {pressItemType} from './pressItem'
 import {mediaItemType} from './mediaItem'
 import {qcShowFlyerType} from './qcShowFlyer'
 import {qcShowEpisodeType} from './qcShowEpisode'
+import {couponType} from './coupon'
+import {giftCardType} from './giftCard'
+import {orderType} from './order'
+import {shippingMethodType} from './shippingMethod'
+import {awardItemType} from './awardItem'
 
 export const schemaTypes = [
   categoryType,
@@ -25,7 +33,10 @@ export const schemaTypes = [
   ourStoryImagesType,
   teamMemberType,
   partnerType,
+  aboutPageImagesType,
   servicesPageImagesType,
+  educationPageImagesType,
+  featuredPageImagesType,
   conciergeImagesType,
   virtualConsultationsImagesType,
   certificationImagesType,
@@ -36,4 +47,9 @@ export const schemaTypes = [
   mediaItemType,
   qcShowFlyerType,
   qcShowEpisodeType,
+  couponType,
+  giftCardType,
+  orderType,
+  shippingMethodType,
+  awardItemType,
 ]

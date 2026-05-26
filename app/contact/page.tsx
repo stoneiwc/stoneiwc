@@ -1,11 +1,18 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 import { CONTACT_INFO, BOOKING_URL } from "@/lib/navigation"
+import { ContactForm } from "@/components/contact/contact-form"
+
+const DESCRIPTION = "Get in touch with Stone International Wellness Center in Plano, TX."
 
 export const metadata: Metadata = {
   title: "Contact Us",
-  description: "Get in touch with Stone International Wellness Center in Plano, TX.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/contact" },
+  openGraph: { title: "Contact Us | Stone IWC", description: DESCRIPTION, url: "/contact", type: "website" },
+  twitter: { card: "summary_large_image", title: "Contact Us | Stone IWC", description: DESCRIPTION },
 }
 
 export default function ContactPage() {
@@ -39,9 +46,20 @@ export default function ContactPage() {
                   <Phone className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-body font-bold text-foreground">Phone</h3>
-                  <a href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`} className="mt-1 text-sm font-body text-muted-foreground hover:text-primary transition-colors">
-                    {CONTACT_INFO.phone}
+                  <h3 className="font-body font-bold text-foreground">General Information</h3>
+                  <a href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`} className="mt-1 text-sm font-body text-muted-foreground hover:text-primary transition-colors">
+                    {CONTACT_INFO.phoneGeneral}
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-primary/10">
+                  <Phone className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-body font-bold text-foreground">Concierge Services</h3>
+                  <a href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`} className="mt-1 text-sm font-body text-muted-foreground hover:text-primary transition-colors">
+                    {CONTACT_INFO.phoneConcierge}
                   </a>
                 </div>
               </div>
@@ -69,14 +87,12 @@ export default function ContactPage() {
               </div>
             </div>
             <div className="mt-10">
-              <a
+              <Link
                 href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
               >
                 Book an Appointment
-              </a>
+              </Link>
             </div>
           </div>
           <div className="rounded-sm border border-border bg-card p-8 lg:p-10">
@@ -84,33 +100,7 @@ export default function ContactPage() {
             <p className="mt-2 text-sm text-muted-foreground font-body">
               Fill out the form below and we will get back to you shortly.
             </p>
-            <form className="mt-8 flex flex-col gap-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="firstName" className="text-sm font-body font-bold text-foreground">First Name</label>
-                  <input id="firstName" type="text" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="John" />
-                </div>
-                <div>
-                  <label htmlFor="lastName" className="text-sm font-body font-bold text-foreground">Last Name</label>
-                  <input id="lastName" type="text" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Doe" />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="email" className="text-sm font-body font-bold text-foreground">Email</label>
-                <input id="email" type="email" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="john@example.com" />
-              </div>
-              <div>
-                <label htmlFor="phone" className="text-sm font-body font-bold text-foreground">Phone</label>
-                <input id="phone" type="tel" className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" placeholder="(555) 000-0000" />
-              </div>
-              <div>
-                <label htmlFor="message" className="text-sm font-body font-bold text-foreground">Message</label>
-                <textarea id="message" rows={4} className="mt-2 block w-full rounded-sm border border-border bg-background px-4 py-3 text-sm font-body text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none" placeholder="How can we help you?" />
-              </div>
-              <button type="submit" className="w-full rounded-sm bg-primary py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90">
-                Send Message
-              </button>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </section>

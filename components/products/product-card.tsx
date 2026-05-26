@@ -6,12 +6,15 @@ import { ShoppingBag, Minus, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
+import { GIFT_CARD_SLUG } from "@/components/products/gift-card-purchase"
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity } = useCart()
-  
+  const isGiftCard = product.slug === GIFT_CARD_SLUG
   const cartItem = items.find(item => item.product.id === product.id)
   const quantity = cartItem?.quantity || 0
+  const isOnSale = Boolean(product.isDiscount && product.originalPrice && product.originalPrice > product.price)
+  const isOutOfStock = !product.inStock
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card transition-all duration-300 hover:shadow-xl hover:border-primary/30">
@@ -26,16 +29,19 @@ export function ProductCard({ product }: { product: Product }) {
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
-        {product.originalPrice && (
+        {isOutOfStock ? (
+          <Badge className="absolute left-3 top-3 rounded-sm bg-muted text-muted-foreground font-body text-xs">
+            Out of Stock
+          </Badge>
+        ) : isOnSale ? (
           <Badge className="absolute left-3 top-3 rounded-sm bg-destructive text-destructive-foreground font-body text-xs">
             Sale
           </Badge>
-        )}
-        {product.tags.includes("bestseller") && !product.originalPrice && (
+        ) : product.tags.includes("bestseller") ? (
           <Badge className="absolute left-3 top-3 rounded-sm bg-primary text-primary-foreground font-body text-xs">
             Bestseller
           </Badge>
-        )}
+        ) : null}
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
@@ -57,16 +63,34 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-4 flex items-end justify-between">
           <div className="flex items-baseline gap-2">
             <span className="font-sans text-xl font-semibold text-foreground">
-              ${product.price}
+              {isGiftCard ? 'From $25' : `$${product.price}`}
             </span>
-            {product.originalPrice && (
+            {!isGiftCard && isOnSale && (
               <span className="text-sm font-body text-muted-foreground line-through">
                 ${product.originalPrice}
               </span>
             )}
           </div>
-          
-          {quantity > 0 ? (
+
+          {isGiftCard ? (
+            <Link
+              href={`/products/${product.slug}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-xs font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-md"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              Buy
+            </Link>
+          ) : isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed rounded-sm bg-muted px-4 py-2 text-xs font-body font-bold tracking-wider text-muted-foreground"
+              aria-label={`${product.name} is out of stock`}
+            >
+              Unavailable
+            </button>
+          ) : quantity > 0 ? (
             <div className="flex items-center rounded-sm border border-input bg-background">
               <button
                 onClick={(e) => {

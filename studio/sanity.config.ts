@@ -65,6 +65,22 @@ export default defineConfig({
                           .title('About Us')
                           .items([
 
+                            S.listItem()
+                              .title('About Us Page')
+                              .child(
+                                S.list()
+                                  .title('About Us Page')
+                                  .items([
+                                    S.listItem()
+                                      .title('Images')
+                                      .child(
+                                        S.document()
+                                          .schemaType('aboutPageImages')
+                                          .documentId('aboutPageImages'),
+                                      ),
+                                  ]),
+                              ),
+
                             // Our Story
                             S.listItem()
                               .title('Our Story')
@@ -127,10 +143,10 @@ export default defineConfig({
                           .title('Services')
                           .items([
                             S.listItem()
-                              .title('All Services')
+                              .title('Services Page')
                               .child(
                                 S.list()
-                                  .title('All Services')
+                                  .title('Services Page')
                                   .items([
                                     S.listItem()
                                       .title('Images')
@@ -181,6 +197,21 @@ export default defineConfig({
                         S.list()
                           .title('Education')
                           .items([
+                            S.listItem()
+                              .title('Education Page')
+                              .child(
+                                S.list()
+                                  .title('Education Page')
+                                  .items([
+                                    S.listItem()
+                                      .title('Images')
+                                      .child(
+                                        S.document()
+                                          .schemaType('educationPageImages')
+                                          .documentId('educationPageImages'),
+                                      ),
+                                  ]),
+                              ),
                             S.listItem()
                               .title('Practitioner Certifications')
                               .child(
@@ -246,6 +277,21 @@ export default defineConfig({
                           .title('Featured On')
                           .items([
                             S.listItem()
+                              .title('Featured On Page')
+                              .child(
+                                S.list()
+                                  .title('Featured On Page')
+                                  .items([
+                                    S.listItem()
+                                      .title('Images')
+                                      .child(
+                                        S.document()
+                                          .schemaType('featuredPageImages')
+                                          .documentId('featuredPageImages'),
+                                      ),
+                                  ]),
+                              ),
+                            S.listItem()
                               .title('Press')
                               .child(
                                 S.list()
@@ -269,6 +315,21 @@ export default defineConfig({
                                     S.documentTypeListItem('mediaItem').title('All Media'),
                                     orderableDocumentListDeskItem({
                                       type: 'mediaItem',
+                                      title: 'Manage Order',
+                                      S,
+                                      context,
+                                    }),
+                                  ]),
+                              ),
+                            S.listItem()
+                              .title('Awards')
+                              .child(
+                                S.list()
+                                  .title('Awards')
+                                  .items([
+                                    S.documentTypeListItem('awardItem').title('All Awards'),
+                                    orderableDocumentListDeskItem({
+                                      type: 'awardItem',
                                       title: 'Manage Order',
                                       S,
                                       context,
@@ -329,16 +390,41 @@ export default defineConfig({
 
             S.divider(),
 
+            // ─── Shipping & Coupons ─────────────────────────────────
+            S.listItem()
+              .title('Shipping & Coupons')
+              .child(
+                S.list()
+                  .title('Shipping & Coupons')
+                  .items([
+                    S.listItem()
+                      .title('Coupons')
+                      .child(
+                        S.documentTypeList('coupon').title('All Coupons'),
+                      ),
+                    S.listItem()
+                      .title('Shipping Methods')
+                      .child(
+                        S.documentTypeList('shippingMethod').title('All Shipping Methods'),
+                      ),
+                  ]),
+              ),
+
+            S.divider(),
+
             // ─── Everything else ────────────────────────────────────
             ...S.documentTypeListItems().filter(
               (item) =>
                 ![
                   'heroSlide',
                   'homePageImages',
+                  'aboutPageImages',
                   'ourStoryImages',
                   'teamMember',
                   'partner',
                   'servicesPageImages',
+                  'educationPageImages',
+                  'featuredPageImages',
                   'conciergeImages',
                   'virtualConsultationsImages',
                   'category',
@@ -349,8 +435,11 @@ export default defineConfig({
                   'article',
                   'pressItem',
                   'mediaItem',
+                  'awardItem',
                   'qcShowFlyer',
                   'qcShowEpisode',
+                  'coupon',
+                  'shippingMethod',
                 ].includes(item.getId() ?? ''),
             ),
           ]),
@@ -362,8 +451,11 @@ export default defineConfig({
     actions: (prev, context) => {
       const singletonTypes = [
         'homePageImages',
+        'aboutPageImages',
         'ourStoryImages',
         'servicesPageImages',
+        'educationPageImages',
+        'featuredPageImages',
         'conciergeImages',
         'virtualConsultationsImages',
         'certificationImages',

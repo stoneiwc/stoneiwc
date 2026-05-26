@@ -43,6 +43,7 @@ export const navigation: NavItem[] = [
     children: [
       { label: "Press", href: "/featured/press" },
       { label: "Media", href: "/featured/media" },
+      { label: "Awards", href: "/featured/awards" },
       { label: "Stoneiwc Podcast", href: "/featured/podcast" },
       { label: "The QC Show", href: "/featured/qc-show" },
     ],
@@ -50,12 +51,13 @@ export const navigation: NavItem[] = [
   { label: "Contact Us", href: "/contact" },
 ]
 
-export const BOOKING_URL =
-  "https://www.fresha.com/a/stone-international-wellness-center-plano-1108-west-parker-road-rrih48ux/booking?cartId=72ed3fb4-b2f6-490c-a9db-a0d7e877298a"
+export const BOOKING_URL = "/book"
 
 export const CONTACT_INFO = {
-  email: "Info@stoneiwc.com",
+  email: "info@stoneiwc.com",
   phone: "+1 972-473-2205",
+  phoneGeneral: "+1 972-473-2205",
+  phoneConcierge: "+1 469-439-0052",
   address: "1108 W Parker Rd Ste 102 Plano, TX 75075",
 }
 

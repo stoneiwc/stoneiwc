@@ -25,8 +25,8 @@ export function MobileNav({
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0 [&>button]:top-6">
-        <SheetHeader className="p-6 pb-4 border-b border-border pr-14">
+      <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0 [&>button]:top-10 [&>button]:h-8 [&>button]:w-8 [&>button_svg]:h-5 [&>button_svg]:w-5">
+        <SheetHeader className="shrink-0 p-6 pb-4 border-b border-border pr-14">
           <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <Link href="/" onClick={onClose} className="inline-block">
             <Image
@@ -39,48 +39,55 @@ export function MobileNav({
           </Link>
         </SheetHeader>
 
-        <div className="flex flex-col py-4">
-          {navigation.map((item) => (
-            <MobileNavItem
-              key={item.href}
-              item={item}
-              pathname={pathname}
-              onClose={onClose}
-            />
-          ))}
-        </div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="flex flex-col py-4">
+            {navigation.map((item) => (
+              <MobileNavItem
+                key={item.href}
+                item={item}
+                pathname={pathname}
+                onClose={onClose}
+              />
+            ))}
+          </div>
 
-        <div className="px-6 pb-4">
-          <a
-            href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full rounded-sm bg-primary py-3.5 text-center text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
-            onClick={onClose}
-          >
-            Book Now
-          </a>
-        </div>
+          <div className="px-6 pb-4">
+            <Link
+              href={BOOKING_URL}
+              className="block w-full rounded-sm bg-primary py-3.5 text-center text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
+              onClick={onClose}
+            >
+              Book Now
+            </Link>
+          </div>
 
-        <div className="border-t border-border px-6 py-6">
-          <div className="flex flex-col gap-4 text-sm font-body text-muted-foreground">
-            <a
-              href={`mailto:${CONTACT_INFO.email}`}
-              className="flex items-center gap-3 hover:text-primary transition-colors"
-            >
-              <Mail className="h-4 w-4 shrink-0 text-primary" />
-              {CONTACT_INFO.email}
-            </a>
-            <a
-              href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`}
-              className="flex items-center gap-3 hover:text-primary transition-colors"
-            >
-              <Phone className="h-4 w-4 shrink-0 text-primary" />
-              {CONTACT_INFO.phone}
-            </a>
-            <div className="flex items-start gap-3">
-              <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-              {CONTACT_INFO.address}
+          <div className="border-t border-border px-6 py-6">
+            <div className="flex flex-col gap-4 text-sm font-body text-muted-foreground">
+              <a
+                href={`mailto:${CONTACT_INFO.email}`}
+                className="flex items-center gap-3 hover:text-primary transition-colors"
+              >
+                <Mail className="h-4 w-4 shrink-0 text-primary" />
+                {CONTACT_INFO.email}
+              </a>
+              <a
+                href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
+                className="flex items-center gap-3 hover:text-primary transition-colors"
+              >
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                General Info: {CONTACT_INFO.phoneGeneral}
+              </a>
+              <a
+                href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
+                className="flex items-center gap-3 hover:text-primary transition-colors"
+              >
+                <Phone className="h-4 w-4 shrink-0 text-primary" />
+                Concierge Services: {CONTACT_INFO.phoneConcierge}
+              </a>
+              <div className="flex items-start gap-3">
+                <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+                {CONTACT_INFO.address}
+              </div>
             </div>
           </div>
         </div>
@@ -120,21 +127,33 @@ function MobileNavItem({
 
   return (
     <div>
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className={cn(
-          "flex w-full items-center justify-between px-6 py-3.5 text-base font-body font-bold tracking-wide transition-colors hover:text-primary",
-          isActive ? "text-primary" : "text-foreground"
-        )}
-      >
-        {item.label}
-        <ChevronDown
+      <div className="flex items-center">
+        <Link
+          href={item.href}
+          onClick={onClose}
           className={cn(
-            "h-4 w-4 transition-transform duration-200",
-            expanded && "rotate-180"
+            "flex-1 px-6 py-3.5 text-base font-body font-bold tracking-wide transition-colors hover:text-primary",
+            isActive ? "text-primary" : "text-foreground"
           )}
-        />
-      </button>
+        >
+          {item.label}
+        </Link>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className={cn(
+            "px-4 py-3.5 transition-colors hover:text-primary",
+            isActive ? "text-primary" : "text-foreground"
+          )}
+          aria-label={`Toggle ${item.label} submenu`}
+        >
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              expanded && "rotate-180"
+            )}
+          />
+        </button>
+      </div>
 
       <div
         className={cn(

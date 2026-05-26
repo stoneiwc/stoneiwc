@@ -25,14 +25,33 @@ export const productType = defineType({
       name: 'price',
       title: 'Price',
       type: 'number',
+      description: 'Regular price. When "Add Discount" is on, this is shown struck-through.',
       validation: (Rule) => Rule.required().positive(),
     }),
     defineField({
-      name: 'originalPrice',
-      title: 'Original Price',
+      name: 'isDiscount',
+      title: 'Add Discount',
+      type: 'boolean',
+      description: 'Toggle on to put this product on sale',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'discountedPrice',
+      title: 'Discounted Price',
       type: 'number',
-      description: 'Optional - Use for sale items to show strikethrough pricing',
-      validation: (Rule) => Rule.positive(),
+      description: 'The sale price the customer pays. Must be lower than Price.',
+      hidden: ({parent}) => !parent?.isDiscount,
+      validation: (Rule) =>
+        Rule.custom((discountedPrice, context) => {
+          const parent = context.parent as {isDiscount?: boolean; price?: number} | undefined
+          if (!parent?.isDiscount) return true
+          if (discountedPrice == null) return 'Discounted Price is required when Add Discount is on'
+          if (discountedPrice <= 0) return 'Discounted Price must be positive'
+          if (parent.price != null && discountedPrice >= parent.price) {
+            return 'Discounted Price must be less than the regular Price'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'shortDescription',

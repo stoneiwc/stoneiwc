@@ -36,11 +36,18 @@ export function Navbar() {
               {CONTACT_INFO.email}
             </a>
             <a
-              href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`}
+              href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
               className="flex items-center gap-2 transition-colors hover:text-primary"
             >
               <Phone className="h-3 w-3" />
-              {CONTACT_INFO.phone}
+              General Info: {CONTACT_INFO.phoneGeneral}
+            </a>
+            <a
+              href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
+              className="flex items-center gap-2 transition-colors hover:text-primary"
+            >
+              <Phone className="h-3 w-3" />
+              Concierge Services: {CONTACT_INFO.phoneConcierge}
             </a>
           </div>
           <p className="text-background/70">{CONTACT_INFO.address}</p>
@@ -90,14 +97,12 @@ export function Navbar() {
                 </span>
               )}
             </button>
-            <a
+            <Link
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center justify-center rounded-sm bg-primary px-6 py-2.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
             >
               Book Now
-            </a>
+            </Link>
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
@@ -147,7 +152,8 @@ function NavItemDesktop({
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button
+      <Link
+        href={item.href}
         className={cn(
           "flex items-center gap-1 px-3 py-2 text-sm font-body font-bold tracking-wide transition-colors hover:text-primary",
           isActive ? "text-primary" : "text-foreground"
@@ -160,7 +166,7 @@ function NavItemDesktop({
             open && "rotate-180"
           )}
         />
-      </button>
+      </Link>
 
       <div
         className={cn(

@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { BOOKING_URL, CONTACT_INFO } from "@/lib/navigation"
 import { Phone } from "lucide-react"
 
@@ -23,14 +24,12 @@ export function CTASection() {
           The Source of Hope.
         </p>
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-xl"
           >
             Schedule a Consultation
-          </a>
+          </Link>
           <a
             href={`tel:${CONTACT_INFO.phone.replace(/\s/g, "")}`}
             className="inline-flex items-center justify-center gap-2 rounded-sm border border-border px-10 py-3.5 text-sm font-body font-bold tracking-wider text-foreground transition-all hover:border-primary hover:text-primary"

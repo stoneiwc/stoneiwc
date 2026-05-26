@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Image from "next/image"
+import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { getTeamMembers } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
@@ -103,14 +104,12 @@ export default async function TeamPage() {
           <p className="mx-auto mt-6 max-w-xl font-body text-base leading-relaxed text-muted-foreground">
             Schedule a consultation and let our practitioners guide you toward lasting holistic health.
           </p>
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="mt-8 inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 font-body text-sm font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
           >
             Schedule a Consultation
-          </a>
+          </Link>
         </div>
       </section>
     </>

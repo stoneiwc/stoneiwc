@@ -13,8 +13,12 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
+import { GiftCardPurchase, GIFT_CARD_SLUG } from "@/components/products/gift-card-purchase"
 
 export function ProductDetail({ product }: { product: Product }) {
+  const isGiftCard = product.slug === GIFT_CARD_SLUG
+  const isOnSale = Boolean(product.isDiscount && product.originalPrice && product.originalPrice > product.price)
+  const isOutOfStock = !product.inStock
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addItem } = useCart()
@@ -45,7 +49,11 @@ export function ProductDetail({ product }: { product: Product }) {
             sizes="(max-width: 1024px) 100vw, 50vw"
             priority
           />
-          {product.originalPrice && (
+          {isOutOfStock ? (
+            <Badge className="absolute left-4 top-4 rounded-sm bg-muted text-muted-foreground font-body">
+              Out of Stock
+            </Badge>
+          ) : isOnSale && product.originalPrice ? (
             <Badge className="absolute left-4 top-4 rounded-sm bg-destructive text-destructive-foreground font-body">
               {Math.round(
                 ((product.originalPrice - product.price) /
@@ -54,7 +62,7 @@ export function ProductDetail({ product }: { product: Product }) {
               )}
               % Off
             </Badge>
-          )}
+          ) : null}
         </div>
 
         <div className="flex flex-col">
@@ -67,16 +75,24 @@ export function ProductDetail({ product }: { product: Product }) {
           </h1>
 
 
-          <div className="mt-6 flex items-baseline gap-3">
-            <span className="font-sans text-3xl font-semibold text-foreground">
-              ${product.price.toFixed(2)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-lg font-body text-muted-foreground line-through">
-                ${product.originalPrice.toFixed(2)}
+          {!isGiftCard && (
+            <div className="mt-6 flex items-baseline gap-3">
+              <span className="font-sans text-3xl font-semibold text-foreground">
+                ${product.price.toFixed(2)}
               </span>
-            )}
-          </div>
+              {isOnSale && product.originalPrice && (
+                <span className="text-lg font-body text-muted-foreground line-through">
+                  ${product.originalPrice.toFixed(2)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {isGiftCard && (
+            <p className="mt-6 font-sans text-2xl font-semibold text-foreground">
+              From $25
+            </p>
+          )}
 
           <div className="mt-6 h-px bg-border" />
 
@@ -96,44 +112,58 @@ export function ProductDetail({ product }: { product: Product }) {
             ))}
           </div>
 
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex items-center rounded-sm border border-input">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="flex h-12 w-12 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Decrease quantity"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="flex h-12 w-14 items-center justify-center border-x border-input text-sm font-body font-bold">
-                {quantity}
-              </span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="flex h-12 w-12 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Increase quantity"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-
-            <button
-              onClick={handleAdd}
-              disabled={added}
-              className="flex flex-1 items-center justify-center gap-2.5 rounded-sm bg-primary px-8 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg disabled:opacity-80"
-            >
-              {added ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  Added to Cart
-                </>
-              ) : (
-                <>
-                  <ShoppingBag className="h-4 w-4" />
-                  Add to Cart &mdash; ${(product.price * quantity).toFixed(2)}
-                </>
-              )}
-            </button>
+          <div className="mt-8">
+            {isGiftCard ? (
+              <GiftCardPurchase />
+            ) : isOutOfStock ? (
+              <div className="rounded-sm border border-input bg-muted/40 px-6 py-4 text-center">
+                <p className="font-body text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                  Currently Unavailable
+                </p>
+                <p className="mt-1 font-body text-xs text-muted-foreground">
+                  This product is out of stock. Please check back soon.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex items-center rounded-sm border border-input">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="flex h-12 w-12 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="flex h-12 w-14 items-center justify-center border-x border-input text-sm font-body font-bold">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="flex h-12 w-12 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                <button
+                  onClick={handleAdd}
+                  disabled={added}
+                  className="flex flex-1 items-center justify-center gap-2.5 rounded-sm bg-primary px-8 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg disabled:opacity-80"
+                >
+                  {added ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Added to Cart
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="h-4 w-4" />
+                      Add to Cart &mdash; ${(product.price * quantity).toFixed(2)}
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

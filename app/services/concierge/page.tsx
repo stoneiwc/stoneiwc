@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
-import { BOOKING_URL } from "@/lib/navigation"
+const BOOKING_URL = "/book?category=concierge"
 import {
   Building2,
   Church,
@@ -125,14 +125,12 @@ export default async function ConciergePage() {
                 and receive care.
               </p>
               <div className="mt-8">
-                <a
+                <Link
                   href={BOOKING_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
                 >
                   Book a Concierge Visit
-                </a>
+                </Link>
               </div>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
@@ -226,14 +224,12 @@ export default async function ConciergePage() {
             health access to underserved communities.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
+            <Link
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
             >
               Schedule a Concierge Visit
-            </a>
+            </Link>
             <Link
               href="/contact"
               className="inline-flex items-center justify-center rounded-sm border border-background/30 px-10 py-3.5 text-sm font-body font-bold tracking-wider text-background transition-all hover:border-primary hover:text-primary"

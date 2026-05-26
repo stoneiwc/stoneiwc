@@ -12,12 +12,21 @@ import {
   FileText,
   Globe,
 } from "lucide-react"
+import { getEducationPageImages } from "@/lib/sanity.queries"
+import { urlFor } from "@/lib/sanity.image"
+
+const DESCRIPTION =
+  "Stone IWC advanced education center -- practitioner certifications, licensee programs, and holistic health education honoring Eastern and Western traditions."
 
 export const metadata: Metadata = {
   title: "Education",
-  description:
-    "Stone IWC advanced education center -- practitioner certifications, licensee programs, and holistic health education honoring Eastern and Western traditions.",
+  description: DESCRIPTION,
+  alternates: { canonical: "/education" },
+  openGraph: { title: "Education | Stone IWC", description: DESCRIPTION, url: "/education", type: "website" },
+  twitter: { card: "summary_large_image", title: "Education | Stone IWC", description: DESCRIPTION },
 }
+
+export const revalidate = 60
 
 const featuredPrograms = [
   {
@@ -71,7 +80,14 @@ const educationLinks = [
   },
 ]
 
-export default function EducationPage() {
+export default async function EducationPage() {
+  const images = await getEducationPageImages()
+
+  const heroImageUrl = images?.heroImage?.asset
+    ? urlFor(images.heroImage).width(900).height(675).url()
+    : "/images/education-center.jpg"
+  const heroImageAlt = images?.heroImage?.alt ?? "Stone IWC advanced education center"
+
   return (
     <>
       <PageHeader
@@ -84,8 +100,8 @@ export default function EducationPage() {
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div className="relative aspect-[4/3] overflow-hidden rounded-sm">
               <Image
-                src="/images/education-center.jpg"
-                alt="Stone IWC advanced education center"
+                src={heroImageUrl}
+                alt={heroImageAlt}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
