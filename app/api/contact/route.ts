@@ -1,6 +1,10 @@
 import { Resend } from "resend"
 import { type NextRequest, NextResponse } from "next/server"
 import { contactEmailHtml, contactEmailText } from "@/lib/email/contact-template"
+import {
+  contactAutoReplyHtml,
+  contactAutoReplyText,
+} from "@/lib/email/contact-autoreply-template"
 import { checkRateLimit } from "@/lib/email/rate-limit"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -70,6 +74,20 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error("Resend error:", error)
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 })
+  }
+
+  // Auto-reply to the customer. We don't fail the request if this errors —
+  // the team has already received the submission, which is the critical path.
+  const { error: autoReplyError } = await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL!,
+    to: data.email,
+    replyTo: process.env.CONTACT_EMAIL_TO!,
+    subject: "We received your message — Stone IWC",
+    html: contactAutoReplyHtml({ firstName: data.firstName }),
+    text: contactAutoReplyText({ firstName: data.firstName }),
+  })
+  if (autoReplyError) {
+    console.error("Contact auto-reply error:", autoReplyError)
   }
 
   return NextResponse.json({ success: true })
