@@ -103,6 +103,7 @@ export async function POST(request: Request) {
           const { error: emailError } = await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL!,
             to: customerEmail,
+            replyTo: process.env.CONTACT_EMAIL_TO!,
             subject: `Order ${order.orderNumber} confirmed`,
             html: orderConfirmationEmailHtml(emailData),
             text: orderConfirmationEmailText(emailData),
@@ -206,7 +207,8 @@ export async function POST(request: Request) {
   const { error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: recipientEmail,
-    subject: `${senderName} sent you a $${amountDollars} Stone IWC gift card`,
+    replyTo: process.env.CONTACT_EMAIL_TO!,
+    subject: `${senderName} sent you a Stone IWC gift`,
     html: giftCardEmailHtml(emailData),
     text: giftCardEmailText(emailData),
   })
@@ -227,7 +229,8 @@ export async function POST(request: Request) {
     const { error: confirmationError } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
       to: customerEmail,
-      subject: `Your $${amountDollars} Stone IWC gift card has been sent`,
+      replyTo: process.env.CONTACT_EMAIL_TO!,
+      subject: `Your Stone IWC gift card has been sent`,
       html: giftCardPurchaseConfirmationHtml(confirmationData),
       text: giftCardPurchaseConfirmationText(confirmationData),
     })
