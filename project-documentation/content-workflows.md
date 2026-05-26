@@ -10,6 +10,7 @@ For developer-oriented schema details (field validations, GROQ queries), see [sa
 
 ## Contents
 
+- [Getting started in Studio](#getting-started-in-studio) ← **read this first**
 - [Adding a product](#adding-a-product)
 - [Adding a service / Cal.com booking](#adding-a-service--calcom-booking)
 - [Uploading images correctly](#uploading-images-correctly)
@@ -20,6 +21,113 @@ For developer-oriented schema details (field validations, GROQ queries), see [sa
 - [Editing page images and hero slides](#editing-page-images-and-hero-slides)
 - [Publishing articles](#publishing-articles)
 - [Updating team members and partners](#updating-team-members-and-partners)
+
+---
+
+## Getting started in Studio
+
+If this is your first time, do these things in order before touching anything else.
+
+### 1. Get access
+
+You need a Sanity account that's been added to the Stone IWC project. Steps:
+
+1. Your admin sends you an invite by email — subject like "You've been invited to a Sanity project"
+2. Open the email, click the invite link
+3. Sign in or create a Sanity account using the **same email** the invite was sent to
+4. Once accepted, the Stone IWC project shows up in your Sanity dashboard
+
+> If the invite link is expired or missing, ask the admin to resend it. Don't sign up with a different email — you'll create a separate account that has no access.
+
+### 2. Open the Studio
+
+Two ways to reach it:
+
+- **Hosted URL** (recommended for daily work) — the link the admin gave you, looks like `https://stoneiwc-studio.sanity.studio`. Bookmark it.
+- **Local** (only if you're working with a developer running the project on their machine) — `http://localhost:3333`
+
+Sign in with the same Sanity account from step 1.
+
+### 3. Understand the sidebar
+
+The left sidebar is the **map of everything you can edit**. The top-level sections are:
+
+| Section | Contains |
+|---|---|
+| **Pages** | Editable images, text, and assets for each public page of the site (Home, About Us, Services, Education, Featured On) |
+| **Products** | The storefront — All products and Categories |
+| **Order** | Customer orders. Day-to-day fulfillment work happens here. |
+| **Gift Cards** | Issued + manually created gift cards |
+| **Shipping & Coupons** | Discount codes and shipping options shown at checkout |
+
+Within **Pages**, the layout mirrors the site navigation. So **Pages → About Us → Our Story → Images** edits the images on the `/about/our-story` URL.
+
+### 4. Drafts vs Published — the most important thing to know
+
+Every document in Studio has two states:
+
+- **Draft** (the local copy you're editing — orange dot in the corner of the field)
+- **Published** (the version live on the website)
+
+When you type, Sanity **auto-saves** your draft every few seconds. **But that does NOT make it live.** To make changes visible on `stoneiwc.com`, you must click the green **Publish** button at the bottom of the document.
+
+```
+You type → auto-saved as draft (visitors still see the old published version)
+You click Publish → live within ~60 seconds (ISR cache refresh)
+```
+
+If you don't see your change on the live site after a minute:
+1. Did you click Publish? Look for the green button — when there's an unpublished draft, it says "Publish" and is highlighted
+2. Hard-refresh the page (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows)
+3. Wait another 60 seconds — ISR caches refresh on the next request after the timeout
+
+To **discard** a draft without publishing: open the document → three-dot menu → "Discard changes".
+
+### 5. Undo / revision history
+
+Sanity tracks every change. If you mess something up:
+
+1. Open the document
+2. Click the **clock icon** in the top-right corner (or the document's three-dot menu → "Inspect")
+3. Browse the timeline — you can see who changed what, when
+4. Click any past version to preview it, or restore to that version
+
+This is your safety net. You almost can't permanently break anything as long as you don't *delete* the document.
+
+### 6. Search — Cmd+K
+
+Press **Cmd+K** (Mac) or **Ctrl+K** (Windows) anywhere in Studio to open the global search. Type a product name, an order number, a customer email, anything — Studio finds matching documents across all types. Useful when there are too many products to scroll through.
+
+### 7. Image hotspot — what it does
+
+When you upload an image, click the image to edit it and you'll see a circle you can drag — the **hotspot**. This tells Studio which part of the image is the "focal point" — the part that must stay visible when the image gets cropped for different layouts (square card vs. wide banner).
+
+Practical tip:
+- For a portrait → drag the hotspot to the face
+- For a wide scene → drag the hotspot to the main subject
+- For a flat-lay (e.g. product photography) → center the hotspot
+
+Also fill in the **alt text** — read by screen readers, used by Google. A short description of what's in the image. Not the file name.
+
+### 8. If something looks wrong
+
+- "I can't see my change on the site" → see [Drafts vs Published](#4-drafts-vs-published--the-most-important-thing-to-know) above
+- "I accidentally deleted something" → revision history (#5) — if the document still exists, restore it. If you fully deleted the document, ask the admin (they may be able to recover from a Sanity dataset backup)
+- "I see fields I don't recognize" → don't fill them out randomly; ask the admin. New schema fields sometimes appear without instructions
+- "Studio is showing 'Insufficient permissions'" → you have Viewer access, not Editor. Ask the admin to upgrade you
+
+### Quick reference
+
+| Action | How |
+|---|---|
+| Save a draft | Automatic, no button needed |
+| Publish (make live) | Green "Publish" button at the bottom |
+| Discard a draft | Three-dot menu → Discard changes |
+| Restore an older version | Clock icon → pick version → Restore |
+| Search anything | Cmd+K / Ctrl+K |
+| Switch documents quickly | Click in the sidebar, the breadcrumbs stay |
+
+Once you've done all this once, the workflows in the rest of this doc make sense.
 
 ---
 
