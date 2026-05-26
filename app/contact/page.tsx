@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 import { CONTACT_INFO, BOOKING_URL } from "@/lib/navigation"
@@ -86,14 +87,12 @@ export default function ContactPage() {
               </div>
             </div>
             <div className="mt-10">
-              <a
+              <Link
                 href={BOOKING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-sm bg-primary px-8 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
               >
                 Book an Appointment
-              </a>
+              </Link>
             </div>
           </div>
           <div className="rounded-sm border border-border bg-card p-8 lg:p-10">

@@ -314,14 +314,12 @@ export default async function CertificationsPage() {
             tuition for any of our certification programs.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
+            <Link
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
             >
               Inquire About Programs
-            </a>
+            </Link>
             <Link
               href="/education/licensee"
               className="inline-flex items-center gap-2 rounded-sm border border-background/30 px-10 py-3.5 text-sm font-body font-bold tracking-wider text-background transition-all hover:border-primary hover:text-primary"

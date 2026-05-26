@@ -144,14 +144,12 @@ export default async function ServicesPage() {
             Schedule a consultation and let us create a personalized
             treatment plan for your needs. We come to you.
           </p>
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="mt-8 inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
           >
             Schedule a Consultation
-          </a>
+          </Link>
         </div>
       </section>
     </>

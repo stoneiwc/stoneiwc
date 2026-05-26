@@ -127,14 +127,12 @@ export function Hero({ slides: sanitySlides }: HeroProps) {
             {slides[current].description}
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <a
+            <Link
               href={BOOKING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-xl"
             >
               Schedule a Consultation
-            </a>
+            </Link>
             <Link
               href="/services"
               className="inline-flex items-center justify-center rounded-sm border border-background/30 px-10 py-3.5 text-sm font-body font-bold tracking-wider text-background transition-all hover:border-primary hover:text-primary"

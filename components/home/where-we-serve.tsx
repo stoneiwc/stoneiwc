@@ -8,6 +8,7 @@ import {
   Hospital,
   GlassWater,
 } from "lucide-react"
+import Link from "next/link"
 import { BOOKING_URL } from "@/lib/navigation"
 
 const locations = [
@@ -93,14 +94,12 @@ export function WhereWeServe() {
         </div>
 
         <div className="mt-16 text-center">
-          <a
+          <Link
             href={BOOKING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-xl"
           >
             Book a Concierge Visit
-          </a>
+          </Link>
         </div>
       </div>
     </section>
