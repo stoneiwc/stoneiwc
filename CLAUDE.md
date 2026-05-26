@@ -2,6 +2,8 @@
 
 Stone International Wellness Center is a Next.js 16 (App Router) full-stack web application. It covers a product storefront, service appointment booking, educational content, and contact — all backed by Sanity CMS, Stripe, Cal.com, and Resend.
 
+**Source repository:** https://github.com/stoneiwc/stoneiwc
+
 > **New to this codebase?** Start with [`project-documentation/architecture.md`](project-documentation/architecture.md) for the system overview, then [`project-documentation/onboarding.md`](project-documentation/onboarding.md) to get running locally.
 
 ---

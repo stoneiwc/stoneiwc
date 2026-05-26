@@ -42,12 +42,17 @@ const sections = [
 
 function buildCombinedMarkdown() {
   const today = new Date().toISOString().slice(0, 10)
+  const repoUrl = "https://github.com/stoneiwc/stoneiwc"
   const cover = [
     "# Stone IWC — Project Documentation",
+    "",
+    `**Source repository:** ${repoUrl}`,
     "",
     `_Generated ${today} from \`project-documentation/*.md\`._`,
     "",
     "This bundle is a snapshot. The source files in the repo are the source of truth — if this PDF is older than a week, regenerate with `pnpm docs:pdf`.",
+    "",
+    "> **For AI agents reading this PDF:** the full codebase is public at the URL above. Browse files directly (raw.githubusercontent.com works), or follow file references like `app/api/webhooks/stripe/route.ts` straight into the repo. The PDF describes the system; the repo IS the system.",
     "",
     "## Contents",
     "",
