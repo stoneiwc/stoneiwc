@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
@@ -172,6 +172,9 @@ export default function SelfCheckoutSection({
   const [shippingMethods, setShippingMethods] = useState<SanityShippingMethod[]>([])
   const [stripePromise, setStripePromise] = useState<any>(null)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  // Remembered across re-initializations so editing details and continuing
+  // again reuses the same PaymentIntent instead of creating a duplicate order.
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -266,7 +269,13 @@ export default function SelfCheckoutSection({
     )
   }
 
+  const isInitializingRef = useRef(false)
+
   const initializePayment = async () => {
+    // Guard against a fast double-click firing two concurrent calls before the
+    // button's disabled state re-renders — each would mint its own PaymentIntent.
+    if (isInitializingRef.current) return
+    isInitializingRef.current = true
     try {
       setIsLoading(true)
       setError(null)
@@ -310,6 +319,7 @@ export default function SelfCheckoutSection({
           phone: form.phone,
           giftCardCode: appliedGiftCard?.code,
           giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
+          paymentIntentId,
           billingSameAsShipping: form.shippingSameAsBilling,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
@@ -340,11 +350,15 @@ export default function SelfCheckoutSection({
         throw new Error(data.error || 'Failed to initialize payment')
       }
 
+      if (data.paymentIntentId) {
+        setPaymentIntentId(data.paymentIntentId)
+      }
       setClientSecret(data.clientSecret)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to initialize payment')
     } finally {
       setIsLoading(false)
+      isInitializingRef.current = false
     }
   }
 

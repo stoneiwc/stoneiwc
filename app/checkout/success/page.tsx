@@ -262,7 +262,7 @@ export default function CheckoutSuccessPage() {
 
             {/* Support Message */}
             <p className="mt-8 text-center text-xs font-body text-muted-foreground">
-              Need help? Email us at support@stoneiwc.com or check your email for order details.
+              Need help? Email us at info@stoneiwc.com or check your email for order details.
             </p>
           </div>
         </div>

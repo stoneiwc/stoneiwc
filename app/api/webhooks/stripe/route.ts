@@ -10,6 +10,8 @@ import {
 import {
   orderConfirmationEmailHtml,
   orderConfirmationEmailText,
+  ownerOrderNotificationHtml,
+  ownerOrderNotificationText,
 } from '@/lib/email/order-confirmation-template'
 import { client as sanityClient } from '@/lib/sanity.client'
 import { createGiftCard, redeemGiftCard } from '@/lib/gift-cards'
@@ -77,29 +79,29 @@ export async function POST(request: Request) {
       if (result.transitioned && result.order) {
         const order = result.order
         const customerEmail = order.customer?.email
-        if (customerEmail) {
-          const emailData = {
-            orderNumber: order.orderNumber,
-            firstName: order.customer?.firstName,
-            items: (order.items ?? []).map((it) => ({
-              name: it.name,
-              quantity: Number(it.quantity ?? 0),
-              unitPrice: Number(it.unitPrice ?? 0),
-              lineTotal: Number(it.lineTotal ?? 0),
-            })),
-            subtotal: Number(order.subtotal ?? 0),
-            couponCode: order.couponCode,
-            couponDiscount:
-              order.couponDiscount != null ? Number(order.couponDiscount) : undefined,
-            shippingMethod: order.shippingMethod ?? 'standard',
-            shippingCost: Number(order.shippingCost ?? 0),
-            giftCardCode: order.giftCardCode,
-            giftCardApplied:
-              order.giftCardApplied != null ? Number(order.giftCardApplied) : undefined,
-            total: Number(order.total ?? 0),
-            shippingAddress: order.shippingAddress ?? {},
-          }
+        const emailData = {
+          orderNumber: order.orderNumber,
+          firstName: order.customer?.firstName,
+          items: (order.items ?? []).map((it) => ({
+            name: it.name,
+            quantity: Number(it.quantity ?? 0),
+            unitPrice: Number(it.unitPrice ?? 0),
+            lineTotal: Number(it.lineTotal ?? 0),
+          })),
+          subtotal: Number(order.subtotal ?? 0),
+          couponCode: order.couponCode,
+          couponDiscount:
+            order.couponDiscount != null ? Number(order.couponDiscount) : undefined,
+          shippingMethod: order.shippingMethod ?? 'standard',
+          shippingCost: Number(order.shippingCost ?? 0),
+          giftCardCode: order.giftCardCode,
+          giftCardApplied:
+            order.giftCardApplied != null ? Number(order.giftCardApplied) : undefined,
+          total: Number(order.total ?? 0),
+          shippingAddress: order.shippingAddress ?? {},
+        }
 
+        if (customerEmail) {
           const { error: emailError } = await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL!,
             to: customerEmail,
@@ -113,6 +115,27 @@ export async function POST(request: Request) {
           }
         } else {
           console.error('Order paid but no customer email to send confirmation', order._id)
+        }
+
+        // Notify the owner of every paid order. Same transitioned guard as the
+        // customer email, so Stripe webhook retries can't duplicate it.
+        const ownerData = {
+          ...emailData,
+          customerEmail,
+          customerName: [order.customer?.firstName, order.customer?.lastName]
+            .filter(Boolean)
+            .join(' ') || undefined,
+        }
+        const { error: ownerEmailError } = await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL!,
+          to: process.env.CONTACT_EMAIL_TO!,
+          ...(customerEmail ? { replyTo: customerEmail } : {}),
+          subject: `New order ${order.orderNumber} — $${emailData.total.toFixed(2)}`,
+          html: ownerOrderNotificationHtml(ownerData),
+          text: ownerOrderNotificationText(ownerData),
+        })
+        if (ownerEmailError) {
+          console.error('Owner order notification email send error:', ownerEmailError)
         }
       }
     } catch (err) {
