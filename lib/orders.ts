@@ -69,12 +69,57 @@ export function generateOrderNumber(now: Date = new Date()): string {
 export async function createPendingOrder(
   input: CreateOrderInput,
 ): Promise<{ _id: string; orderNumber: string }> {
-  // Idempotency: if an order already exists for this PaymentIntent, return it.
-  const existing = await client.fetch<{ _id: string; orderNumber: string } | null>(
-    `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, orderNumber }`,
+  // Idempotency: at most one order per PaymentIntent. A PaymentIntent can be
+  // re-initialized for the same checkout (e.g. the customer edits their details
+  // and continues again), so if one already exists we refresh it in place
+  // rather than creating a duplicate. Never modify an order that has advanced
+  // past pending — its data is already committed.
+  const existing = await client.fetch<{
+    _id: string
+    orderNumber: string
+    status: OrderStatus
+  } | null>(
+    `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, orderNumber, status }`,
     { pid: input.stripePaymentIntentId },
   )
-  if (existing) return existing
+  if (existing) {
+    if (existing.status === 'pending') {
+      const patch = client.patch(existing._id).set({
+        customer: input.customer,
+        shippingAddress: input.shippingAddress,
+        billingAddress: input.billingAddress,
+        billingSameAsShipping: input.billingSameAsShipping ?? false,
+        items: input.items.map((item) => ({
+          _key: `${item.productId ?? item.name}-${Math.random().toString(36).slice(2, 8)}`,
+          ...item,
+        })),
+        subtotal: input.subtotal,
+        shippingMethod: input.shippingMethod,
+        shippingCost: input.shippingCost,
+        total: input.total,
+      })
+
+      // Optional discount fields: set when present, unset when removed so a
+      // cleared coupon/gift card doesn't linger from an earlier attempt.
+      const setFields: Record<string, unknown> = {}
+      const unsetFields: string[] = []
+      if (input.couponCode != null) {
+        setFields.couponCode = input.couponCode
+        setFields.couponDiscount = input.couponDiscount
+      } else {
+        unsetFields.push('couponCode', 'couponDiscount')
+      }
+      if (input.giftCardCode != null) {
+        setFields.giftCardCode = input.giftCardCode
+        setFields.giftCardApplied = input.giftCardApplied
+      } else {
+        unsetFields.push('giftCardCode', 'giftCardApplied')
+      }
+
+      await patch.set(setFields).unset(unsetFields).commit()
+    }
+    return { _id: existing._id, orderNumber: existing.orderNumber }
+  }
 
   for (let attempt = 0; attempt < 5; attempt++) {
     const orderNumber = generateOrderNumber()

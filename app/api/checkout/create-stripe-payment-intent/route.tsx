@@ -40,6 +40,9 @@ type CreateStripePaymentIntentBody = {
   phone?: string
   giftCardCode?: string
   giftCardAppliedAmount?: number
+  // Echoed back by the client so a re-initialized checkout reuses the same
+  // PaymentIntent instead of creating a duplicate (and a duplicate order).
+  paymentIntentId?: string
 }
 
 export async function GET() {
@@ -78,6 +81,7 @@ export async function POST(request: Request) {
       phone,
       giftCardCode,
       giftCardAppliedAmount,
+      paymentIntentId: existingPaymentIntentId,
     } = body
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -131,27 +135,52 @@ export async function POST(request: Request) {
         }),
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: 'usd',
-      automatic_payment_methods: { enabled: true },
-      receipt_email: email,
-      metadata,
-      shipping: shippingAddress
-        ? {
-            name: `${shippingAddress.firstName || ''} ${shippingAddress.lastName || ''}`.trim(),
-            phone: phone || undefined,
-            address: {
-              line1: shippingAddress.address || '',
-              line2: shippingAddress.addressLine2 || undefined,
-              city: shippingAddress.city || '',
-              state: shippingAddress.state || '',
-              postal_code: shippingAddress.zipCode || '',
-              country: shippingAddress.country || 'US',
-            },
-          }
-        : undefined,
-    })
+    const shipping = shippingAddress
+      ? {
+          name: `${shippingAddress.firstName || ''} ${shippingAddress.lastName || ''}`.trim(),
+          phone: phone || undefined,
+          address: {
+            line1: shippingAddress.address || '',
+            line2: shippingAddress.addressLine2 || undefined,
+            city: shippingAddress.city || '',
+            state: shippingAddress.state || '',
+            postal_code: shippingAddress.zipCode || '',
+            country: shippingAddress.country || 'US',
+          },
+        }
+      : undefined
+
+    // Reuse the existing PaymentIntent when the client is re-initializing the
+    // same checkout (e.g. after editing details), so we don't strand a second
+    // PaymentIntent — and a second pending order — behind. Only reuse one that
+    // hasn't started payment yet; otherwise fall through to a fresh intent.
+    let paymentIntent: Stripe.PaymentIntent | null = null
+    if (existingPaymentIntentId) {
+      try {
+        const existing = await stripe.paymentIntents.retrieve(existingPaymentIntentId)
+        if (existing.status === 'requires_payment_method') {
+          paymentIntent = await stripe.paymentIntents.update(existing.id, {
+            amount: amountInCents,
+            receipt_email: email,
+            metadata,
+            ...(shipping ? { shipping } : {}),
+          })
+        }
+      } catch (reuseErr) {
+        console.error('Could not reuse PaymentIntent, creating a new one', reuseErr)
+      }
+    }
+
+    if (!paymentIntent) {
+      paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: 'usd',
+        automatic_payment_methods: { enabled: true },
+        receipt_email: email,
+        metadata,
+        shipping,
+      })
+    }
 
     // Mirror the order into Sanity so admins can manage fulfillment in Studio.
     // Errors here don't break checkout — the customer can still pay; we just
