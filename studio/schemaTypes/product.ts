@@ -58,7 +58,8 @@ export const productType = defineType({
       title: 'Short Description',
       type: 'string',
       description: 'Brief description for product cards',
-      validation: (Rule) => Rule.required().max(200),
+      #validation: (Rule) => Rule.required().max(200),
+      validation: (Rule) => Rule.max(200)
     }),
     defineField({
       name: 'description',
@@ -66,7 +67,8 @@ export const productType = defineType({
       type: 'text',
       description: 'Full product description for detail page',
       rows: 5,
-      validation: (Rule) => Rule.required(),
+      #validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.optional()
     }),
     defineField({
       name: 'image',
