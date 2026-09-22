@@ -1,28 +1,29 @@
-import type { Metadata, Viewport } from "next"
-import { Cormorant_Garamond, Lato } from "next/font/google"
+import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, Lato } from "next/font/google";
+import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 
-import "./globals.css"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { CartProvider } from "@/lib/cart-context"
-import { JsonLd } from "@/components/seo/json-ld"
+import "./globals.css";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { CartProvider } from "@/lib/cart-context";
+import { JsonLd } from "@/components/seo/json-ld";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-cormorant",
-})
+});
 
 const lato = Lato({
   subsets: ["latin"],
   weight: ["300", "400", "700"],
   variable: "--font-lato",
-})
+});
 
-const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
+const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com";
 
 const DESCRIPTION =
-  "A concierge holistic wellness retreat devoted to restoring the body from the inside out. Personalized lymphatic care, non-surgical body contouring, restorative hand & foot care, holistic nourishment guidance, and refined semi-permanent aesthetics."
+  "A concierge holistic wellness retreat devoted to restoring the body from the inside out. Personalized lymphatic care, non-surgical body contouring, restorative hand & foot care, holistic nourishment guidance, and refined semi-permanent aesthetics.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -55,16 +56,16 @@ export const metadata: Metadata = {
   alternates: {
     canonical: BASE_URL,
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: "#C5A44E",
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   const organizationSchema = {
     "@context": "https://schema.org",
@@ -83,11 +84,15 @@ export default function RootLayout({
         publisher: { "@id": `${BASE_URL}/#organization` },
       },
     ],
-  }
+  };
 
   return (
     <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
+      <head>
+        <GoogleTagManager gtmId="G-K90NGHL09B" />
+      </head>
       <body className="font-body antialiased" suppressHydrationWarning>
+        <GoogleAnalytics gaId="G-K90NGHL09B" />
         <JsonLd data={organizationSchema} />
         <CartProvider>
           <Navbar />
@@ -96,5 +101,5 @@ export default function RootLayout({
         </CartProvider>
       </body>
     </html>
-  )
+  );
 }
