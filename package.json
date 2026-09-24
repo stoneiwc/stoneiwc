@@ -12,6 +12,7 @@
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
     "@hookform/resolvers": "^3.9.1",
+    "@next/third-parties": "^16.4.0-canary.38",
     "@portabletext/react": "^6.0.3",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
