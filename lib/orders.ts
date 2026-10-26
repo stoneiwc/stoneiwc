@@ -216,3 +216,13 @@ export async function markOrderFailed(stripePaymentIntentId: string): Promise<vo
 
   await client.patch(order._id).set({ status: 'failed' }).commit()
 }
+
+export async function markOrderCanceled(stripePaymentIntentId: string): Promise<void> {
+  const order = await client.fetch<{ _id: string; status: OrderStatus } | null>(
+    `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, status }`,
+    { pid: stripePaymentIntentId },
+  )
+  if (!order) return
+  if (order.status !== 'pending') return
+  await client.patch(order._id).set({ status: 'cancelled' }).commit()
+}
