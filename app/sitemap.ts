@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { getAllProductSlugs, getAllArticleSlugs } from "@/lib/sanity.queries"
+import { getAllProductSlugs } from "@/lib/sanity.queries"
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
 
@@ -16,9 +16,8 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [productSlugs, articleSlugs] = await Promise.all([
+  const [productSlugs] = await Promise.all([
     getAllProductSlugs(),
-    getAllArticleSlugs(),
   ])
 
   const productRoutes: MetadataRoute.Sitemap = productSlugs.map((slug) => ({
@@ -26,12 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
     changeFrequency: "weekly",
   }))
-
-  const articleRoutes: MetadataRoute.Sitemap = articleSlugs.map((slug) => ({
-    url: `${BASE_URL}/education/articles/${slug}`,
-    priority: 0.7,
-    changeFrequency: "monthly",
-  }))
-
-  return [...STATIC_ROUTES, ...productRoutes, ...articleRoutes]
+  
+  return [...STATIC_ROUTES, ...productRoutes]
 }

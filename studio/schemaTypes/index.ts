@@ -14,7 +14,6 @@ import {virtualConsultationsImagesType} from './virtualConsultationsImages'
 import {certificationImagesType} from './certificationImages'
 import {licenseeProgramImagesType} from './licenseeProgramImages'
 import {cuppingImagesType} from './cuppingImages'
-import {articleType} from './article'
 import {pressItemType} from './pressItem'
 import {mediaItemType} from './mediaItem'
 import {qcShowFlyerType} from './qcShowFlyer'
@@ -42,7 +41,6 @@ export const schemaTypes = [
   certificationImagesType,
   licenseeProgramImagesType,
   cuppingImagesType,
-  articleType,
   pressItemType,
   mediaItemType,
   qcShowFlyerType,

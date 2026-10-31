@@ -34,7 +34,6 @@ export const navigation: NavItem[] = [
       { label: "General Services Information", href: "/education/general" },
       { label: "Concerns", href: "/education/concerns" },
       { label: "Cupping", href: "/education/cupping" },
-      { label: "Articles", href: "/education/articles" },
     ],
   },
   {

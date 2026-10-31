@@ -71,13 +71,6 @@ const educationLinks = [
       "A deep dive into traditional fire cupping -- our signature modality refined over 50 years. Learn about the types, benefits, and what to expect.",
     href: "/education/cupping",
   },
-  {
-    icon: FileText,
-    title: "Articles",
-    description:
-      "Insights, research, and perspectives from our practitioners on holistic health, nutrition, Eastern and Western medicine, and root-cause healing.",
-    href: "/education/articles",
-  },
 ]
 
 export default async function EducationPage() {
