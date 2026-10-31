@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
 
 const MAX_CUSTOM_AMOUNT = 500
 const NOTE_MAX_LENGTH = 500
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Stripe is not configured.' }, { status: 500 })
   }
 
-  let body: {
+  let body: HoneypotFields & {
     amount?: number
     senderName?: string
     purchaserEmail?: string
@@ -23,6 +24,13 @@ export async function POST(request: Request) {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
+  }
+
+  // Honeypot filled → a bot. Hand back a decoy client secret; nothing is
+  // created in Stripe.
+  if (isHoneypotTripped(body)) {
+    console.warn('Gift card honeypot tripped; request dropped')
+    return NextResponse.json({ clientSecret: decoyPaymentIntent().clientSecret })
   }
 
   const { amount, senderName, purchaserEmail, recipientName, recipientEmail, note } = body

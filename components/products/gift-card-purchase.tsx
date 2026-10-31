@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
+import { HoneypotField } from '@/components/honeypot-field'
+import { HONEYPOT_FIELD } from '@/lib/honeypot'
 
 export { GIFT_CARD_SLUG } from '@/lib/constants'
 
@@ -94,6 +96,7 @@ export function GiftCardPurchase() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
+  const honeypotRef = useRef<HTMLInputElement>(null)
 
   const finalAmount = isCustom ? Number(customAmount) : selectedAmount
 
@@ -124,6 +127,7 @@ export function GiftCardPurchase() {
           recipientName: recipientName.trim() || undefined,
           recipientEmail,
           note: note.trim() || undefined,
+          [HONEYPOT_FIELD]: honeypotRef.current?.value ?? '',
         }),
       })
       const data = await res.json()
@@ -291,6 +295,7 @@ export function GiftCardPurchase() {
               {note.length} / {NOTE_MAX_LENGTH}
             </p>
           </div>
+          <HoneypotField ref={honeypotRef} />
 
           {error && (
             <div className="rounded-sm border border-red-200 bg-red-50 p-3">

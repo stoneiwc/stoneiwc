@@ -152,7 +152,7 @@ if (error) {
 ```
 
 3. If the email is customer-facing (not internal), add `replyTo` only if appropriate.
-4. If the endpoint is public-facing (user-submitted), add rate limiting using `checkRateLimit` from `lib/email/rate-limit.ts`.
+4. If the endpoint is public-facing (user-submitted), add rate limiting using `checkRateLimit` from `lib/email/rate-limit.ts`, and the spam honeypot (`<HoneypotField />` in the form, `isHoneypotTripped` in the route — see [security-and-compliance.md](security-and-compliance.md#spam-honeypot)).
 
 ---
 

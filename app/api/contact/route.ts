@@ -6,10 +6,11 @@ import {
   contactAutoReplyText,
 } from "@/lib/email/contact-autoreply-template"
 import { checkRateLimit } from "@/lib/email/rate-limit"
+import { isHoneypotTripped, type HoneypotFields } from "@/lib/honeypot"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export interface ContactFormPayload {
+export interface ContactFormPayload extends HoneypotFields {
   firstName: string
   lastName: string
   email: string
@@ -48,6 +49,12 @@ export async function POST(req: NextRequest) {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+  }
+
+  // Honeypot filled → a bot. Answer like a normal send, but email nobody.
+  if (isHoneypotTripped(body)) {
+    console.warn("Contact form honeypot tripped; submission dropped")
+    return NextResponse.json({ success: true })
   }
 
   const { firstName, lastName, email, phone, message } = body

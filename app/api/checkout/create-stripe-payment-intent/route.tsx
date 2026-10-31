@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createPendingOrder } from '@/lib/orders'
 import { computeOrderPricing } from '@/lib/pricing'
+import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
 
 type CheckoutItem = {
   id?: string
@@ -24,7 +25,7 @@ type CheckoutAddress = {
   country?: string
 }
 
-type CreateStripePaymentIntentBody = {
+type CreateStripePaymentIntentBody = HoneypotFields & {
   items?: CheckoutItem[]
   subtotal?: number
   couponCode?: string
@@ -63,6 +64,15 @@ export async function POST(request: Request) {
 
     const stripe = new Stripe(stripeSecretKey)
     const body = (await request.json()) as CreateStripePaymentIntentBody
+
+    // Honeypot filled → a bot. Hand back a decoy PaymentIntent: no Stripe call
+    // and no pending order in Sanity.
+    if (isHoneypotTripped(body)) {
+      console.warn('Checkout honeypot tripped; request dropped')
+      const decoy = decoyPaymentIntent()
+      return NextResponse.json({ clientSecret: decoy.clientSecret, paymentIntentId: decoy.id })
+    }
+
     const {
       items,
       couponCode,
