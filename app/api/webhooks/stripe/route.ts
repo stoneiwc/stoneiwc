@@ -15,7 +15,7 @@ import {
 } from '@/lib/email/order-confirmation-template'
 import { client as sanityClient } from '@/lib/sanity.client'
 import { createGiftCard, redeemGiftCard } from '@/lib/gift-cards'
-import { markOrderFailed, markOrderPaid } from '@/lib/orders'
+import { markOrderCanceled, markOrderFailed, markOrderPaid } from '@/lib/orders'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -48,7 +48,8 @@ export async function POST(request: Request) {
 
   if (
     event.type !== 'payment_intent.succeeded' &&
-    event.type !== 'payment_intent.payment_failed'
+    event.type !== 'payment_intent.payment_failed' &&
+    event.type !== 'payment_intent.canceled'
   ) {
     return NextResponse.json({ received: true })
   }
@@ -63,6 +64,18 @@ export async function POST(request: Request) {
         await markOrderFailed(paymentIntent.id)
       } catch (err) {
         console.error('Failed to mark order as failed:', err)
+      }
+    }
+    return NextResponse.json({ received: true })
+  }
+
+  // Handle cancellations: flip the corresponding pending order to 'cancelled'.
+  if (event.type === 'payment_intent.canceled') {
+    if (meta.order_type === 'storefront') {
+      try {
+        await markOrderCanceled(paymentIntent.id)
+      } catch (err) {
+        console.error('Failed to mark order as cancelled:', err)
       }
     }
     return NextResponse.json({ received: true })
