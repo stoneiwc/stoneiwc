@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
-import { ArrowRight, Newspaper, Tv, Trophy, Mic, Radio } from "lucide-react"
+import { ArrowRight, Newspaper, Tv, Mic, Radio } from "lucide-react"
 import { getFeaturedPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
@@ -33,13 +33,6 @@ const subPages = [
     description:
       "Video appearances, interviews, and feature segments showcasing our holistic approach and the work we do.",
     href: "/featured/media",
-  },
-  {
-    icon: Trophy,
-    title: "Awards",
-    description:
-      "Recognition and accolades received for our commitment to holistic wellness, community service, and excellence in care.",
-    href: "/featured/awards",
   },
   {
     icon: Mic,
