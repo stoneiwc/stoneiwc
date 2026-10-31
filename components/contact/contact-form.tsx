@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import type { ContactFormPayload } from "@/app/api/contact/route"
+import { HoneypotField } from "@/components/honeypot-field"
+import { HONEYPOT_FIELD } from "@/lib/honeypot"
 
 type Status = "idle" | "loading" | "success" | "error"
 
@@ -26,6 +28,7 @@ export function ContactForm() {
       email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim() || undefined,
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
+      [HONEYPOT_FIELD]: (form.elements.namedItem(HONEYPOT_FIELD) as HTMLInputElement).value,
     }
 
     try {
@@ -98,6 +101,7 @@ export function ContactForm() {
         <label htmlFor="message" className={labelClass}>Message</label>
         <textarea id="message" name="message" rows={4} required className={`${inputClass} resize-none`} placeholder="How can we help you?" />
       </div>
+      <HoneypotField />
 
       {status === "error" && (
         <p className="text-sm font-body text-red-600">{errorMsg}</p>

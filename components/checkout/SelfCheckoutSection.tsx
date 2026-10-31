@@ -6,6 +6,8 @@ import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
 import type { AppliedGiftCard } from '@/app/checkout/page'
+import { HoneypotField } from '@/components/honeypot-field'
+import { HONEYPOT_FIELD } from '@/lib/honeypot'
 
 interface CheckoutFormState {
   email: string
@@ -270,6 +272,7 @@ export default function SelfCheckoutSection({
   }
 
   const isInitializingRef = useRef(false)
+  const honeypotRef = useRef<HTMLInputElement>(null)
 
   const initializePayment = async () => {
     // Guard against a fast double-click firing two concurrent calls before the
@@ -320,6 +323,7 @@ export default function SelfCheckoutSection({
           giftCardCode: appliedGiftCard?.code,
           giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
           paymentIntentId,
+          [HONEYPOT_FIELD]: honeypotRef.current?.value ?? '',
           billingSameAsShipping: form.shippingSameAsBilling,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
@@ -771,6 +775,8 @@ export default function SelfCheckoutSection({
               <p className="mt-2 text-xs font-body text-red-600">{giftCardError}</p>
             )}
           </div>
+
+          <HoneypotField ref={honeypotRef} />
 
           {error && (
             <div className="rounded-sm border border-red-200 bg-red-50 p-4">
