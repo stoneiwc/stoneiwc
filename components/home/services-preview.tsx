@@ -14,7 +14,7 @@ export function ServicesPreview({ conciergeImage, treatmentRoomImage }: Services
     {
       title: "Concierge Holistic Treatments",
       description:
-        "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, refined semi-permanent aesthetics, and 100+ more services -- delivered directly to your location.",
+        "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, refined semi-permanent aesthetics, and more -- with select services brought directly to your location.",
       image: conciergeImage?.asset
         ? urlFor(conciergeImage).width(1600).height(1200).url()
         : "/images/concierge.jpg",
@@ -22,13 +22,13 @@ export function ServicesPreview({ conciergeImage, treatmentRoomImage }: Services
       href: "/services/concierge",
     },
     {
-      title: "In-Facility at The Source of Hope",
+      title: "In-Facility in Plano",
       description:
-        "When an in-person location is required, we see patients at The Source of Hope facility in Plano, TX -- home to our advanced holistic education center and full treatment rooms.",
+        "Visit us at 1108 W Parker Rd Ste 102 in Plano, TX -- home to our advanced holistic education center and full treatment rooms.",
       image: treatmentRoomImage?.asset
         ? urlFor(treatmentRoomImage).width(1600).height(1200).url()
         : "/images/treatment-room.jpg",
-      alt: treatmentRoomImage?.alt ?? "The Source of Hope treatment room in Plano, TX",
+      alt: treatmentRoomImage?.alt ?? "Stone IWC treatment room in Plano, TX",
       href: "/services/treatments",
     },
   ]

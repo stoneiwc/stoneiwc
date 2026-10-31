@@ -17,21 +17,14 @@ const DEFAULT_SLIDES = [
     subtitle: "Concierge Holistic Wellness Retreat",
     title: "Restoring the Body from the Inside Out",
     description:
-      "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, holistic nourishment guidance, and refined semi-permanent aesthetics -- delivered wherever you are.",
+      "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, holistic nourishment guidance, and refined semi-permanent aesthetics -- in Plano, with select services available at your location.",
   },
   {
     image: "/images/hero-cupping.jpg",
     subtitle: "Eastern & Western Medicine United",
-    title: "Holistic Precision. Five Decades Deep.",
+    title: "Holistic Precision. 50 Years Deep.",
     description:
-      "We honor both Eastern and Western medicine -- each for its intended purpose. Over 100 services refined across 50+ years of hands-on experience, treating chronic conditions at the root.",
-  },
-  {
-    image: "/images/hero-holistic.jpg",
-    subtitle: "Holistic Nourishment Guidance",
-    title: "Private Chefs. Nutritional Programs. Culinary Wellness.",
-    description:
-      "17+ trained chefs deliver private cooking classes, nutritional detox programs, pantry transformations, and healing meal preparation -- at your home, office, or event.",
+      "We honor both Eastern and Western medicine -- each for its intended purpose. Over 100 services refined across 50 years of hands-on experience, treating chronic conditions at the root.",
   },
 ]
 

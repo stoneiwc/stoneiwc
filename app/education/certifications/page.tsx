@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
-import { BOOKING_URL } from "@/lib/navigation"
 import {
   ArrowRight,
   Flame,
@@ -30,7 +29,7 @@ const certificationPrograms = [
     icon: Flame,
     title: "Fire Cupping Certification",
     description:
-      "Master traditional fire cupping -- our signature modality refined over five decades. Learn glass cup techniques, fire safety, patient assessment, treatment protocols, and aftercare. Includes all 6 cupping types: fire, wet/hijama, dry, moving, flash, and facial.",
+      "Master traditional fire cupping -- our signature modality refined over 50 years. Learn glass cup techniques, fire safety, patient assessment, treatment protocols, and aftercare. Includes all 6 cupping types: fire, wet/hijama, dry, moving, flash, and facial.",
     modules: [
       "History and theory of cupping therapy",
       "Fire cupping safety and glass cup handling",
@@ -100,7 +99,7 @@ const certificationPrograms = [
     icon: Leaf,
     title: "Culinary Wellness & Nutrition Certification",
     description:
-      "Become a certified culinary wellness practitioner. Learn to design nutritional detox programs, lead pantry cleanouts, guide grocery trips, and prepare healing meals using the Stone IWC 3-day concept. 17+ chefs have trained through this program.",
+      "Become a certified culinary wellness practitioner. Learn to design nutritional detox programs, lead pantry cleanouts, guide grocery trips, and prepare healing meals using the Stone IWC 3-day concept.",
     modules: [
       "Nutritional science foundations for holistic healing",
       "The 3-day meal rotation concept",
@@ -113,7 +112,7 @@ const certificationPrograms = [
 ]
 
 const programBenefits = [
-  "Hands-on training from practitioners with 50+ years of experience",
+  "Hands-on training from practitioners with 50 years of experience",
   "Both Eastern and Western modalities covered in every program",
   "Small class sizes for personalized instruction",
   "Certification recognized by Stone IWC for concierge practice eligibility",
@@ -133,7 +132,7 @@ export default async function CertificationsPage() {
     <>
       <PageHeader
         title="Holistic Practitioner Certifications"
-        subtitle="Train under practitioners with 50+ years of experience. Earn your certification in holistic health, wellness, and non-invasive cosmetic procedures."
+        subtitle="Train under practitioners with 50 years of experience. Earn your certification in holistic health, wellness, and non-invasive cosmetic procedures."
       />
 
       <section className="py-20 lg:py-28">
@@ -157,7 +156,7 @@ export default async function CertificationsPage() {
               </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 All programs are taught by experienced practitioners who
-                have refined these modalities over five decades. We honor
+                have refined these modalities over 50 years. We honor
                 both Eastern and Western approaches, teaching you when and
                 how to apply each for maximum patient benefit.
               </p>
@@ -315,7 +314,7 @@ export default async function CertificationsPage() {
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href={BOOKING_URL}
+              href="/contact"
               className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
             >
               Inquire About Programs

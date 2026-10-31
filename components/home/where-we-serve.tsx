@@ -64,13 +64,10 @@ export function WhereWeServe() {
             Concierge Model
           </p>
           <h2 className="mt-4 font-sans text-3xl font-semibold tracking-wide text-foreground md:text-4xl lg:text-5xl text-balance">
-            We Come to Wherever You Are
+            Select Services, Wherever You Are
           </h2>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-            We operate as a concierge service, traveling to patients' homes,
-            hospice, hospitals, or wherever care is needed. When an
-            in-person location is required, we see patients at The Source
-            of Hope facility in Plano, TX.
+            Select services can be brought to patients' homes, hospice, hospitals, or wherever care is needed. All other care takes place at our Plano location, 1108 W Parker Rd Ste 102.
           </p>
         </div>
 

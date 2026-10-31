@@ -5,7 +5,6 @@ import { BOOKING_URL } from "@/lib/navigation"
 import {
   Stethoscope,
   MapPin,
-  Utensils,
   GraduationCap,
   Clock,
   Shield,
@@ -24,9 +23,9 @@ const serviceTypes = [
     icon: Stethoscope,
     title: "Holistic Treatments",
     description:
-      "Our core offering includes over 100 holistic modalities addressing chronic conditions at the root cause. From traditional fire cupping and lymphatic drainage to skin imperfection removal and inflammation reduction -- every treatment is performed by experienced practitioners with 50+ years of collective experience.",
+      "Our core offering includes over 100 holistic modalities addressing chronic conditions at the root cause. From traditional fire cupping and lymphatic drainage to skin imperfection removal and inflammation reduction -- every treatment is performed by experienced practitioners with 50 years of experience.",
     details: [
-      "Treatments available at your location or our facility",
+      "Treatments at our Plano facility, with select services at your location",
       "Each session begins with a wellness assessment",
       "Custom treatment plans based on your health goals",
       "Both Eastern and Western modalities available",
@@ -36,24 +35,12 @@ const serviceTypes = [
     icon: MapPin,
     title: "Concierge Model",
     description:
-      "Stone IWC operates on a concierge model. We come to you -- corporate offices, churches, events, private homes, hotels, hospitals, hospice facilities, and anywhere else you need us. Our practitioners arrive with all equipment, supplies, and products needed for a complete experience.",
+      "Select services are available through our concierge model. We come to corporate offices, churches, events, private homes, hotels, hospitals, hospice facilities, and more. Our practitioners arrive with all equipment, supplies, and products needed for a complete experience.",
     details: [
       "Full portable treatment setup provided",
       "Available for individuals, groups, and organizations",
-      "Flexible scheduling including evenings and weekends",
+      "Contact us to confirm which services we can bring to you",
       "Setup and cleanup handled entirely by our team",
-    ],
-  },
-  {
-    icon: Utensils,
-    title: "Culinary Wellness",
-    description:
-      "With 17+ trained chefs, our culinary wellness program is unlike anything else. We believe food is medicine. Our chefs come to your home or location to teach nutritional cooking, prepare healing meals, guide grocery trips, and clean out pantries. We teach the 3-day concept: one day of entrees, one day of smoothies and desserts, one day of variety.",
-    details: [
-      "Custom meal programs for your health condition",
-      "In-home pantry cleanouts and grocery guidance",
-      "Legume, organic, and vegetable-focused cooking",
-      "Family and corporate nutritional workshops",
     ],
   },
   {
@@ -74,7 +61,7 @@ const faqs = [
   {
     question: "Are you doctors?",
     answer:
-      "No. We are experienced holistic practitioners with over five decades of experience. We are not doctors and we are not a spa. We occupy the space in between -- addressing health conditions through holistic, root-cause modalities from both Eastern and Western traditions.",
+      "No. We are experienced holistic practitioners with 50 years of experience. We are not doctors and we are not a spa. We occupy the space in between -- addressing health conditions through holistic, root-cause modalities from both Eastern and Western traditions.",
   },
   {
     question: "What conditions do you help with?",
@@ -84,22 +71,17 @@ const faqs = [
   {
     question: "Do you come to my location?",
     answer:
-      "Yes. Our entire model is built on concierge service. We come to corporate offices, churches, events, private homes, hotels, hospitals, hospice facilities -- anywhere you need us. We bring all equipment and supplies.",
+      "For select services, yes. We come to corporate offices, churches, events, private homes, hotels, hospitals, and hospice facilities, and bring all equipment and supplies. Other services take place at our Plano location, 1108 W Parker Rd Ste 102. Contact us to confirm which services we can bring to you.",
   },
   {
     question: "What is The Source of Hope?",
     answer:
-      "The Source of Hope is our foundation. All profits from Stone IWC go directly to sustaining this foundation, which extends holistic health access to underserved communities. When you book a service with us, you are also supporting a greater mission.",
+      "The Source of Hope is our foundation. All proceeds from Stone IWC go directly to sustaining this foundation, which extends holistic health access to underserved communities. When you book a service with us, you are also supporting a greater mission.",
   },
   {
     question: "How do I book a service?",
     answer:
       "You can schedule a consultation through our online booking system, call us at +1 972-473-2205, or email Info@stoneiwc.com. We will discuss your needs and create a custom plan for your individual or group session.",
-  },
-  {
-    question: "What is the 3-day food concept?",
-    answer:
-      "Our culinary wellness program teaches a rotating 3-day meal concept. One day focuses on entrees and full meals. Another day is dedicated to smoothies, desserts, and lighter options. The third day offers variety. This rotation keeps nutrition engaging and ensures a balanced intake of healing foods.",
   },
 ]
 
@@ -118,12 +100,10 @@ export default function GeneralInfoPage() {
               How We Work
             </p>
             <h2 className="mt-4 font-sans text-3xl font-semibold tracking-wide text-foreground md:text-4xl text-balance">
-              Four Pillars of Service
+              Three Pillars of Service
             </h2>
             <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-              Our services fall into four interconnected categories -- each
-              designed to address your health from a different angle, all
-              delivered through our concierge model.
+              Our services fall into three interconnected categories -- each designed to address your health from a different angle.
             </p>
           </div>
 
@@ -199,7 +179,7 @@ export default function GeneralInfoPage() {
             <div className="flex items-center gap-3">
               <Shield className="h-5 w-5 text-primary" />
               <span className="text-sm font-body text-muted-foreground">
-                50+ Years Experience
+                50 Years Experience
               </span>
             </div>
             <div className="flex items-center gap-3">

@@ -12,15 +12,15 @@ export const revalidate = 60
 export const metadata: Metadata = {
   title: "Our Story",
   description:
-    "Five decades of holistic healing, a Presidential award, and a mission that launched before the pandemic to serve our community.",
+    "50 years of holistic healing, a Presidential award, and a mission to serve our community.",
 }
 
 const milestones = [
   {
     icon: Clock,
-    title: "Five Decades of Experience",
+    title: "50 Years of Experience",
     description:
-      "Our journey in holistic wellness spans over 50 years. Long before the term 'holistic health' became mainstream, our practitioners were already combining ancient Eastern modalities with Western understanding to help people heal from within.",
+      "Our journey in holistic wellness spans 50 years. Long before the term 'holistic health' became mainstream, our practitioners were already combining ancient Eastern modalities with Western understanding to help people heal from within.",
   },
   {
     icon: Globe,
@@ -38,13 +38,13 @@ const milestones = [
     icon: Heart,
     title: "Launched to Serve Our Community",
     description:
-      "Stone IWC was launched before the pandemic with a singular mission: to bring holistic care directly to our community. When the world shut down, the need for root-cause healing and immune support only confirmed what we already knew -- our community needed this.",
+      "Stone IWC was launched with a singular mission: to bring holistic care directly to our community.",
   },
   {
     icon: Utensils,
     title: "Food is Medicine",
     description:
-      "With 17+ trained chefs on our team, we do not just treat conditions -- we teach people how to heal through nutrition. We write custom meal programs, guide grocery trips, clean out pantries, and teach families the art of healing through food. Vegetables, fruits, organics, legumes, detox smoothies, and healing entrees are all part of our approach.",
+      "We do not just treat conditions -- we teach people how to heal through nutrition. We write custom meal programs, guide grocery trips, clean out pantries, and teach families the art of healing through food. Vegetables, fruits, organics, legumes, detox smoothies, and healing entrees are all part of our approach.",
   },
   {
     icon: GraduationCap,
@@ -64,7 +64,7 @@ export default async function OurStoryPage() {
     <>
       <PageHeader
         title="Our Story"
-        subtitle="Five decades of holistic healing, a Presidential award, and a mission to serve our community from the inside out."
+        subtitle="50 years of holistic healing, a Presidential award, and a mission to serve our community from the inside out."
       />
 
       <section className="py-20 lg:py-28">
@@ -79,7 +79,7 @@ export default async function OurStoryPage() {
               </h2>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 Stone International Wellness Center was not born from a
-                business plan. It was born from over five decades of watching
+                business plan. It was born from 50 years of watching
                 people suffer with chronic conditions -- diabetes, high blood
                 pressure, inflammation, lymphedema, kidney issues -- and
                 knowing there was a better way to help them.
@@ -90,10 +90,10 @@ export default async function OurStoryPage() {
                 the body from the inside out. We treat the root cause of
                 health issues using modalities refined over generations --
                 from traditional fire cupping and lymphatic drainage to
-                nutritional detox programs and culinary wellness.
+                nutritional detox programs.
               </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-                All profits from Stone IWC sustain our foundation,{" "}
+                All proceeds from Stone IWC sustain our foundation,{" "}
                 <strong className="text-foreground">The Source of Hope</strong>,
                 extending holistic health access to underserved communities.
                 When you choose our services, you are not just investing in
@@ -110,7 +110,7 @@ export default async function OurStoryPage() {
               />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/80 to-transparent p-8">
                 <p className="font-sans text-2xl font-semibold text-background">
-                  50+ Years
+                  50 Years
                 </p>
                 <p className="mt-1 text-sm font-body text-background/80">
                   of holistic healing experience

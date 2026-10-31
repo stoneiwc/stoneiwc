@@ -33,7 +33,7 @@ const featuredPrograms = [
     icon: GraduationCap,
     title: "Holistic Practitioner Certifications",
     description:
-      "Earn your certification in fire cupping, lymphatic drainage, non-invasive cosmetic procedures, holistic bodywork, ear/eye/TMJ therapies, and culinary wellness. Hands-on training from practitioners with 50+ years of experience.",
+      "Earn your certification in fire cupping, lymphatic drainage, non-invasive cosmetic procedures, holistic bodywork, ear/eye/TMJ therapies, and culinary wellness. Hands-on training from practitioners with 50 years of experience.",
     href: "/education/certifications",
     cta: "View Certifications",
     accent: "primary",
@@ -68,7 +68,7 @@ const educationLinks = [
     icon: Flame,
     title: "Cupping Therapy",
     description:
-      "A deep dive into traditional fire cupping -- our signature modality refined over five decades. Learn about the types, benefits, and what to expect.",
+      "A deep dive into traditional fire cupping -- our signature modality refined over 50 years. Learn about the types, benefits, and what to expect.",
     href: "/education/cupping",
   },
   {
@@ -125,7 +125,7 @@ export default async function EducationPage() {
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 We teach both Eastern and Western approaches, honoring each
                 for its intended purpose. All programs are led by
-                practitioners with five decades of hands-on experience.
+                practitioners with 50 years of hands-on experience.
               </p>
               <div className="mt-8 flex items-center gap-8">
                 <div className="flex items-center gap-3">

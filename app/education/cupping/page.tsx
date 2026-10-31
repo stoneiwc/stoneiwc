@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
-import { BOOKING_URL } from "@/lib/navigation"
 import { Flame, Droplets, Wind, CircleDot, MoveRight, Zap } from "lucide-react"
 import { getCuppingImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
@@ -10,7 +9,7 @@ import { urlFor } from "@/lib/sanity.image"
 export const metadata: Metadata = {
   title: "Cupping Therapy",
   description:
-    "Learn about traditional fire cupping -- our signature modality refined over five decades. Types, benefits, and what to expect.",
+    "Learn about traditional fire cupping -- our signature modality refined over 50 years. Types, benefits, and what to expect.",
 }
 
 const cuppingTypes = [
@@ -18,7 +17,7 @@ const cuppingTypes = [
     icon: Flame,
     title: "Traditional Fire Cupping",
     description:
-      "Our signature modality. A flame is used to create suction inside glass cups, which are then placed on the body. The heat draws blood flow to the area, promoting healing, reducing inflammation, and releasing tension. This ancient Eastern technique has been refined by our practitioners over five decades.",
+      "Our signature modality. A flame is used to create suction inside glass cups, which are then placed on the body. The heat draws blood flow to the area, promoting healing, reducing inflammation, and releasing tension. This ancient Eastern technique has been refined by our practitioners over 50 years.",
   },
   {
     icon: Droplets,
@@ -104,7 +103,7 @@ export default async function CuppingPage() {
     <>
       <PageHeader
         title="Cupping Therapy"
-        subtitle="Our signature modality -- refined over five decades of practice, combining ancient Eastern wisdom with modern holistic understanding."
+        subtitle="Our signature modality -- refined over 50 years of practice, combining ancient Eastern wisdom with modern holistic understanding."
       />
 
       <section className="py-20 lg:py-28">
@@ -125,7 +124,7 @@ export default async function CuppingPage() {
                 entire practice was built.
               </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-                Our practitioners have refined this art over five decades,
+                Our practitioners have refined this art over 50 years,
                 combining the ancient technique with a modern understanding
                 of anatomy, physiology, and root-cause healing. We use
                 cupping not just for pain relief, but as a comprehensive
@@ -248,12 +247,11 @@ export default async function CuppingPage() {
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-background/70 font-body">
             Whether at your home, office, or our facility -- our
-            practitioners bring five decades of cupping expertise directly to
-            you.
+            practitioners bring 50 years of cupping expertise to you.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href={BOOKING_URL}
+              href="/book?category=cupping"
               className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
             >
               Book a Cupping Session
