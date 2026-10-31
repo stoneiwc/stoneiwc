@@ -63,14 +63,14 @@ MICROPIGMENTATION_SERVICES = [
         "description": "Semi-permanent lower eyeliner to enhance eye depth and definition.",
     },
     {
-        "title": "Eyelid Upper Liners (CPT-11921)",
+        "title": "Permanent Eyeliner – Upper Lid",
         "slug": "micropigmentation-eyelid-upper-liners",
         "length_minutes": 120,
         "price_cents": 40000,
         "description": "Precision semi-permanent pigmentation along the upper eyelid for long-lasting definition.\nCPT Code: CPT-11921",
     },
     {
-        "title": "Eyelid Lower Liners (CPT-11921)",
+        "title": "Permanent Eyeliner – Lower Lid",
         "slug": "micropigmentation-eyelid-lower-liners",
         "length_minutes": 120,
         "price_cents": 40000,

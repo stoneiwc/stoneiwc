@@ -42,7 +42,7 @@ NAIL_SERVICES = [
         "description": "Comprehensive foot care treatment including exfoliation, nail care, and moisturizing for healthy, refreshed feet.",
     },
     {
-        "title": "Ingrown Toe Nail Removal (CPT-11750)",
+        "title": "Ingrown Toenail Removal",
         "slug": "nail-ingrown-toenail-removal",
         "length_minutes": 45,
         "price_cents": 7500,

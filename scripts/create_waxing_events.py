@@ -63,7 +63,7 @@ WAXING_SERVICES = [
         "description": "Full half-leg wax from the knee down for smooth, hair-free skin.",
     },
     {
-        "title": "Full Leg Waxing - Full",
+        "title": "Full Leg Waxing",
         "slug": "waxing-full-leg",
         "length_minutes": 60,
         "price_cents": 9500,
@@ -77,7 +77,7 @@ WAXING_SERVICES = [
         "description": "Half back wax targeting the upper or lower back for clean, smooth skin.",
     },
     {
-        "title": "Full Back Waxing - Full",
+        "title": "Full Back Waxing",
         "slug": "waxing-full-back",
         "length_minutes": 60,
         "price_cents": 9500,
