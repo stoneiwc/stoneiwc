@@ -23,6 +23,7 @@ import {couponType} from './coupon'
 import {giftCardType} from './giftCard'
 import {orderType} from './order'
 import {shippingMethodType} from './shippingMethod'
+import {awardItemType} from './awardItem'
 
 export const schemaTypes = [
   categoryType,
@@ -50,4 +51,5 @@ export const schemaTypes = [
   giftCardType,
   orderType,
   shippingMethodType,
+  awardItemType,
 ]

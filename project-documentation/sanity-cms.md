@@ -159,7 +159,7 @@ These are simpler content types managed in Sanity. Most are single-document type
 | `teamMember` | About → Team | `name`, `title`, `bio`, `image`, `specialties`, ordered by `orderRank` |
 | `partner` | About → Partners | `name`, `description`, `logo`, `websiteUrl`, ordered by `orderRank` |
 | `pressItem` | Featured → Press | `title`, `description`, `image`, `link`, ordered by `orderRank` |
-| `awardItem` | Featured → Awards | `title`, `description`, `image`, ordered by `orderRank` |
+| `awardItem` | Featured → Media (Awards section, shown once one is published) | `title`, `description`, `image`, ordered by `orderRank` |
 | `mediaItem` | Featured → Media | `title`, `description`, `youtubeUrl`, ordered by `orderRank` |
 | `qcShowFlyer` | Featured → QC Show | Single document, image only |
 | `qcShowEpisode` | Featured → QC Show | `youtubeUrl`, ordered by `_createdAt` |
