@@ -465,3 +465,22 @@ export async function getShippingMethods(): Promise<SanityShippingMethod[]> {
     { next: { tags: ["shippingMethod"] } }
   )
 }
+
+// ─── Award Items ─────────────────────────────────────────────────────────────
+
+export interface SanityAwardItem {
+  _id: string
+  title: string
+  description: string
+  image: { asset: { _ref: string; _type: string }; alt?: string }
+}
+
+export async function getAwardItems(): Promise<SanityAwardItem[]> {
+  const query = `*[_type == "awardItem"] | order(orderRank asc) {
+    _id,
+    title,
+    description,
+    image
+  }`
+  return client.fetch<SanityAwardItem[]>(query, {}, { next: { tags: ["awardItem"] } })
+}
