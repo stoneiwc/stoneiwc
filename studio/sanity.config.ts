@@ -257,15 +257,6 @@ export default defineConfig({
                                       ),
                                   ]),
                               ),
-                            S.listItem()
-                              .title('Articles')
-                              .child(
-                                S.list()
-                                  .title('Articles')
-                                  .items([
-                                    S.documentTypeListItem('article').title('All Articles'),
-                                  ]),
-                              ),
                           ]),
                       ),
 
@@ -432,7 +423,6 @@ export default defineConfig({
                   'certificationImages',
                   'licenseeProgramImages',
                   'cuppingImages',
-                  'article',
                   'pressItem',
                   'mediaItem',
                   'awardItem',
