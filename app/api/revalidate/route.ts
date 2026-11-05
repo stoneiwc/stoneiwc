@@ -13,7 +13,6 @@ const TYPE_TAG_MAP: Record<string, string[]> = {
   certificationImages:           ["certificationImages"],
   licenseeProgramImages:         ["licenseeProgramImages"],
   cuppingImages:                 ["cuppingImages"],
-  article:                       ["article"],
   pressItem:                     ["pressItem"],
   mediaItem:                     ["mediaItem"],
   awardItem:                     ["awardItem"],
