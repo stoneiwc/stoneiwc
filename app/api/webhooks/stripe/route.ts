@@ -163,7 +163,11 @@ export async function POST(request: Request) {
     const appliedAmount = parseFloat(appliedAmountRaw)
     if (appliedAmount > 0) {
       try {
-        await redeemGiftCard(redeemedCode, appliedAmount, paymentIntent.id)
+        const redemption = await redeemGiftCard(redeemedCode, appliedAmount, paymentIntent.id)
+        if (redemption.applied < appliedAmount) {
+          // Charged for more than the card still held: another order spent it first.
+          console.error('Gift card shortfall', paymentIntent.id, { appliedAmount, applied: redemption.applied })
+        }
       } catch (err) {
         console.error('Gift card redemption failed:', err)
       }

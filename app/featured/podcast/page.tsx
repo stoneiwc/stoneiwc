@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { PageHeader } from "@/components/page-header"
 
 export const metadata: Metadata = {
-  title: "Stoneiwc Podcast",
-  description: "Listen to the Stoneiwc Podcast for wellness insights and conversations.",
+  title: "StoneIWC Podcast",
+  description: "Listen to the StoneIWC Podcast for wellness insights and conversations.",
 }
 
 const SPOTIFY_SHOW_ID = "4o2EoOQx3dyY6BAFrorBql"
@@ -13,7 +13,7 @@ export default function PodcastPage() {
   return (
     <>
       <PageHeader
-        title="Stoneiwc Podcast"
+        title="StoneIWC Podcast"
         subtitle="Deep conversations on wellness, healing, and the art of living well."
       />
 

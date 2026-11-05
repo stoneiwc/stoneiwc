@@ -100,6 +100,14 @@ export async function redeemGiftCard(
     throw new Error(`Gift card not found: ${code}`)
   }
 
+  // Stripe can retry payment_intent.succeeded. If this order already redeemed,
+  // report the earlier amount and deduct nothing a second time. Checked before
+  // the status test, because the card may now be fully redeemed.
+  const prior = card.redemptions?.find((r) => r.orderId === orderId)
+  if (prior) {
+    return { applied: prior.amount, remainingBalance: card.currentBalance, status: card.status }
+  }
+
   if (card.status !== 'active') {
     return {
       applied: 0,

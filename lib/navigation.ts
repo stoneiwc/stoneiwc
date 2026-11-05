@@ -42,7 +42,7 @@ export const navigation: NavItem[] = [
     children: [
       { label: "Press", href: "/featured/press" },
       { label: "Media", href: "/featured/media" },
-      { label: "Stoneiwc Podcast", href: "/featured/podcast" },
+      { label: "StoneIWC Podcast", href: "/featured/podcast" },
       { label: "The QC Show", href: "/featured/qc-show" },
     ],
   },
