@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState, useCallback } from "react"
 import { PageHeader } from "@/components/page-header"
 import { useCart } from "@/lib/cart-context"
+import { giftCardAmount } from "@/lib/gift-card-math"
 import SelfCheckoutSection from "@/components/checkout/SelfCheckoutSection"
 import CheckoutDetailsSection from "@/components/checkout/CheckoutDetailsSection"
 
@@ -28,11 +29,15 @@ export default function CheckoutPage() {
 		setShippingCost(cost)
 	}, [])
 
-	// Gift cards apply to merchandise only — shipping is always paid by the customer.
-	// This guarantees every order produces a Stripe charge (no zero-total dead zone).
+	// Same rule as the server (lib/gift-card-math.ts): merchandise only, and the
+	// charge never drops below Stripe's minimum.
 	const merchandiseTotal = Math.max(0, subtotal - discountAmount)
 	const giftCardDiscount = appliedGiftCard
-		? Math.min(appliedGiftCard.balance, merchandiseTotal)
+		? giftCardAmount({
+				merchandise: merchandiseTotal,
+				shipping: shippingCost,
+				balance: appliedGiftCard.balance,
+			})
 		: 0
 	const finalTotal = Math.max(0, merchandiseTotal + shippingCost - giftCardDiscount)
 

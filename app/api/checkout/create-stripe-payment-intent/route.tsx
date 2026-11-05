@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { createPendingOrder } from '@/lib/orders'
 import { computeOrderPricing } from '@/lib/pricing'
 import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
+import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
 
 type CheckoutItem = {
   id?: string
@@ -95,6 +96,13 @@ export async function POST(request: Request) {
     const pricing = await computeOrderPricing({ items, couponCode, shippingMethod, giftCardCode })
     if (!pricing.ok) {
       return NextResponse.json({ error: pricing.error }, { status: 400 })
+    }
+
+    if (pricing.total < MIN_STRIPE_CHARGE) {
+      return NextResponse.json(
+        { error: `Orders must total at least $${MIN_STRIPE_CHARGE.toFixed(2)}.` },
+        { status: 400 },
+      )
     }
 
     const amountInCents = Math.round(pricing.total * 100)

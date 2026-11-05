@@ -2,6 +2,7 @@ import 'server-only'
 import { client } from './sanity.client'
 import { getCoupons, getShippingMethods } from './sanity.queries'
 import { getGiftCardByCode } from './gift-cards'
+import { giftCardAmount } from './gift-card-math'
  
 const MAX_ITEMS = 100
 const MAX_QTY_PER_ITEM = 100
@@ -136,8 +137,11 @@ export async function computeOrderPricing(input: {
     const card = await getGiftCardByCode(giftCardCode)
     const notExpired = card ? new Date(card.expiresAt).getTime() > Date.now() : false
     if (card && card.status === 'active' && notExpired) {
-      const dueBeforeGiftCard = round2(Math.max(0, subtotal - couponDiscount + shippingCost))
-      giftCardApplied = round2(Math.min(card.currentBalance, dueBeforeGiftCard))
+      giftCardApplied = giftCardAmount({
+        merchandise: round2(subtotal - couponDiscount),
+        shipping: shippingCost,
+        balance: card.currentBalance,
+      })
     }
   }
  
