@@ -42,7 +42,7 @@ const pillars = [
     icon: MapPin,
     title: "Concierge Model",
     description:
-      "Select services can be brought to your home, office, hotel, church, event, hospital, or hospice. All other care takes place at our Plano location, 1108 W Parker Rd Ste 102.",
+      "Many of our services can be brought to your home, office, hotel, church, event, hospital, or hospice. All other care takes place at our Plano location, 1108 W Parker Rd Ste 102.",
   },
 ]
 
@@ -61,7 +61,7 @@ export function Philosophy() {
           <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
             Stone International Wellness Center is devoted to restoring the
             body from the inside out. We are not a spa. We are not a hospital.
-            We are experienced holistic practitioners you can hire -- with 50 years of expertise and 100+ services, offered at our Plano location and, for select services, wherever you are.
+            We are experienced holistic practitioners you can hire -- with 50 years of expertise and 100+ services, offered at our Plano location and, for many of our services, wherever you are.
           </p>
         </div>
 

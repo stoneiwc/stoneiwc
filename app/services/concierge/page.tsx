@@ -20,7 +20,7 @@ import { urlFor } from "@/lib/sanity.image"
 export const metadata: Metadata = {
   title: "Concierge Services",
   description:
-    "We come to you -- corporate offices, churches, events, homes, hotels, hospitals, and more. Select holistic services delivered to your location.",
+    "We come to you -- corporate offices, churches, events, homes, hotels, hospitals, and more. Many of our holistic services delivered to your location.",
 }
 
 const locations = [
@@ -97,7 +97,7 @@ export default async function ConciergePage() {
     <>
       <PageHeader
         title="Concierge Services"
-        subtitle="We bring select holistic services directly to your location. Call +1 469-439-0052 to find out which services we can bring to you."
+        subtitle="We bring many of our holistic services directly to your location. Call +1 469-439-0052 to see what we can arrange for you."
       />
 
       <section className="py-20 lg:py-28">
@@ -112,7 +112,7 @@ export default async function ConciergePage() {
               </h2>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 Stone IWC was built on a concierge model from day one. We do
-                not wait for you to find us -- we bring select services directly to your location with the same professional standards and comprehensive care as our facility. Our
+                not wait for you to find us -- we bring many of our services directly to your location with the same professional standards and comprehensive care as our facility. Our
                 practitioners arrive with everything needed for a complete
                 treatment experience.
               </p>
@@ -155,7 +155,7 @@ export default async function ConciergePage() {
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground font-body">
               From boardrooms to living rooms, from churches to hotel suites
-              -- our practitioners bring select holistic services to any setting.
+              -- our practitioners bring our holistic services to many settings.
             </p>
           </div>
           <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

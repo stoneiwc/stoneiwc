@@ -215,7 +215,7 @@ export default async function VirtualConsultationsPage() {
             Prefer In-Person Care?
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-background/70 font-body">
-            We also offer in-facility care at our Plano location, 1108 W Parker Rd Ste 102, and select concierge services (we come to you). Choose the
+            We also offer in-facility care at our Plano location, 1108 W Parker Rd Ste 102, and concierge visits (we come to you). Choose the
             option that works best for your needs.
           </p>
           <Link

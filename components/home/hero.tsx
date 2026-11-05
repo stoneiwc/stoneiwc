@@ -17,7 +17,7 @@ const DEFAULT_SLIDES = [
     subtitle: "Concierge Holistic Wellness Retreat",
     title: "Restoring the Body from the Inside Out",
     description:
-      "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, holistic nourishment guidance, and refined semi-permanent aesthetics -- in Plano, with select services available at your location.",
+      "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, holistic nourishment guidance, and refined semi-permanent aesthetics -- in Plano, with many of our services available at your location.",
   },
   {
     image: "/images/hero-cupping.jpg",

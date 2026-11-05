@@ -47,7 +47,7 @@ export function AboutSection({ image }: AboutSectionProps) {
                 aesthetics.
               </p>
               <p className="text-base leading-relaxed text-muted-foreground font-body">
-                We see patients at our Plano location, 1108 W Parker Rd Ste 102, and bring select services to patients' homes, hospice, hospitals, or wherever care is needed. We honor both Eastern and
+                We see patients at our Plano location, 1108 W Parker Rd Ste 102, and bring many of our services to patients' homes, hospice, hospitals, or wherever care is needed. We honor both Eastern and
                 Western medicine -- each for its intended purpose.
               </p>
             </div>

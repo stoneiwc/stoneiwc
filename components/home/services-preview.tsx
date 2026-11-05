@@ -14,7 +14,7 @@ export function ServicesPreview({ conciergeImage, treatmentRoomImage }: Services
     {
       title: "Concierge Holistic Treatments",
       description:
-        "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, refined semi-permanent aesthetics, and more -- with select services brought directly to your location.",
+        "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, refined semi-permanent aesthetics, and more -- with many of our services brought directly to your location.",
       image: conciergeImage?.asset
         ? urlFor(conciergeImage).width(1600).height(1200).url()
         : "/images/concierge.jpg",

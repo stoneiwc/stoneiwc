@@ -64,10 +64,10 @@ export function WhereWeServe() {
             Concierge Model
           </p>
           <h2 className="mt-4 font-sans text-3xl font-semibold tracking-wide text-foreground md:text-4xl lg:text-5xl text-balance">
-            Select Services, Wherever You Are
+            Our Services, Wherever You Are
           </h2>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-            Select services can be brought to patients' homes, hospice, hospitals, or wherever care is needed. All other care takes place at our Plano location, 1108 W Parker Rd Ste 102.
+            Many of our services can be brought to patients' homes, hospice, hospitals, or wherever care is needed. All other care takes place at our Plano location, 1108 W Parker Rd Ste 102.
           </p>
         </div>
 

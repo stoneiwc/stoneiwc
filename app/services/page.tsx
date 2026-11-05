@@ -8,7 +8,7 @@ import { getServicesPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
 const DESCRIPTION =
-  "Over 100 holistic wellness services -- professional treatments in Plano, plus select services brought to your location."
+  "Over 100 holistic wellness services -- professional treatments in Plano, plus many of our services brought to your location."
 
 export const metadata: Metadata = {
   title: "Services",
@@ -46,7 +46,7 @@ export default async function ServicesPage() {
       icon: MapPin,
       title: "Concierge Services",
       description:
-        "Select services can be brought to you -- corporate offices, churches, events, private homes, hotels, hospitals, and hospice.",
+        "Many of our services can be brought to you -- corporate offices, churches, events, private homes, hotels, hospitals, and hospice.",
       href: "/services/concierge",
       image: images?.conciergeImage?.asset
         ? urlFor(images.conciergeImage).width(900).height(675).url()
@@ -59,7 +59,7 @@ export default async function ServicesPage() {
     <>
       <PageHeader
         title="Our Services"
-        subtitle="Over 100 holistic services addressing chronic conditions at the root -- in Plano, with select services available at your location."
+        subtitle="Over 100 holistic services addressing chronic conditions at the root -- in Plano, with many of our services available at your location."
       />
 
       <section className="py-20 lg:py-28">

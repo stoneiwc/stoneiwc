@@ -25,7 +25,7 @@ const serviceTypes = [
     description:
       "Our core offering includes over 100 holistic modalities addressing chronic conditions at the root cause. From traditional fire cupping and lymphatic drainage to skin imperfection removal and inflammation reduction -- every treatment is performed by experienced practitioners with 50 years of experience.",
     details: [
-      "Treatments at our Plano facility, with select services at your location",
+      "Treatments at our Plano facility, with many of our services available at your location",
       "Each session begins with a wellness assessment",
       "Custom treatment plans based on your health goals",
       "Both Eastern and Western modalities available",
@@ -35,7 +35,7 @@ const serviceTypes = [
     icon: MapPin,
     title: "Concierge Model",
     description:
-      "Select services are available through our concierge model. We come to corporate offices, churches, events, private homes, hotels, hospitals, hospice facilities, and more. Our practitioners arrive with all equipment, supplies, and products needed for a complete experience.",
+      "Many of our services are available through our concierge model. We come to corporate offices, churches, events, private homes, hotels, hospitals, hospice facilities, and more. Our practitioners arrive with all equipment, supplies, and products needed for a complete experience.",
     details: [
       "Full portable treatment setup provided",
       "Available for individuals, groups, and organizations",
@@ -71,7 +71,7 @@ const faqs = [
   {
     question: "Do you come to my location?",
     answer:
-      "For select services, yes. We come to corporate offices, churches, events, private homes, hotels, hospitals, and hospice facilities, and bring all equipment and supplies. Other services take place at our Plano location, 1108 W Parker Rd Ste 102. Contact us to confirm which services we can bring to you.",
+      "For many of our services, yes. We come to corporate offices, churches, events, private homes, hotels, hospitals, and hospice facilities, and bring all equipment and supplies. Other services take place at our Plano location, 1108 W Parker Rd Ste 102. Contact us to confirm which services we can bring to you.",
   },
   {
     question: "What is The Source of Hope?",

@@ -140,7 +140,7 @@ export default async function BookPage({ searchParams }: Props) {
     <>
       <PageHeader
         title="Book a Service"
-        subtitle="Select a service below to schedule your appointment. Services take place at our Plano location unless noted; select services are also available through our concierge visits."
+        subtitle="Select a service below to schedule your appointment. Services take place at our Plano location unless noted; many of our services are also available through concierge visits."
       />
 
       <section className="py-20 lg:py-28">

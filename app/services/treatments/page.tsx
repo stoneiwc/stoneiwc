@@ -141,7 +141,7 @@ export default function TreatmentsPage() {
             <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
               We honor both Eastern and Western medicine -- each for its
               intended purpose. Our treatments address the root cause of
-              health conditions, not just the symptoms. Select services are also available at your location through our concierge service.
+              health conditions, not just the symptoms. Many of our services are also available at your location through our concierge service.
             </p>
           </div>
 
