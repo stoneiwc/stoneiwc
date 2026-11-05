@@ -20,6 +20,7 @@ export interface AppliedCoupon {
   description: string
   type: "percentage" | "fixed"
   value: number
+  minSubtotal?: number | null
 }
 
 interface CartState {
@@ -193,14 +194,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (sum, i) => sum + i.product.price * i.quantity,
     0
   )
-  const discountAmount = state.coupon
-    ? Math.min(
-        state.coupon.type === "percentage"
-          ? (subtotal * state.coupon.value) / 100
-          : state.coupon.value,
-        subtotal
-      )
-    : 0
+  // Mirrors computeOrderPricing (lib/pricing.ts): the minimum-spend rule is
+  // re-checked here, and the discount is rounded to cents, so the total shown
+  // is the total the server charges.
+  const couponApplies =
+    !!state.coupon &&
+    (state.coupon.minSubtotal == null || subtotal >= state.coupon.minSubtotal)
+  const rawDiscount =
+    couponApplies && state.coupon
+      ? state.coupon.type === "percentage"
+        ? (subtotal * state.coupon.value) / 100
+        : state.coupon.value
+      : 0
+  const discountAmount =
+    Math.round(Math.min(rawDiscount, subtotal) * 100) / 100
   const totalPrice = Math.max(subtotal - discountAmount, 0)
 
   return (
