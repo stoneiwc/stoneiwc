@@ -19,6 +19,12 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // The Articles section was removed; its pages are still in search indexes.
+      { source: "/education/articles/:slug*", destination: "/education", permanent: true },
+    ]
+  },
 }
 
 export default nextConfig
