@@ -156,7 +156,10 @@ export async function POST(request: Request) {
     }
   }
 
-  // Deduct balance for any gift card redeemed in this order.
+  // Deduct balance for any gift card redeemed in this order. On failure, answer
+  // 500 so Stripe retries: redeemGiftCard skips orders it already recorded, and
+  // the order emails above only go out on the first pending → paid transition,
+  // so a retry repeats neither.
   const redeemedCode = meta.gift_card_code
   const appliedAmountRaw = meta.gift_card_applied_amount
   if (redeemedCode && appliedAmountRaw) {
@@ -166,6 +169,7 @@ export async function POST(request: Request) {
         await redeemGiftCard(redeemedCode, appliedAmount, paymentIntent.id)
       } catch (err) {
         console.error('Gift card redemption failed:', err)
+        return NextResponse.json({ error: 'Gift card redemption failed.' }, { status: 500 })
       }
     }
   }
