@@ -3,10 +3,7 @@ type JsonLdProps = {
 }
 
 export function JsonLd({ data }: JsonLdProps) {
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  )
+  // Escape "<" so CMS text containing "</script>" can't end the tag early.
+  const json = JSON.stringify(data).replace(/</g, "\\u003c")
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
 }

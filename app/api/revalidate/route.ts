@@ -1,5 +1,14 @@
+import { createHash, timingSafeEqual } from "node:crypto"
 import { revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
+
+// Constant-time comparison. Hashing first gives both sides the same length,
+// which timingSafeEqual requires.
+function secretMatches(provided: string | null, expected: string): boolean {
+  if (!provided) return false
+  const digest = (value: string) => createHash("sha256").update(value).digest()
+  return timingSafeEqual(digest(provided), digest(expected))
+}
 
 // Map Sanity _type → cache tag(s) to revalidate
 const TYPE_TAG_MAP: Record<string, string[]> = {
@@ -25,9 +34,13 @@ const TYPE_TAG_MAP: Record<string, string[]> = {
 }
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get("x-webhook-secret")
+  const expected = process.env.SANITY_WEBHOOK_SECRET
+  if (!expected) {
+    console.error("SANITY_WEBHOOK_SECRET is not set; refusing revalidation requests")
+    return NextResponse.json({ message: "Not configured" }, { status: 500 })
+  }
 
-  if (secret !== process.env.SANITY_WEBHOOK_SECRET) {
+  if (!secretMatches(req.headers.get("x-webhook-secret"), expected)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
   }
 
