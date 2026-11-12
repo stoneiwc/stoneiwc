@@ -8,6 +8,9 @@ import { Footer } from "@/components/footer";
 import { CartProvider } from "@/lib/cart-context";
 import { JsonLd } from "@/components/seo/json-ld";
 
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -90,6 +93,8 @@ export default function RootLayout({
     <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
       <head>
         <GoogleTagManager gtmId="G-K90NGHL09B" />
+        <Analytics />
+        <SpeedInsights />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <GoogleAnalytics gaId="G-K90NGHL09B" />
