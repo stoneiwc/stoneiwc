@@ -4,6 +4,7 @@ import { createPendingOrder } from '@/lib/orders'
 import { computeOrderPricing } from '@/lib/pricing'
 import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
 import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
+import { isValidEmail } from '@/lib/validation'
 
 type CheckoutItem = {
   id?: string
@@ -93,6 +94,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cart items are required' }, { status: 400 })
     }
 
+    // The order confirmation goes to this address, and Stripe rejects a
+    // malformed receipt_email, so check it before pricing anything.
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'A valid email address is required.' }, { status: 400 })
+    }
+
     const pricing = await computeOrderPricing({ items, couponCode, shippingMethod, giftCardCode })
     if (!pricing.ok) {
       return NextResponse.json({ error: pricing.error }, { status: 400 })
@@ -109,10 +116,9 @@ export async function POST(request: Request) {
 
     const truncate = (s: string, max = 500) =>
       s.length <= max ? s : s.slice(0, max - 1) + '…'
+    // Names and quantities from server pricing, not from the client.
     const itemsSummary = truncate(
-      items
-        .map((i) => `${Number(i.quantity ?? 1)}× ${i.name ?? i.title ?? 'item'}`)
-        .join(', '),
+      pricing.items.map((i) => `${i.quantity}× ${i.name}`).join(', '),
       480,
     )
     const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
@@ -121,7 +127,7 @@ export async function POST(request: Request) {
       order_type: 'storefront',
       customer_email: email || '',
       customer_name: fullName,
-      items_count: String(items.length),
+      items_count: String(pricing.items.length),
       items_summary: itemsSummary,
       subtotal: pricing.subtotal.toFixed(2),
       shipping_method: shippingMethod || 'standard',
@@ -252,7 +258,18 @@ export async function POST(request: Request) {
         console.error('Failed to update Stripe metadata with order_number', updateErr)
       }
     } catch (err) {
+      // No order means nobody would know to fulfil this payment. Cancel the
+      // PaymentIntent so it can't be paid, and let the customer retry.
       console.error('Sanity order creation failed for PaymentIntent', paymentIntent.id, err)
+      try {
+        await stripe.paymentIntents.cancel(paymentIntent.id)
+      } catch (cancelErr) {
+        console.error('Could not cancel PaymentIntent after order failure', paymentIntent.id, cancelErr)
+      }
+      return NextResponse.json(
+        { error: 'We could not start your order. Please try again in a moment.' },
+        { status: 503 },
+      )
     }
 
     return NextResponse.json({
@@ -262,10 +279,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Payment Intent creation error:', error)
-    const details = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json(
-      { error: 'Failed to create payment intent', details },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to create payment intent' }, { status: 500 })
   }
 }

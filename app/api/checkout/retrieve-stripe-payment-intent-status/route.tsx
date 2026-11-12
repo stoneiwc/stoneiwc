@@ -36,12 +36,8 @@ export async function GET(request: Request) {
         });
     } catch (error) {
         console.error('Retrieve Payment Intent status error:', error);
-        const details = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
-            {
-                error: 'Failed to retrieve Payment Intent status',
-                details,
-            },
+            { error: 'Failed to retrieve Payment Intent status' },
             { status: 500 },
         );
     }
