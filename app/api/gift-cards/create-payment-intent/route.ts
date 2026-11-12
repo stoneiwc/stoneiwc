@@ -3,10 +3,14 @@ import Stripe from 'stripe'
 import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
 import { GIFT_CARD_MAX, GIFT_CARD_MIN } from '@/lib/gift-card-math'
 import { isValidEmail } from '@/lib/validation'
+import { rateLimit } from '@/lib/rate-limit'
 
 const NOTE_MAX_LENGTH = 500
 
 export async function POST(request: Request) {
+  const limited = await rateLimit('giftCardPurchase', request)
+  if (limited) return limited
+
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY
   if (!stripeSecretKey) {
     return NextResponse.json({ error: 'Stripe is not configured.' }, { status: 500 })

@@ -5,6 +5,7 @@ import { computeOrderPricing } from '@/lib/pricing'
 import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
 import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
 import { isValidEmail } from '@/lib/validation'
+import { rateLimit } from '@/lib/rate-limit'
 
 type CheckoutItem = {
   id?: string
@@ -47,17 +48,10 @@ type CreateStripePaymentIntentBody = HoneypotFields & {
   paymentIntentId?: string
 }
 
-export async function GET() {
-  return NextResponse.json({
-    message: 'Stripe payment intent endpoint is available. Use POST to create a payment intent.',
-  })
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: { Allow: 'GET,POST,OPTIONS' } })
-}
-
 export async function POST(request: Request) {
+  const limited = await rateLimit('checkout', request)
+  if (limited) return limited
+
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY
     if (!stripeSecretKey) {

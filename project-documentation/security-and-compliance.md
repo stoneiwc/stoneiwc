@@ -106,12 +106,18 @@ There is no formal data deletion API. Honor requests manually.
 
 ## Rate limiting
 
-| Endpoint | Limit | Where |
-|---|---|---|
-| `POST /api/contact` | Per-IP, see [`lib/email/rate-limit.ts`](../lib/email/rate-limit.ts) | In-memory (resets on function cold start) |
-| Other endpoints | None | Vercel's built-in DDoS protection at the platform level |
+Per-IP sliding windows in [`lib/rate-limit.ts`](../lib/rate-limit.ts), stored in Upstash Redis so they hold across all serverless instances:
 
-The in-memory rate limit resets on every cold start, so a determined attacker could bypass it. For higher confidence, move to Vercel Edge Config / Upstash Redis. Acceptable today because the cost of contact form spam is just team inbox noise.
+| Endpoint | Limit |
+|---|---|
+| `POST /api/contact` | 3 per hour |
+| `GET /api/gift-cards/validate` | 10 per 10 minutes (codes are bearer credentials and this returns balances) |
+| `POST /api/validate-coupon` | 20 per 10 minutes |
+| `POST /api/checkout/create-stripe-payment-intent` | 30 per hour |
+| `POST /api/gift-cards/create-payment-intent` | 10 per hour |
+| Other endpoints | Vercel's built-in DDoS protection at the platform level |
+
+Over the limit, the route answers 429 with `Retry-After`. Without `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (or the Marketplace integration's `KV_REST_API_URL` / `KV_REST_API_TOKEN`) limiting is off and a warning is logged; if Redis errors, requests are allowed rather than blocking checkout.
 
 ### Spam honeypot
 
