@@ -113,6 +113,18 @@ There is no formal data deletion API. Honor requests manually.
 
 The in-memory rate limit resets on every cold start, so a determined attacker could bypass it. For higher confidence, move to Vercel Edge Config / Upstash Redis. Acceptable today because the cost of contact form spam is just team inbox noise.
 
+### Spam honeypot
+
+The contact, checkout and gift card forms each render an off-screen input ([`components/honeypot-field.tsx`](../components/honeypot-field.tsx)) that people never see and most bots fill. The matching endpoints check it with `isHoneypotTripped` from [`lib/honeypot.ts`](../lib/honeypot.ts):
+
+| Endpoint | Response when the honeypot is filled | Skipped |
+|---|---|---|
+| `POST /api/contact` | `{ success: true }` | Both emails |
+| `POST /api/checkout/create-stripe-payment-intent` | Decoy `clientSecret` + `paymentIntentId` | Stripe call, Sanity pending order |
+| `POST /api/gift-cards/create-payment-intent` | Decoy `clientSecret` | Stripe call |
+
+Each drop logs a `honeypot tripped` warning in the Vercel function logs. Don't rename the field to anything a browser autofills (email, company, website, phone, code): a real visitor's autofill would trip it and their submission would silently vanish.
+
 ---
 
 ## Webhook URLs and public exposure

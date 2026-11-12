@@ -6,7 +6,6 @@ import { CONTACT_INFO } from "@/lib/navigation"
 import {
   Video,
   Calendar,
-  ShieldCheck,
   Clock,
   Globe,
   MessageSquare,
@@ -15,7 +14,7 @@ import {
 import { getVirtualConsultationsImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
-const BOOKING_URL = "/book?category=virtual-consultation"
+const BOOKING_URL = "/book/consultation-virtual-free"
 
 export const metadata: Metadata = {
   title: "Virtual Holistic Consultations",
@@ -34,13 +33,7 @@ const benefits = [
     icon: Clock,
     title: "Flexible Scheduling",
     description:
-      "Book sessions that fit your schedule, including evenings and weekends. No travel time means more convenience.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Secure & Private",
-    description:
-      "HIPAA-compliant video platform ensuring your health information and conversations remain completely confidential.",
+      "Book a time that fits your schedule through our online booking. No travel time means more convenience.",
   },
   {
     icon: MessageSquare,
@@ -104,8 +97,7 @@ export default async function VirtualConsultationsPage() {
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 Whether you need nutritional coaching, lymphatic care
                 guidance, body contouring program design, or chronic
-                condition management support -- our virtual consultations
-                provide the same expert care you would receive in person.
+                condition management support -- our virtual consultations offer personalized guidance from our practitioners.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -131,7 +123,7 @@ export default async function VirtualConsultationsPage() {
               Benefits of Online Consultations
             </h2>
           </div>
-          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
             {benefits.map((benefit) => (
               <div
                 key={benefit.title}
@@ -196,8 +188,7 @@ export default async function VirtualConsultationsPage() {
             <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground font-body">
               Book your virtual consultation through our online booking
               system. After booking, you will receive a secure video link and
-              preparation instructions via email. Sessions typically last
-              30-60 minutes.
+              preparation instructions via email. 
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -224,8 +215,7 @@ export default async function VirtualConsultationsPage() {
             Prefer In-Person Care?
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-background/70 font-body">
-            We also offer concierge services (we come to you) and
-            in-facility care at The Source of Hope in Plano, TX. Choose the
+            We also offer in-facility care at our Plano location, 1108 W Parker Rd Ste 102, and concierge visits (we come to you). Choose the
             option that works best for your needs.
           </p>
           <Link

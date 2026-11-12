@@ -3,12 +3,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { BOOKING_URL } from "@/lib/navigation"
-import { ArrowRight, Stethoscope, MapPin, Utensils } from "lucide-react"
+import { ArrowRight, Stethoscope, MapPin } from "lucide-react"
 import { getServicesPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
 const DESCRIPTION =
-  "Over 100 holistic wellness services delivered to your location -- treatments, culinary wellness, and nutritional programs."
+  "Over 100 holistic wellness services -- professional treatments in Plano, plus many of our services brought to your location."
 
 export const metadata: Metadata = {
   title: "Services",
@@ -22,8 +22,8 @@ export const revalidate = 60
 
 const highlights = [
   { value: "100+", label: "Holistic Services" },
-  { value: "50+", label: "Years Experience" },
-  { value: "17+", label: "Trained Chefs" },
+  { value: "50", label: "Years Experience" },
+  
   { value: "8+", label: "Location Types Served" },
 ]
 
@@ -46,23 +46,12 @@ export default async function ServicesPage() {
       icon: MapPin,
       title: "Concierge Services",
       description:
-        "We come to you. Corporate offices, churches, events, private homes, hotels, hospitals, hospice -- wherever you are, our practitioners and chefs bring the full Stone IWC experience to your door.",
+        "Many of our services can be brought to you -- corporate offices, churches, events, private homes, hotels, hospitals, and hospice.",
       href: "/services/concierge",
       image: images?.conciergeImage?.asset
         ? urlFor(images.conciergeImage).width(900).height(675).url()
         : "/images/concierge-service.jpg",
       imageAlt: images?.conciergeImage?.alt ?? "Concierge Services",
-    },
-    {
-      icon: Utensils,
-      title: "Culinary Wellness",
-      description:
-        "17+ trained chefs delivering nutritional detox programs, pantry cleanouts, grocery guidance, and custom meal preparation. We teach the 3-day concept and believe food is medicine.",
-      href: "/services/concierge",
-      image: images?.culinaryImage?.asset
-        ? urlFor(images.culinaryImage).width(900).height(675).url()
-        : "/images/culinary-wellness.jpg",
-      imageAlt: images?.culinaryImage?.alt ?? "Culinary Wellness",
     },
   ]
 
@@ -70,12 +59,12 @@ export default async function ServicesPage() {
     <>
       <PageHeader
         title="Our Services"
-        subtitle="Over 100 holistic services addressing chronic conditions at the root. We come to you -- wherever you are."
+        subtitle="Over 100 holistic services addressing chronic conditions at the root -- in Plano, with many of our services available at your location."
       />
 
       <section className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
             {highlights.map((h) => (
               <div key={h.label} className="text-center">
                 <p className="font-sans text-3xl font-semibold text-primary md:text-4xl">
@@ -142,7 +131,7 @@ export default async function ServicesPage() {
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-background/70 font-body">
             Schedule a consultation and let us create a personalized
-            treatment plan for your needs. We come to you.
+            treatment plan for your needs.
           </p>
           <Link
             href={BOOKING_URL}

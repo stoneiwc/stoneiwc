@@ -7,7 +7,7 @@ import { getAboutPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
 const DESCRIPTION =
-  "Learn about Stone International Wellness Center -- holistic practitioners with over five decades of experience, honoring both Eastern and Western medicine."
+  "Learn about Stone International Wellness Center -- holistic practitioners with 50 years of experience, honoring both Eastern and Western medicine."
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -24,14 +24,14 @@ const subPages = [
     icon: BookOpen,
     title: "Our Story",
     description:
-      "How five decades of holistic experience, a Presidential award, and a mission to serve our community became Stone IWC.",
+      "How 50 years of holistic experience, a Presidential award, and a mission to serve our community became Stone IWC.",
     href: "/about/our-story",
   },
   {
     icon: Users,
     title: "Team Members",
     description:
-      "Meet the experienced holistic practitioners, trained chefs, and wellness educators who make Stone IWC possible.",
+      "Meet the experienced holistic practitioners and wellness educators who make Stone IWC possible.",
     href: "/about/team",
   },
   {
@@ -55,7 +55,7 @@ export default async function AboutPage() {
     <>
       <PageHeader
         title="About Us"
-        subtitle="Holistic practitioners with over five decades of experience, honoring both Eastern and Western medicine for their intended purposes."
+        subtitle="Holistic practitioners with 50 years of experience, honoring both Eastern and Western medicine for their intended purposes."
       />
 
       <section className="py-20 lg:py-28">
@@ -78,8 +78,7 @@ export default async function AboutPage() {
                 Not Doctors. Not a Spa. Holistic Practitioners.
               </h2>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-                Stone International Wellness Center is built on over five
-                decades of holistic healing experience. We are not doctors
+                Stone International Wellness Center is built on 50 years of holistic healing experience. We are not doctors
                 and we are not a spa -- we are experienced holistic
                 practitioners who address chronic health conditions at the
                 root using time-tested modalities from both Eastern and
@@ -92,9 +91,7 @@ export default async function AboutPage() {
                 work together -- and that is what we practice.
               </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-                Awarded by the President and launched before the pandemic to
-                serve our community, all profits from Stone IWC sustain our
-                foundation, The Source of Hope, extending holistic health
+                Awarded by the President, Stone IWC gives all proceeds to sustain our foundation, The Source of Hope, extending holistic health
                 access to those who need it most.
               </p>
             </div>

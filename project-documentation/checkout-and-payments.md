@@ -166,11 +166,10 @@ On success:
 Fires on `payment_intent.succeeded`. Two responsibilities:
 
 **A) Gift card redemption** (any order type):
-- If `metadata.gift_card_promotion_code_id` exists → `stripe.promotionCodes.update(id, { active: false })`
-- This prevents the code from being reused
+- If `metadata.gift_card_code` and `metadata.gift_card_applied_amount` exist → `redeemGiftCard()` deducts the amount from the card's balance in Sanity, at most once per order
 
 **B) Gift card creation** (gift card orders only):
-- If `metadata.order_type === "gift_card"` → generate `STONE-XXXX-XXXX` code, create Stripe Coupon + PromotionCode, send email via Resend
+- If `metadata.order_type === "gift_card"` → `createGiftCard()` stores a new `STONE-XXXX-XXXX` card in Sanity, then the code is emailed via Resend
 
 See `project-documentation/gift-card.md` for full webhook details.
 

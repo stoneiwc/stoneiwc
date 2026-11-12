@@ -34,7 +34,6 @@ export const navigation: NavItem[] = [
       { label: "General Services Information", href: "/education/general" },
       { label: "Concerns", href: "/education/concerns" },
       { label: "Cupping", href: "/education/cupping" },
-      { label: "Articles", href: "/education/articles" },
     ],
   },
   {
@@ -43,8 +42,7 @@ export const navigation: NavItem[] = [
     children: [
       { label: "Press", href: "/featured/press" },
       { label: "Media", href: "/featured/media" },
-      { label: "Awards", href: "/featured/awards" },
-      { label: "Stoneiwc Podcast", href: "/featured/podcast" },
+      { label: "StoneIWC Podcast", href: "/featured/podcast" },
       { label: "The QC Show", href: "/featured/qc-show" },
     ],
   },

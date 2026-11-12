@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
-import { BOOKING_URL } from "@/lib/navigation"
 import { getLicenseeProgramImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 import {
@@ -28,7 +27,7 @@ const licenseeFeatures = [
     icon: Building2,
     title: "Operate Under the Stone IWC Brand",
     description:
-      "As a licensee, you gain the right to operate a Stone IWC concierge wellness practice in your approved market. You carry the credibility and reputation of a presidential award-winning practice built over five decades.",
+      "As a licensee, you gain the right to operate a Stone IWC concierge wellness practice in your approved market. You carry the credibility and reputation of a presidential award-winning practice built over 50 years.",
   },
   {
     icon: Globe,
@@ -110,7 +109,7 @@ export default async function LicenseePage() {
     <>
       <PageHeader
         title="Licensee Programs"
-        subtitle="Operate a Stone IWC concierge wellness practice in your market. Carry our brand, our model, and five decades of expertise."
+        subtitle="Operate a Stone IWC concierge wellness practice in your market. Carry our brand, our model, and 50 years of expertise."
       />
 
       <section className="py-20 lg:py-28">
@@ -136,8 +135,7 @@ export default async function LicenseePage() {
                 Our licensee program is for qualified professionals who want
                 to operate a Stone IWC concierge wellness practice in their
                 own market. You gain access to our proven business model,
-                treatment protocols, brand reputation, and five decades of
-                holistic expertise -- all while contributing to The Source
+                treatment protocols, brand reputation, and 50 years of holistic expertise -- all while contributing to The Source
                 of Hope foundation with every service delivered.
               </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
@@ -269,7 +267,7 @@ export default async function LicenseePage() {
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href={BOOKING_URL}
+              href="/contact"
               className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
             >
               Contact Us About Licensing

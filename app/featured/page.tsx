@@ -2,12 +2,12 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
-import { ArrowRight, Newspaper, Tv, Trophy, Mic, Radio } from "lucide-react"
+import { ArrowRight, Newspaper, Tv, Mic, Radio } from "lucide-react"
 import { getFeaturedPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
 const DESCRIPTION =
-  "Stone International Wellness Center in the press, media, podcasts, awards, and thought leadership platforms."
+  "Stone International Wellness Center in the press, media, podcasts, and thought leadership platforms."
 
 export const metadata: Metadata = {
   title: "Featured On",
@@ -33,13 +33,6 @@ const subPages = [
     description:
       "Video appearances, interviews, and feature segments showcasing our holistic approach and the work we do.",
     href: "/featured/media",
-  },
-  {
-    icon: Trophy,
-    title: "Awards",
-    description:
-      "Recognition and accolades received for our commitment to holistic wellness, community service, and excellence in care.",
-    href: "/featured/awards",
   },
   {
     icon: Mic,
@@ -69,7 +62,7 @@ export default async function FeaturedPage() {
     <>
       <PageHeader
         title="Featured On"
-        subtitle="Our presence across press, media, awards, and thought leadership platforms."
+        subtitle="Our presence across press, media, podcasts, and thought leadership platforms."
       />
 
       <section className="py-20 lg:py-28">
@@ -93,7 +86,7 @@ export default async function FeaturedPage() {
               </h2>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 Stone International Wellness Center has been recognized by
-                press outlets, media programs, and award bodies for our
+                press outlets and media programs for our
                 commitment to holistic health and community wellness. Our
                 practitioners share knowledge through podcasts, broadcast
                 shows, and public appearances.

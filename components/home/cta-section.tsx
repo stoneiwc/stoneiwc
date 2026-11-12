@@ -19,9 +19,7 @@ export function CTASection() {
         <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
           Book our practitioners for personalized lymphatic care, non-surgical
           body contouring, restorative hand and foot care, holistic nourishment
-          guidance, refined semi-permanent aesthetics, or any of our 100+
-          concierge services. We come to you -- and every service funds
-          The Source of Hope.
+          guidance, and refined semi-permanent aesthetics -- in Plano or, for many of our services, at your location. All proceeds fund The Source of Hope.
         </p>
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link

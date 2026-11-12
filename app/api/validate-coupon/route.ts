@@ -27,5 +27,6 @@ export async function POST(req: NextRequest) {
     description: coupon.description,
     type: coupon.type,
     value: coupon.value,
+    minSubtotal: coupon.minSubtotal ?? null,
   })
 }

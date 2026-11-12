@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { PageHeader } from "@/components/page-header"
-const BOOKING_URL = "/book?category=professional-treatment"
+const BOOKING_URL = "/book"
 import Link from "next/link"
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ const treatmentCategories = [
   {
     category: "Traditional & Fire Cupping",
     description:
-      "Our signature modality -- traditional fire cupping refined over five decades to address a wide range of conditions.",
+      "Our signature modality -- traditional fire cupping refined over 50 years to address a wide range of conditions.",
     treatments: [
       "Traditional Fire Cupping",
       "Wet Cupping (Hijama)",
@@ -88,23 +88,6 @@ const treatmentCategories = [
     ],
   },
   {
-    category: "Culinary Wellness & Nutrition",
-    description:
-      "Food is medicine. Our 17+ trained chefs deliver hands-on nutritional programs to your home or location.",
-    treatments: [
-      "Custom Meal Program Design",
-      "3-Day Concept Meal Plans",
-      "Nutritional Detox Cooking",
-      "Grocery Store Guidance",
-      "Pantry Cleanout & Assessment",
-      "Healing Smoothie Programs",
-      "Dessert & Wellness Menu",
-      "Legume & Organic Cooking Classes",
-      "Family Nutrition Education",
-      "Corporate Nutrition Workshops",
-    ],
-  },
-  {
     category: "Holistic Bodywork",
     description:
       "Hands-on modalities addressing musculoskeletal, circulatory, and energetic imbalances.",
@@ -158,8 +141,7 @@ export default function TreatmentsPage() {
             <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
               We honor both Eastern and Western medicine -- each for its
               intended purpose. Our treatments address the root cause of
-              health conditions, not just the symptoms. All services are
-              available at your location through our concierge model.
+              health conditions, not just the symptoms. Many of our services are also available at your location through our concierge service.
             </p>
           </div>
 

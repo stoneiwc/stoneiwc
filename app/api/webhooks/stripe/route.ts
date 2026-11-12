@@ -15,7 +15,7 @@ import {
 } from '@/lib/email/order-confirmation-template'
 import { client as sanityClient } from '@/lib/sanity.client'
 import { createGiftCard, redeemGiftCard } from '@/lib/gift-cards'
-import { markOrderFailed, markOrderPaid } from '@/lib/orders'
+import { markOrderCanceled, markOrderFailed, markOrderPaid } from '@/lib/orders'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -48,7 +48,8 @@ export async function POST(request: Request) {
 
   if (
     event.type !== 'payment_intent.succeeded' &&
-    event.type !== 'payment_intent.payment_failed'
+    event.type !== 'payment_intent.payment_failed' &&
+    event.type !== 'payment_intent.canceled'
   ) {
     return NextResponse.json({ received: true })
   }
@@ -63,6 +64,18 @@ export async function POST(request: Request) {
         await markOrderFailed(paymentIntent.id)
       } catch (err) {
         console.error('Failed to mark order as failed:', err)
+      }
+    }
+    return NextResponse.json({ received: true })
+  }
+
+  // Handle cancellations: flip the corresponding pending order to 'cancelled'.
+  if (event.type === 'payment_intent.canceled') {
+    if (meta.order_type === 'storefront') {
+      try {
+        await markOrderCanceled(paymentIntent.id)
+      } catch (err) {
+        console.error('Failed to mark order as cancelled:', err)
       }
     }
     return NextResponse.json({ received: true })
@@ -143,16 +156,24 @@ export async function POST(request: Request) {
     }
   }
 
-  // Deduct balance for any gift card redeemed in this order.
+  // Deduct balance for any gift card redeemed in this order. On failure, answer
+  // 500 so Stripe retries: redeemGiftCard skips orders it already recorded, and
+  // the order emails above only go out on the first pending → paid transition,
+  // so a retry repeats neither.
   const redeemedCode = meta.gift_card_code
   const appliedAmountRaw = meta.gift_card_applied_amount
   if (redeemedCode && appliedAmountRaw) {
     const appliedAmount = parseFloat(appliedAmountRaw)
     if (appliedAmount > 0) {
       try {
-        await redeemGiftCard(redeemedCode, appliedAmount, paymentIntent.id)
+        const redemption = await redeemGiftCard(redeemedCode, appliedAmount, paymentIntent.id)
+        if (redemption.applied < appliedAmount) {
+          // Charged for more than the card still held: another order spent it first.
+          console.error('Gift card shortfall', paymentIntent.id, { appliedAmount, applied: redemption.applied })
+        }
       } catch (err) {
         console.error('Gift card redemption failed:', err)
+        return NextResponse.json({ error: 'Gift card redemption failed.' }, { status: 500 })
       }
     }
   }

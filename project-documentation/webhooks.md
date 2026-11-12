@@ -92,7 +92,7 @@ Stripe **will** retry webhook delivery on failure. Network blips, function cold 
 | `markOrderPaid` | Only transitions from `pending` or `failed`; if already `paid` (or further along like `shipped`), returns `{ transitioned: false }` and skips the email send |
 | `markOrderFailed` | Only transitions from `pending`; finalized states are not overwritten |
 | `createGiftCard` | First fetches by `paymentIntentId`; if a Gift Card document already exists for this PI, returns its `code` without creating a duplicate |
-| `redeemGiftCard` | Optimistic concurrency: re-fetches current balance + `redemptions` array, checks if this `paymentIntentId` is already in the array, only commits the patch if no duplicate. See [`lib/gift-cards.ts`](../lib/gift-cards.ts) |
+| `redeemGiftCard` | Skips the deduction if `redemptions` already has an entry with this `paymentIntentId` as `orderId`. Commits with `ifRevisionId` and re-reads + retries on a conflict (up to 5 attempts). If it still fails, the handler returns 500 so Stripe retries. See [`lib/gift-cards.ts`](../lib/gift-cards.ts) |
 | Order confirmation email | Only sent on the `pending → paid` transition (`if (result.transitioned)`) — Stripe replays don't trigger duplicate emails |
 | Gift card emails | Sent every time the handler runs for a gift card event, but the create step is idempotent so the email itself can be considered idempotent in practice — receiving a second email is annoying but not catastrophic |
 

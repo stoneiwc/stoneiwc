@@ -6,6 +6,9 @@ import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
 import type { AppliedGiftCard } from '@/app/checkout/page'
+import { HoneypotField } from '@/components/honeypot-field'
+import { HONEYPOT_FIELD } from '@/lib/honeypot'
+import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
 
 interface CheckoutFormState {
   email: string
@@ -269,7 +272,9 @@ export default function SelfCheckoutSection({
     )
   }
 
+  const belowMinimum = totalPrice < MIN_STRIPE_CHARGE
   const isInitializingRef = useRef(false)
+  const honeypotRef = useRef<HTMLInputElement>(null)
 
   const initializePayment = async () => {
     // Guard against a fast double-click firing two concurrent calls before the
@@ -320,6 +325,7 @@ export default function SelfCheckoutSection({
           giftCardCode: appliedGiftCard?.code,
           giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
           paymentIntentId,
+          [HONEYPOT_FIELD]: honeypotRef.current?.value ?? '',
           billingSameAsShipping: form.shippingSameAsBilling,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
@@ -772,6 +778,8 @@ export default function SelfCheckoutSection({
             )}
           </div>
 
+          <HoneypotField ref={honeypotRef} />
+
           {error && (
             <div className="rounded-sm border border-red-200 bg-red-50 p-4">
               <p className="text-sm font-semibold text-red-800">{error}</p>
@@ -781,11 +789,16 @@ export default function SelfCheckoutSection({
           <button
             type="button"
             onClick={initializePayment}
-            disabled={!isFormValid() || isLoading}
+            disabled={!isFormValid() || isLoading || belowMinimum}
             className="w-full rounded-sm bg-primary px-6 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
           >
             {isLoading ? 'Loading...' : 'Continue to Payment'}
           </button>
+          {belowMinimum && (
+            <p className="mt-3 text-center text-sm font-body text-muted-foreground">
+              Orders must total at least ${MIN_STRIPE_CHARGE.toFixed(2)} to check out. Please add items to your cart.
+            </p>
+          )}
         </div>
       ) : stripePromise && clientSecret ? (
         <>

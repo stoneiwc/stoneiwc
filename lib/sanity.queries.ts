@@ -267,36 +267,6 @@ export async function getCuppingImages(): Promise<{mainImage?: SanityImageField}
   return client.fetch(`*[_type == "cuppingImages" && _id == "cuppingImages"][0]{mainImage}`, {}, { next: { tags: ["cuppingImages"] } })
 }
 
-export interface SanityArticle {
-  _id: string
-  title: string
-  slug: { current: string }
-  publishedAt: string
-  coverImage?: SanityImageField
-  excerpt: string
-  tags?: string[]
-}
-
-export interface SanityArticleFull extends SanityArticle {
-  body: any[]
-}
-
-export async function getArticles(): Promise<SanityArticle[]> {
-  return client.fetch(`*[_type == "article"] | order(publishedAt desc) {
-    _id, title, slug, publishedAt, coverImage, excerpt, tags
-  }`, {}, { next: { tags: ["article"] } })
-}
-
-export async function getArticleBySlug(slug: string): Promise<SanityArticleFull | null> {
-  return client.fetch(`*[_type == "article" && slug.current == $slug][0] {
-    _id, title, slug, publishedAt, coverImage, excerpt, tags, body
-  }`, { slug }, { next: { tags: ["article"] } })
-}
-
-export async function getAllArticleSlugs(): Promise<string[]> {
-  return client.fetch(`*[_type == "article"].slug.current`, {}, { next: { tags: ["article"] } })
-}
-
 // ─── Press Items ─────────────────────────────────────────────────────────────
 
 export interface SanityPressItem {
@@ -316,25 +286,6 @@ export async function getPressItems(): Promise<SanityPressItem[]> {
     link
   }`
   return client.fetch<SanityPressItem[]>(query, {}, { next: { tags: ["pressItem"] } })
-}
-
-// ─── Award Items ─────────────────────────────────────────────────────────────
-
-export interface SanityAwardItem {
-  _id: string
-  title: string
-  description: string
-  image: { asset: { _ref: string; _type: string }; alt?: string }
-}
-
-export async function getAwardItems(): Promise<SanityAwardItem[]> {
-  const query = `*[_type == "awardItem"] | order(orderRank asc) {
-    _id,
-    title,
-    description,
-    image
-  }`
-  return client.fetch<SanityAwardItem[]>(query, {}, { next: { tags: ["awardItem"] } })
 }
 
 // ─── Media Items ─────────────────────────────────────────────────────────────

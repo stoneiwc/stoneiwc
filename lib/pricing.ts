@@ -2,6 +2,7 @@ import 'server-only'
 import { client } from './sanity.client'
 import { getCoupons, getShippingMethods } from './sanity.queries'
 import { getGiftCardByCode } from './gift-cards'
+import { giftCardAmount } from './gift-card-math'
  
 const MAX_ITEMS = 100
 const MAX_QTY_PER_ITEM = 100
@@ -122,22 +123,25 @@ export async function computeOrderPricing(input: {
 
   couponDiscount = round2(Math.min(couponDiscount, subtotal))
  
-  let shippingCost = 0
-  if (shippingMethod) {
-    const methods = await getShippingMethods()
-    const method = methods.find((m) => m.id === shippingMethod)
-    if (method) {
-      shippingCost = round2(method.cost)
-    }
+  // Every order ships, so the method must be one of the active ones in Sanity.
+  // A missing or unknown id is rejected rather than priced at $0.
+  const methods = await getShippingMethods()
+  const method = shippingMethod ? methods.find((m) => m.id === shippingMethod) : undefined
+  if (!method) {
+    return { ok: false, error: 'Please choose a shipping method.' }
   }
+  const shippingCost = round2(method.cost)
  
   let giftCardApplied = 0
   if (giftCardCode?.trim()) {
     const card = await getGiftCardByCode(giftCardCode)
     const notExpired = card ? new Date(card.expiresAt).getTime() > Date.now() : false
     if (card && card.status === 'active' && notExpired) {
-      const dueBeforeGiftCard = round2(Math.max(0, subtotal - couponDiscount + shippingCost))
-      giftCardApplied = round2(Math.min(card.currentBalance, dueBeforeGiftCard))
+      giftCardApplied = giftCardAmount({
+        merchandise: round2(subtotal - couponDiscount),
+        shipping: shippingCost,
+        balance: card.currentBalance,
+      })
     }
   }
  

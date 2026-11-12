@@ -53,8 +53,7 @@ export function Footer() {
               body from the inside out. Personalized lymphatic care,
               non-surgical body contouring, restorative hand and foot care,
               holistic nourishment guidance, and refined semi-permanent
-              aesthetics. Proceeds from every service fund The Source of
-              Hope foundation.
+              aesthetics. All proceeds fund The Source of Hope foundation.
             </p>
             <div className="flex flex-col gap-3 text-sm font-body">
               <a

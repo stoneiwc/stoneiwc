@@ -35,7 +35,7 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 BODY_TRANSFORMATION_SERVICES = [
     {
-        "title": "Electrical Stimulation (CPT-97032)",
+        "title": "Electrical Muscle Stimulation",
         "slug": "body-transformation-electrical-stimulation",
         "length_minutes": 15,
         "price_cents": 10000,

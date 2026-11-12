@@ -11,12 +11,12 @@ const policies = [
   {
     title: "Appointment Policy",
     content:
-      "All appointments must be scheduled in advance through our booking system or by contacting our front desk. Walk-ins are welcome based on availability, but we recommend booking ahead to ensure your preferred time slot.",
+      "All appointments must be booked in advance through our online booking system or by contacting our front desk. Walk-ins are not accepted.",
   },
   {
     title: "Cancellation Policy",
     content:
-      "We require at least 24 hours notice for cancellations or rescheduling. Late cancellations or no-shows may be subject to a cancellation fee. We understand that emergencies happen and will work with you on a case-by-case basis.",
+      "Please give at least 24 hours notice to cancel or reschedule. Appointments cancelled at least 24 hours in advance are refunded in full. Late cancellations and no-shows are not refunded. We understand that emergencies happen and will work with you on a case-by-case basis.",
   },
   {
     title: "Late Arrival Policy",
@@ -26,7 +26,7 @@ const policies = [
   {
     title: "Payment Policy",
     content:
-      "Payment is due at the time of service. We accept all major credit cards, debit cards, and cash. Package payments and gift certificates are also available.",
+      "Payment is due at the time of booking and is taken by card through our online booking system. Gift certificates can be used for purchases in our online store.",
   },
   {
     title: "Health & Safety",
@@ -36,7 +36,7 @@ const policies = [
   {
     title: "Refund Policy",
     content:
-      "Services rendered are non-refundable. Unused portions of packages or gift certificates may be transferred or applied to other services. Product returns are accepted within 14 days of purchase in original, unopened condition.",
+      "Appointments cancelled at least 24 hours in advance are refunded in full (see Cancellation Policy). Services already rendered are non-refundable. Product returns are accepted within 14 days of purchase in original, unopened condition.",
   },
 ]
 

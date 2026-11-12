@@ -35,7 +35,7 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 CHIROPRACTIC_SERVICES = [
     {
-        "title": "Chiropractic Manipulative Treatment (CPT-98943)",
+        "title": "Chiropractic Adjustment",
         "slug": "chiropractic-manipulative-treatment",
         "length_minutes": 60,
         "price_cents": 12500,

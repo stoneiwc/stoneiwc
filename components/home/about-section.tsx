@@ -47,10 +47,7 @@ export function AboutSection({ image }: AboutSectionProps) {
                 aesthetics.
               </p>
               <p className="text-base leading-relaxed text-muted-foreground font-body">
-                We operate as a concierge service, traveling to patients'
-                homes, hospice, hospitals, or wherever care is needed. When
-                an in-person location is required, we see patients at
-                The Source of Hope facility. We honor both Eastern and
+                We see patients at our Plano location, 1108 W Parker Rd Ste 102, and bring many of our services to patients' homes, hospice, hospitals, or wherever care is needed. We honor both Eastern and
                 Western medicine -- each for its intended purpose.
               </p>
             </div>
@@ -78,9 +75,7 @@ export function AboutSection({ image }: AboutSectionProps) {
                   Presidential Award-Winning Practice
                 </h3>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground font-body">
-                  Recognized by the President and launched before the
-                  pandemic. When you book Stone IWC, the proceeds from your
-                  services directly fund The Source of Hope -- extending
+                  Recognized by the President. When you book Stone IWC, all proceeds from your services fund The Source of Hope -- extending
                   holistic health access to underserved communities.
                 </p>
               </div>

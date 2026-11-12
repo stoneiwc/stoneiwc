@@ -3,7 +3,6 @@ import { Philosophy } from "@/components/home/philosophy"
 import { AboutSection } from "@/components/home/about-section"
 import { ServicesPreview } from "@/components/home/services-preview"
 import { WhereWeServe } from "@/components/home/where-we-serve"
-import { CulinaryWellness } from "@/components/home/culinary-wellness"
 import { ProductsSection } from "@/components/home/products-section"
 import { Testimonials } from "@/components/home/testimonials"
 import { PoliciesSection } from "@/components/home/policies-section"
@@ -29,7 +28,7 @@ export default async function HomePage() {
         treatmentRoomImage={homePageImages?.servicesTreatmentRoomImage}
       />
       <WhereWeServe />
-      <CulinaryWellness image={homePageImages?.culinaryImage} />
+      
       <ProductsSection />
       <Testimonials />
       <PoliciesSection />

@@ -112,7 +112,10 @@ Listens for `payment_intent.succeeded`. Two responsibilities:
 
 **B) Gift card redemption** — when `metadata.gift_card_code` and `metadata.gift_card_applied_amount` are present (any order, not just gift card purchases):
 - Calls `redeemGiftCard(code, appliedAmount, paymentIntentId)`.
-- Atomically deducts from `currentBalance`, appends to `redemptions`, and sets `status='redeemed'` if balance reaches 0.
+- Deducts from `currentBalance`, appends `{ orderId, amount, redeemedAt }` to `redemptions`, and sets `status='redeemed'` if balance reaches 0.
+- **Once per order:** if `redemptions` already has an entry for this PaymentIntent, nothing changes. Stripe redeliveries and manual "Resend" from the dashboard are safe.
+- **Concurrent orders:** the patch commits only against the revision it read (`ifRevisionId`). On a conflict it re-reads the card and retries, up to 5 times.
+- If redemption still fails, the webhook answers 500 so Stripe retries later. The order and its emails are not repeated; they only fire on the first `pending → paid` transition.
 
 Signature verification uses `stripe.webhooks.constructEvent` with `STRIPE_WEBHOOK_SECRET`.
 

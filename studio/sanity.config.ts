@@ -257,15 +257,6 @@ export default defineConfig({
                                       ),
                                   ]),
                               ),
-                            S.listItem()
-                              .title('Articles')
-                              .child(
-                                S.list()
-                                  .title('Articles')
-                                  .items([
-                                    S.documentTypeListItem('article').title('All Articles'),
-                                  ]),
-                              ),
                           ]),
                       ),
 
@@ -315,21 +306,6 @@ export default defineConfig({
                                     S.documentTypeListItem('mediaItem').title('All Media'),
                                     orderableDocumentListDeskItem({
                                       type: 'mediaItem',
-                                      title: 'Manage Order',
-                                      S,
-                                      context,
-                                    }),
-                                  ]),
-                              ),
-                            S.listItem()
-                              .title('Awards')
-                              .child(
-                                S.list()
-                                  .title('Awards')
-                                  .items([
-                                    S.documentTypeListItem('awardItem').title('All Awards'),
-                                    orderableDocumentListDeskItem({
-                                      type: 'awardItem',
                                       title: 'Manage Order',
                                       S,
                                       context,
@@ -432,10 +408,8 @@ export default defineConfig({
                   'certificationImages',
                   'licenseeProgramImages',
                   'cuppingImages',
-                  'article',
                   'pressItem',
                   'mediaItem',
-                  'awardItem',
                   'qcShowFlyer',
                   'qcShowEpisode',
                   'coupon',

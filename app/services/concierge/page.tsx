@@ -20,7 +20,7 @@ import { urlFor } from "@/lib/sanity.image"
 export const metadata: Metadata = {
   title: "Concierge Services",
   description:
-    "We come to you -- corporate offices, churches, events, homes, hotels, hospitals, and more. 100+ holistic services delivered to your location.",
+    "We come to you -- corporate offices, churches, events, homes, hotels, hospitals, and more. Many of our holistic services delivered to your location.",
 }
 
 const locations = [
@@ -70,18 +70,18 @@ const locations = [
     icon: GlassWater,
     title: "Anywhere You Need Us",
     description:
-      "No location is too unique. If you need holistic care, nutritional guidance, or culinary wellness, we will find a way to bring it to you.",
+      "Don't see your location? Contact us and we'll let you know which services we can bring to you.",
   },
 ]
 
 const conciergeIncludes = [
   "Full portable treatment setup at your location",
   "Experienced holistic practitioners on-site",
-  "Trained chefs for culinary wellness programs",
+  
   "Custom service packages for groups and events",
   "Nutritional consultations and pantry assessments",
   "Follow-up care and program continuity",
-  "Flexible scheduling including evenings and weekends",
+  
   "All equipment, supplies, and products provided",
 ]
 
@@ -97,7 +97,7 @@ export default async function ConciergePage() {
     <>
       <PageHeader
         title="Concierge Services"
-        subtitle="We bring over 100 holistic services directly to your location -- wherever you are, whatever the occasion."
+        subtitle="We bring many of our holistic services directly to your location. Call +1 469-439-0052 to see what we can arrange for you."
       />
 
       <section className="py-20 lg:py-28">
@@ -112,9 +112,7 @@ export default async function ConciergePage() {
               </h2>
               <p className="mt-6 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
                 Stone IWC was built on a concierge model from day one. We do
-                not wait for you to find us -- we bring our full practice
-                directly to your location with the same professional
-                standards and comprehensive care as our facility. Our
+                not wait for you to find us -- we bring many of our services directly to your location with the same professional standards and comprehensive care as our facility. Our
                 practitioners arrive with everything needed for a complete
                 treatment experience.
               </p>
@@ -157,8 +155,7 @@ export default async function ConciergePage() {
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground font-body">
               From boardrooms to living rooms, from churches to hotel suites
-              -- our practitioners and chefs bring holistic care to any
-              setting.
+              -- our practitioners bring our holistic services to many settings.
             </p>
           </div>
           <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -219,7 +216,7 @@ export default async function ConciergePage() {
             Every Service Benefits The Source of Hope
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-background/70 font-body">
-            When you book a concierge visit, all profits go directly to
+            When you book a concierge visit, all proceeds go directly to
             sustaining The Source of Hope foundation -- extending holistic
             health access to underserved communities.
           </p>
