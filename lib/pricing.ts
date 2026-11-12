@@ -123,14 +123,14 @@ export async function computeOrderPricing(input: {
 
   couponDiscount = round2(Math.min(couponDiscount, subtotal))
  
-  let shippingCost = 0
-  if (shippingMethod) {
-    const methods = await getShippingMethods()
-    const method = methods.find((m) => m.id === shippingMethod)
-    if (method) {
-      shippingCost = round2(method.cost)
-    }
+  // Every order ships, so the method must be one of the active ones in Sanity.
+  // A missing or unknown id is rejected rather than priced at $0.
+  const methods = await getShippingMethods()
+  const method = shippingMethod ? methods.find((m) => m.id === shippingMethod) : undefined
+  if (!method) {
+    return { ok: false, error: 'Please choose a shipping method.' }
   }
+  const shippingCost = round2(method.cost)
  
   let giftCardApplied = 0
   if (giftCardCode?.trim()) {

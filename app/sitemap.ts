@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { getAllProductSlugs } from "@/lib/sanity.queries"
+import { navigation } from "@/lib/navigation"
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
 
@@ -15,6 +16,16 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${BASE_URL}/our-policies`, priority: 0.3, changeFrequency: "yearly" },
 ]
 
+// Every page in the nav dropdowns, so a page added to the menu is in the
+// sitemap too.
+const SUBPAGE_ROUTES: MetadataRoute.Sitemap = navigation.flatMap((item) =>
+  (item.children ?? []).map((child) => ({
+    url: `${BASE_URL}${child.href}`,
+    priority: 0.7,
+    changeFrequency: "monthly" as const,
+  })),
+)
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [productSlugs] = await Promise.all([
     getAllProductSlugs(),
@@ -26,5 +37,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly",
   }))
   
-  return [...STATIC_ROUTES, ...productRoutes]
+  return [...STATIC_ROUTES, ...SUBPAGE_ROUTES, ...productRoutes]
 }

@@ -7,10 +7,11 @@ import {
 } from "@/lib/email/contact-autoreply-template"
 import { checkRateLimit } from "@/lib/email/rate-limit"
 import { isHoneypotTripped, type HoneypotFields } from "@/lib/honeypot"
+import { isFilledTooFast, spamSignals, type FillTimeFields } from "@/lib/contact-spam"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export interface ContactFormPayload extends HoneypotFields {
+export interface ContactFormPayload extends HoneypotFields, FillTimeFields {
   firstName: string
   lastName: string
   email: string
@@ -57,6 +58,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   }
 
+  // Posted instantly, or without the browser form at all. Same silent drop.
+  if (isFilledTooFast(body)) {
+    console.warn("Contact form submitted too fast; submission dropped")
+    return NextResponse.json({ success: true })
+  }
+
   const { firstName, lastName, email, phone, message } = body
 
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !message?.trim()) {
@@ -68,12 +75,16 @@ export async function POST(req: NextRequest) {
   }
 
   const data = { firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), phone: phone?.trim(), message: message.trim() }
+  const signals = spamSignals(data)
+  if (signals.length > 0) {
+    console.warn(`Contact form flagged as possible spam: ${signals.join(", ")}`)
+  }
 
   const { error } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: process.env.CONTACT_EMAIL_TO!,
     replyTo: data.email,
-    subject: `New Contact Message — ${data.firstName} ${data.lastName}`,
+    subject: `${signals.length > 0 ? "[Possible spam] " : ""}New Contact Message — ${data.firstName} ${data.lastName}`,
     html: contactEmailHtml(data),
     text: contactEmailText(data),
   })
@@ -81,6 +92,11 @@ export async function POST(req: NextRequest) {
   if (error) {
     console.error("Resend error:", error)
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 })
+  }
+
+  // Flagged submissions get no auto-reply (see lib/contact-spam.ts).
+  if (signals.length > 0) {
+    return NextResponse.json({ success: true })
   }
 
   // Auto-reply to the customer. We don't fail the request if this errors —

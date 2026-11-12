@@ -90,49 +90,66 @@ export interface RedeemResult {
   status: GiftCardDoc['status']
 }
 
+const MAX_REDEEM_ATTEMPTS = 5
+
+const round2 = (n: number) => Math.round(n * 100) / 100
+
+function isRevisionConflict(err: unknown): boolean {
+  return (err as { statusCode?: number } | null)?.statusCode === 409
+}
+
+// Deducts the order's amount from the card, at most once per order.
+//
+// Safe to call again for the same order (Stripe redelivers events, and staff
+// can resend them from the dashboard): if the card's redemptions already list
+// this orderId, nothing changes. The patch only commits against the revision
+// that was read, so two orders on one card can't both spend the same balance;
+// on a conflict the card is re-read and the deduction retried.
 export async function redeemGiftCard(
   code: string,
   orderAmount: number,
   orderId: string,
 ): Promise<RedeemResult> {
-  const card = await getGiftCardByCode(code)
-  if (!card) {
-    throw new Error(`Gift card not found: ${code}`)
-  }
+  for (let attempt = 1; attempt <= MAX_REDEEM_ATTEMPTS; attempt++) {
+    const card = await getGiftCardByCode(code)
+    if (!card) {
+      throw new Error(`Gift card not found: ${code}`)
+    }
 
-  // Stripe can retry payment_intent.succeeded. If this order already redeemed,
-  // report the earlier amount and deduct nothing a second time. Checked before
-  // the status test, because the card may now be fully redeemed.
-  const prior = card.redemptions?.find((r) => r.orderId === orderId)
-  if (prior) {
-    return { applied: prior.amount, remainingBalance: card.currentBalance, status: card.status }
-  }
+    const previous = card.redemptions?.find((r) => r.orderId === orderId)
+    if (previous) {
+      return { applied: previous.amount, remainingBalance: card.currentBalance, status: card.status }
+    }
 
-  if (card.status !== 'active') {
-    return {
-      applied: 0,
-      remainingBalance: card.currentBalance,
-      status: card.status,
+    if (card.status !== 'active') {
+      return { applied: 0, remainingBalance: card.currentBalance, status: card.status }
+    }
+
+    const applied = round2(Math.min(orderAmount, card.currentBalance))
+    const remainingBalance = round2(card.currentBalance - applied)
+    const newStatus: GiftCardDoc['status'] = remainingBalance <= 0 ? 'redeemed' : 'active'
+
+    try {
+      await client
+        .patch(card._id)
+        .ifRevisionId(card._rev)
+        .setIfMissing({ redemptions: [] })
+        .set({ currentBalance: remainingBalance, status: newStatus })
+        .append('redemptions', [
+          {
+            _key: `${orderId}-${Date.now()}`,
+            orderId,
+            amount: applied,
+            redeemedAt: new Date().toISOString(),
+          },
+        ])
+        .commit()
+      return { applied, remainingBalance, status: newStatus }
+    } catch (err) {
+      if (!isRevisionConflict(err) || attempt === MAX_REDEEM_ATTEMPTS) throw err
     }
   }
 
-  const applied = Math.min(orderAmount, card.currentBalance)
-  const remainingBalance = card.currentBalance - applied
-  const newStatus: GiftCardDoc['status'] = remainingBalance <= 0 ? 'redeemed' : 'active'
-
-  await client
-    .patch(card._id)
-    .ifRevisionId(card._rev)
-    .set({ currentBalance: remainingBalance, status: newStatus })
-    .insert('after', 'redemptions[-1]', [
-      {
-        _key: `${orderId}-${Date.now()}`,
-        orderId,
-        amount: applied,
-        redeemedAt: new Date().toISOString(),
-      },
-    ])
-    .commit()
-
-  return { applied, remainingBalance, status: newStatus }
+  // Unreachable: the last attempt either returns or throws.
+  throw new Error(`Gift card redemption failed: ${code}`)
 }

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { ContactFormPayload } from "@/app/api/contact/route"
 import { HoneypotField } from "@/components/honeypot-field"
 import { HONEYPOT_FIELD } from "@/lib/honeypot"
+import { FILL_TIME_FIELD } from "@/lib/contact-spam"
 
 type Status = "idle" | "loading" | "success" | "error"
 
@@ -15,6 +16,12 @@ const labelClass = "text-sm font-body font-bold text-foreground"
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle")
   const [errorMsg, setErrorMsg] = useState("")
+  // When the form appeared, for the fill-time check. Reset after each send so
+  // "Send another message" is timed from when the fresh form shows.
+  const shownAt = useRef(0)
+  useEffect(() => {
+    if (status === "idle") shownAt.current = Date.now()
+  }, [status])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -29,6 +36,7 @@ export function ContactForm() {
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value.trim() || undefined,
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
       [HONEYPOT_FIELD]: (form.elements.namedItem(HONEYPOT_FIELD) as HTMLInputElement).value,
+      [FILL_TIME_FIELD]: Date.now() - shownAt.current,
     }
 
     try {

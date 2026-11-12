@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Image from "next/image"
-import { getAwardItems, getMediaItems } from "@/lib/sanity.queries"
-import { urlFor } from "@/lib/sanity.image"
+import { getMediaItems } from "@/lib/sanity.queries"
 import { PageHeader } from "@/components/page-header"
 
 export const metadata: Metadata = {
@@ -33,7 +32,7 @@ function getYoutubeThumbnail(url: string): string | null {
 }
 
 export default async function MediaPage() {
-  const [mediaItems, awardItems] = await Promise.all([getMediaItems(), getAwardItems()])
+  const mediaItems = await getMediaItems()
 
   return (
     <>
@@ -99,50 +98,6 @@ export default async function MediaPage() {
           </div>
         )}
       </section>
-
-      {/* Awards — hidden until at least one award is published in Studio */}
-      {awardItems.length > 0 && (
-        <section id="awards" className="mx-auto max-w-7xl border-t border-border px-6 py-16">
-          <div className="text-center">
-            <h2 className="font-sans text-3xl font-semibold tracking-wide text-foreground md:text-4xl text-balance">
-              Awards &amp; Recognition
-            </h2>
-            <p className="mt-3 text-muted-foreground font-body">
-              Honors and accolades received by StoneIWC.
-            </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {awardItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex flex-col overflow-hidden rounded border border-border bg-white shadow-sm"
-              >
-                <div className="relative aspect-[4/3] w-full overflow-hidden">
-                  {item.image?.asset && (
-                    <Image
-                      src={urlFor(item.image).width(600).height(450).url()}
-                      alt={item.image.alt ?? item.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  )}
-                </div>
-
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="font-sans text-base font-bold leading-snug text-foreground">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground font-body">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </>
   )
 }
