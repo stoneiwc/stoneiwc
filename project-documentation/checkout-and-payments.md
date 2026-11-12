@@ -97,7 +97,7 @@ Collects:
 - Gift card code input (validated live against `/api/gift-cards/validate`)
 
 On "Continue to Payment":
-1. `POST /api/checkout/retrieve-stripe-publishable-key` → gets `publishableKey`
+1. Stripe.js loads via `getStripe()` ([`lib/stripe-client.ts`](../lib/stripe-client.ts)), using `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` from the bundle.
 2. `POST /api/checkout/create-stripe-payment-intent` → gets `clientSecret`
 3. Stripe Elements (`<PaymentElement>`) renders
 

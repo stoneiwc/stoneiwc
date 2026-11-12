@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { loadStripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
+import { getStripe } from '@/lib/stripe-client'
 import { HoneypotField } from '@/components/honeypot-field'
 import { HONEYPOT_FIELD } from '@/lib/honeypot'
 import { GIFT_CARD_MAX, GIFT_CARD_MIN } from '@/lib/gift-card-math'
@@ -90,7 +90,7 @@ export function GiftCardPurchase() {
   const [recipientEmail, setRecipientEmail] = useState('')
   const [note, setNote] = useState('')
   const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [stripePromise, setStripePromise] = useState<ReturnType<typeof loadStripe> | null>(null)
+  const [stripePromise, setStripePromise] = useState<ReturnType<typeof getStripe> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -111,10 +111,6 @@ export function GiftCardPurchase() {
     setError(null)
     setIsLoading(true)
     try {
-      const keyRes = await fetch('/api/checkout/retrieve-stripe-publishable-key', { method: 'POST' })
-      const keyData = await keyRes.json()
-      if (!keyData.publishableKey) throw new Error('Failed to load payment system.')
-
       const res = await fetch('/api/gift-cards/create-payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -131,7 +127,7 @@ export function GiftCardPurchase() {
       const data = await res.json()
       if (data.error || !data.clientSecret) throw new Error(data.error || 'Failed to initialize payment.')
 
-      setStripePromise(loadStripe(keyData.publishableKey))
+      setStripePromise(getStripe())
       setClientSecret(data.clientSecret)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')

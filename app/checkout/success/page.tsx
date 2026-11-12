@@ -20,11 +20,13 @@ export default function CheckoutSuccessPage() {
   const hasProcessed = useRef(false)
   const { clearCart } = useCart()
 
-  const fetchPaymentIntentStatus = async (paymentIntentId: string) => {
+  const fetchPaymentIntentStatus = async (paymentIntentId: string, clientSecret: string) => {
     try {
-      const response = await fetch(
-        `/api/checkout/retrieve-stripe-payment-intent-status?payment_intent=${paymentIntentId}`
-      )
+      const params = new URLSearchParams({
+        payment_intent: paymentIntentId,
+        payment_intent_client_secret: clientSecret,
+      })
+      const response = await fetch(`/api/checkout/retrieve-stripe-payment-intent-status?${params}`)
       
       if (!response.ok) {
         const errorText = await response.text()
@@ -53,17 +55,18 @@ export default function CheckoutSuccessPage() {
     const queryString = window.location.search
     const urlParams = new URLSearchParams(queryString)
     const paymentIntent = urlParams.get('payment_intent')
+    const clientSecret = urlParams.get('payment_intent_client_secret')
     const email = sessionStorage.getItem('checkoutEmail') || ''
     sessionStorage.removeItem('checkoutEmail')
 
-    // If no payment intent, not a valid success page
-    if (!paymentIntent) {
+    // Without both, this isn't a return from a payment.
+    if (!paymentIntent || !clientSecret) {
       setIsLoading(false)
       return
     }
 
     // Handle Stripe Payment Intent success
-    fetchPaymentIntentStatus(paymentIntent)
+    fetchPaymentIntentStatus(paymentIntent, clientSecret)
       .then((response) => {
         if (response.error) {
           console.error('Error fetching Payment Intent status:', response.error)

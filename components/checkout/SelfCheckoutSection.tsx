@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
+import type { Stripe } from '@stripe/stripe-js'
+import { getStripe } from '@/lib/stripe-client'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
@@ -285,18 +286,10 @@ export default function SelfCheckoutSection({
       setIsLoading(true)
       setError(null)
 
-      // Fetch Stripe publishable key
-      const keyResponse = await fetch('/api/checkout/retrieve-stripe-publishable-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      const keyData = await keyResponse.json()
-
-      if (keyData.error || !keyData.publishableKey) {
+      const stripe = await getStripe()
+      if (!stripe) {
         throw new Error('Failed to load payment system')
       }
-
-      const stripe = await loadStripe(keyData.publishableKey)
       setStripePromise(stripe)
 
       // Create Payment Intent
@@ -381,7 +374,12 @@ export default function SelfCheckoutSection({
     }
     // Redirect to success page
     if (typeof window !== 'undefined') {
-      window.location.href = `/checkout/success?payment_intent=${paymentIntent.id}`
+      // Same parameters Stripe adds when it redirects; the success page needs both.
+      const params = new URLSearchParams({
+        payment_intent: paymentIntent.id,
+        payment_intent_client_secret: paymentIntent.client_secret,
+      })
+      window.location.href = `/checkout/success?${params}`
     }
   }
 
