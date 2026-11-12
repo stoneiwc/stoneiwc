@@ -87,6 +87,13 @@ export const giftCardType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'emailedAt',
+      title: 'Gift Card Email Sent At',
+      type: 'datetime',
+      description: 'Set by the Stripe webhook when the gift card email goes out. Stops retries from sending it twice.',
+      readOnly: true,
+    }),
+    defineField({
       name: 'redemptions',
       title: 'Redemption History',
       type: 'array',

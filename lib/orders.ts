@@ -1,5 +1,7 @@
 import 'server-only'
+import { randomInt } from 'node:crypto'
 import { client } from './sanity.client'
+import { isSanityConflict } from './sanity-errors'
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -59,11 +61,23 @@ export function generateOrderNumber(now: Date = new Date()): string {
   const datePart = `${now.getUTCFullYear()}${String(now.getUTCMonth() + 1).padStart(2, '0')}${String(
     now.getUTCDate(),
   ).padStart(2, '0')}`
-  const random = Array.from(
-    { length: 4 },
-    () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)],
-  ).join('')
+  const random = Array.from({ length: 4 }, () => CODE_CHARS[randomInt(CODE_CHARS.length)]).join('')
   return `SIWC-${datePart}-${random}`
+}
+
+// An order number no existing order uses. Tries `preferred` first, so a
+// recovered order can keep the number the customer was already shown.
+async function uniqueOrderNumber(preferred?: string): Promise<string> {
+  const candidates = [preferred, ...Array.from({ length: 5 }, () => generateOrderNumber())]
+  for (const orderNumber of candidates) {
+    if (!orderNumber) continue
+    const collision = await client.fetch<{ _id: string } | null>(
+      `*[_type == "order" && orderNumber == $orderNumber][0]{ _id }`,
+      { orderNumber },
+    )
+    if (!collision) return orderNumber
+  }
+  throw new Error('Failed to generate a unique order number after 5 attempts.')
 }
 
 export async function createPendingOrder(
@@ -121,42 +135,32 @@ export async function createPendingOrder(
     return { _id: existing._id, orderNumber: existing.orderNumber }
   }
 
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const orderNumber = generateOrderNumber()
-    const collision = await client.fetch<{ _id: string } | null>(
-      `*[_type == "order" && orderNumber == $orderNumber][0]{ _id }`,
-      { orderNumber },
-    )
-    if (collision) continue
+  const orderNumber = await uniqueOrderNumber()
+  const created = await client.create({
+    _type: 'order',
+    orderNumber,
+    status: 'pending' as OrderStatus,
+    createdAt: new Date().toISOString(),
+    stripePaymentIntentId: input.stripePaymentIntentId,
+    customer: input.customer,
+    shippingAddress: input.shippingAddress,
+    billingAddress: input.billingAddress,
+    billingSameAsShipping: input.billingSameAsShipping ?? false,
+    items: input.items.map((item) => ({
+      _key: `${item.productId ?? item.name}-${Math.random().toString(36).slice(2, 8)}`,
+      ...item,
+    })),
+    subtotal: input.subtotal,
+    couponCode: input.couponCode,
+    couponDiscount: input.couponDiscount,
+    shippingMethod: input.shippingMethod,
+    shippingCost: input.shippingCost,
+    giftCardCode: input.giftCardCode,
+    giftCardApplied: input.giftCardApplied,
+    total: input.total,
+  })
 
-    const created = await client.create({
-      _type: 'order',
-      orderNumber,
-      status: 'pending' as OrderStatus,
-      createdAt: new Date().toISOString(),
-      stripePaymentIntentId: input.stripePaymentIntentId,
-      customer: input.customer,
-      shippingAddress: input.shippingAddress,
-      billingAddress: input.billingAddress,
-      billingSameAsShipping: input.billingSameAsShipping ?? false,
-      items: input.items.map((item) => ({
-        _key: `${item.productId ?? item.name}-${Math.random().toString(36).slice(2, 8)}`,
-        ...item,
-      })),
-      subtotal: input.subtotal,
-      couponCode: input.couponCode,
-      couponDiscount: input.couponDiscount,
-      shippingMethod: input.shippingMethod,
-      shippingCost: input.shippingCost,
-      giftCardCode: input.giftCardCode,
-      giftCardApplied: input.giftCardApplied,
-      total: input.total,
-    })
-
-    return { _id: created._id, orderNumber }
-  }
-
-  throw new Error('Failed to generate a unique order number after 5 attempts.')
+  return { _id: created._id, orderNumber }
 }
 
 export interface PaidOrderSnapshot {
@@ -179,17 +183,16 @@ export async function markOrderPaid(
   stripePaymentIntentId: string,
 ): Promise<{ transitioned: boolean; order: PaidOrderSnapshot | null }> {
   const order = await client.fetch<
-    (PaidOrderSnapshot & { status: OrderStatus }) | null
+    (PaidOrderSnapshot & { _rev: string; status: OrderStatus }) | null
   >(
     `*[_type == "order" && stripePaymentIntentId == $pid][0]{
-      _id, orderNumber, status, customer, shippingAddress,
+      _id, _rev, orderNumber, status, customer, shippingAddress,
       items, subtotal, couponCode, couponDiscount,
       shippingMethod, shippingCost, giftCardCode, giftCardApplied, total
     }`,
     { pid: stripePaymentIntentId },
   )
   if (!order) {
-    console.error(`markOrderPaid: no order for PaymentIntent ${stripePaymentIntentId}`)
     return { transitioned: false, order: null }
   }
   // Idempotent: only advance from pending or failed to paid. Don't downgrade
@@ -198,12 +201,96 @@ export async function markOrderPaid(
     return { transitioned: false, order }
   }
 
-  await client
-    .patch(order._id)
-    .set({ status: 'paid', paidAt: new Date().toISOString() })
-    .commit()
+  // Commit only against the revision we read. If two deliveries of the same
+  // event race, exactly one wins the transition, so emails go out once.
+  try {
+    await client
+      .patch(order._id)
+      .ifRevisionId(order._rev)
+      .set({ status: 'paid', paidAt: new Date().toISOString() })
+      .commit()
+  } catch (err) {
+    if (isSanityConflict(err)) return { transitioned: false, order }
+    throw err
+  }
 
   return { transitioned: true, order }
+}
+
+// The fields of a succeeded PaymentIntent that recoverPaidOrder reads.
+export interface RecoverablePaymentIntent {
+  id: string
+  amount: number
+  receipt_email?: string | null
+  metadata?: Record<string, string> | null
+}
+
+// A storefront payment succeeded but no order exists for it, because the
+// order write at checkout failed or someone deleted the pending order.
+// Rebuilds a paid order from the PaymentIntent metadata so the sale isn't
+// lost. Line items can't be rebuilt (only a text summary is in metadata), so
+// the order is flagged for review in internalNotes.
+//
+// Idempotent: the _id is derived from the PaymentIntent, so a second
+// delivery's create fails with 409 and reports created: false.
+export async function recoverPaidOrder(
+  pi: RecoverablePaymentIntent,
+): Promise<{ created: boolean; order: PaidOrderSnapshot }> {
+  const m = pi.metadata ?? {}
+  const amount = (value?: string) => {
+    const n = Number(value)
+    return value && Number.isFinite(n) ? n : undefined
+  }
+  const [firstName, ...lastNames] = (m.customer_name ?? '').trim().split(/\s+/)
+  const now = new Date().toISOString()
+
+  const order: PaidOrderSnapshot = {
+    _id: `order-recovered-${pi.id}`,
+    orderNumber: await uniqueOrderNumber(m.order_number),
+    customer: {
+      email: pi.receipt_email || m.customer_email || '',
+      firstName: firstName || undefined,
+      lastName: lastNames.join(' ') || undefined,
+      phone: m.customer_phone,
+    },
+    shippingAddress: {
+      line1: m.ship_line1,
+      line2: m.ship_line2,
+      city: m.ship_city,
+      state: m.ship_state,
+      postalCode: m.ship_postal,
+      country: m.ship_country,
+    },
+    items: [],
+    subtotal: amount(m.subtotal) ?? 0,
+    couponCode: m.coupon_code,
+    couponDiscount: amount(m.coupon_discount),
+    shippingMethod: m.shipping_method || 'standard',
+    shippingCost: amount(m.shipping_cost) ?? 0,
+    giftCardCode: m.gift_card_code,
+    giftCardApplied: amount(m.gift_card_applied_amount),
+    total: pi.amount / 100,
+  }
+
+  try {
+    await client.create({
+      ...order,
+      _type: 'order',
+      status: 'paid' as OrderStatus,
+      createdAt: now,
+      paidAt: now,
+      stripePaymentIntentId: pi.id,
+      billingAddress: {},
+      internalNotes:
+        `Recovered from Stripe: no order was recorded at checkout. ` +
+        `Items: ${m.items_summary || 'unknown'}. ` +
+        `Confirm the contents against Stripe payment ${pi.id} before fulfilling.`,
+    })
+  } catch (err) {
+    if (isSanityConflict(err)) return { created: false, order }
+    throw err
+  }
+  return { created: true, order }
 }
 
 export async function markOrderFailed(stripePaymentIntentId: string): Promise<void> {
