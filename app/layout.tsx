@@ -1,15 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Lato } from "next/font/google";
-import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { CartProvider } from "@/lib/cart-context";
 import { JsonLd } from "@/components/seo/json-ld";
-
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -91,19 +90,17 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
-      <head>
-        <GoogleTagManager gtmId="G-K90NGHL09B" />
-        <Analytics />
-        <SpeedInsights />
-      </head>
       <body className="font-body antialiased" suppressHydrationWarning>
-        <GoogleAnalytics gaId="G-K90NGHL09B" />
         <JsonLd data={organizationSchema} />
         <CartProvider>
           <Navbar />
           <main>{children}</main>
           <Footer />
         </CartProvider>
+        {/* One Google tag: G-… is a GA4 measurement ID, not a GTM container. */}
+        <GoogleAnalytics gaId="G-K90NGHL09B" />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
