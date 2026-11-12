@@ -5,14 +5,12 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import { HoneypotField } from '@/components/honeypot-field'
 import { HONEYPOT_FIELD } from '@/lib/honeypot'
+import { GIFT_CARD_MAX, GIFT_CARD_MIN } from '@/lib/gift-card-math'
+import { isValidEmail } from '@/lib/validation'
 
 export { GIFT_CARD_SLUG } from '@/lib/constants'
 
 const PRESET_AMOUNTS = [25, 50, 100, 150, 200]
-
-function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
 
 function PaymentForm({ amount, onSuccess }: { amount: number; onSuccess: () => void }) {
   const stripe = useStripe()
@@ -101,8 +99,8 @@ export function GiftCardPurchase() {
   const finalAmount = isCustom ? Number(customAmount) : selectedAmount
 
   const isFormValid =
-    finalAmount >= 1 &&
-    finalAmount <= 500 &&
+    finalAmount >= GIFT_CARD_MIN &&
+    finalAmount <= GIFT_CARD_MAX &&
     !isNaN(finalAmount) &&
     senderName.trim().length > 0 &&
     isValidEmail(purchaserEmail) &&
@@ -200,11 +198,11 @@ export function GiftCardPurchase() {
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-body text-muted-foreground">$</span>
                 <input
                   type="number"
-                  min={1}
-                  max={500}
+                  min={GIFT_CARD_MIN}
+                  max={GIFT_CARD_MAX}
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
-                  placeholder="Enter amount (max $500)"
+                  placeholder={`Enter amount ($${GIFT_CARD_MIN}–$${GIFT_CARD_MAX})`}
                   autoFocus
                   className="w-full rounded-sm border border-input bg-background py-2 pl-7 pr-3 text-sm font-body text-foreground outline-none transition-colors focus:border-primary"
                 />

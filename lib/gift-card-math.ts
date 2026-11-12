@@ -6,6 +6,10 @@
 
 export const MIN_STRIPE_CHARGE = 0.5 // Stripe rejects USD charges under $0.50
 
+// Purchase limits for a gift card, enforced by the API and the purchase form.
+export const GIFT_CARD_MIN = 25
+export const GIFT_CARD_MAX = 500
+
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 export function giftCardAmount({
