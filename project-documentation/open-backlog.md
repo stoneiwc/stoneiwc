@@ -40,14 +40,6 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 
 **Future fix:** Add `quantity` field to Sanity product schema. Decrement on `markOrderPaid` (atomically per item, with concurrency guards similar to gift card redemption). Show "X left" badge under low-stock threshold.
 
-### Sanity validation: shipping cost minimum
-
-**What:** Shipping `cost` field accepts any value ≥ 0. Setting it between $0 and $0.50 creates orders Stripe will reject (below minimum charge).
-
-**Why open:** Trust-based — no admin has set this incorrectly so far.
-
-**Future fix:** Add validation rule to [`studio/schemaTypes/shippingMethod.ts`](../studio/schemaTypes/shippingMethod.ts) — `Rule.custom((cost) => cost === 0 || cost >= 0.5 || 'Cost must be 0 (free) or at least $0.50')`.
-
 ### `payment_intent.canceled` not subscribed in Stripe
 
 **What:** The webhook handler marks a pending order `cancelled` on `payment_intent.canceled` (checkout also cancels the PaymentIntent itself when it can't record the order). Neither Stripe webhook endpoint is subscribed to that event yet, so those orders stay `pending`.
