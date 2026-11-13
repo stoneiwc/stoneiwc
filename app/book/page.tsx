@@ -110,7 +110,15 @@ export default async function BookPage({ searchParams }: Props) {
   const activeCategory = (category ?? "all") as BookingCategory | "all"
 
   const username = process.env.NEXT_PUBLIC_CAL_USERNAME!
-  const allEvents = await getEventTypes(username)
+  let allEvents: CalEventType[] = []
+  let servicesUnavailable = false
+  try {
+    allEvents = await getEventTypes(username)
+  } catch (err) {
+    // Only reached when Cal.com fails and nothing is cached yet.
+    console.error("Could not load services from Cal.com:", err)
+    servicesUnavailable = true
+  }
   const categoryFiltered = filterEventsByCategory(allEvents, activeCategory)
   const events = filterEventsBySearch(categoryFiltered, search ?? "")
 
@@ -166,10 +174,12 @@ export default async function BookPage({ searchParams }: Props) {
               {events.length === 0 ? (
                 <div className="rounded-sm border border-border bg-card p-12 text-center">
                   <p className="font-sans text-xl font-semibold text-foreground">
-                    No services available in this category yet.
+                    {servicesUnavailable
+                      ? "We couldn't load our services just now."
+                      : "No services available in this category yet."}
                   </p>
                   <p className="mt-3 text-sm font-body text-muted-foreground">
-                    Please check back soon or{" "}
+                    {servicesUnavailable ? "Please try again in a few minutes or" : "Please check back soon or"}{" "}
                     <Link
                       href="/contact"
                       className="text-primary underline-offset-4 hover:underline"

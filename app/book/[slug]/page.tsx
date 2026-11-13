@@ -13,10 +13,26 @@ type Props = {
   params: Promise<{ slug: string }>
 }
 
+// Re-check Cal.com every 5 minutes (CAL_EVENTS_REVALIDATE_SECONDS; route
+// config must be a literal). Services added since the last build render on
+// first visit.
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  try {
+    const events = await getEventTypes(process.env.NEXT_PUBLIC_CAL_USERNAME!)
+    return events.map((event) => ({ slug: event.slug }))
+  } catch (err) {
+    // Don't fail the deploy because Cal.com is down; pages render on demand.
+    console.error("Could not prebuild booking pages:", err)
+    return []
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const username = process.env.NEXT_PUBLIC_CAL_USERNAME!
-  const events = await getEventTypes(username)
+  const events = await getEventTypes(username).catch(() => [])
   const event = events.find((e) => e.slug === slug)
 
   return {

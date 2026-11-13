@@ -1,3 +1,5 @@
+import { CAL_EVENTS_REVALIDATE_SECONDS, CAL_EVENTS_TAG } from "./sanity-tags"
+
 export type CalEventType = {
   id: number
   title: string
@@ -41,23 +43,30 @@ export function getCategoryFromSlug(slug: string): BookingCategory | null {
   return match ? (match.value as BookingCategory) : null
 }
 
+// The bookable services, cached for CAL_EVENTS_REVALIDATE_SECONDS so the
+// booking pages don't call Cal.com on every request.
+//
+// Throws when Cal.com fails rather than returning an empty list: an empty
+// list would be rendered as "no services" or a 404, while an error during a
+// background refresh leaves the last good page in place. (Next only caches
+// 200 responses, so a failure never overwrites good data.)
 export async function getEventTypes(username: string): Promise<CalEventType[]> {
-  try {
-    const res = await fetch(
-      `https://api.cal.com/v2/event-types?username=${username}`,
-      {
-        headers: { "cal-api-version": "2024-06-14" },
-        cache: "no-store",
-      }
-    )
-
-    if (!res.ok) return []
-
-    const data = await res.json()
-    return Array.isArray(data?.data) ? data.data : []
-  } catch {
-    return []
+  const res = await fetch(
+    `https://api.cal.com/v2/event-types?username=${encodeURIComponent(username)}`,
+    {
+      headers: { "cal-api-version": "2024-06-14" },
+      next: { revalidate: CAL_EVENTS_REVALIDATE_SECONDS, tags: [CAL_EVENTS_TAG] },
+    }
+  )
+  if (!res.ok) {
+    throw new Error(`Cal.com event types request failed: ${res.status}`)
   }
+
+  const data = await res.json()
+  if (!Array.isArray(data?.data)) {
+    throw new Error("Cal.com event types response had no data array")
+  }
+  return data.data
 }
 
 export function filterEventsByCategory(

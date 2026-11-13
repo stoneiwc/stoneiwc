@@ -2,7 +2,7 @@
 
 ## Overview
 
-The booking system uses the **Cal.com v2 REST API** directly — no SDK. Event types (services) live in Cal.com and are fetched at runtime with `cache: "no-store"`. The frontend filters and displays them; clicking a service embeds the Cal.com booking widget.
+The booking system uses the **Cal.com v2 REST API** directly — no SDK. Event types (services) live in Cal.com and are cached for 5 minutes (see Cache policy below). The frontend filters and displays them; clicking a service embeds the Cal.com booking widget.
 
 Service appointments are provisioned to Cal.com using a set of **Python scripts** in `scripts/`. These scripts are the source of truth for what event types exist — not the database, not Sanity.
 
@@ -30,7 +30,9 @@ Service appointments are provisioned to Cal.com using a set of **Python scripts*
 
 **Base URL:** `https://api.cal.com/v2`  
 **API Version header:** `cal-api-version: 2024-06-14`  
-**Cache policy:** `cache: "no-store"` — always fetches fresh event types (availability changes in real time)
+**Cache policy:** cached for 5 minutes under the `cal-events` tag. The event type list (names, prices, lengths) changes rarely; live availability comes from the Cal.com embed itself, not this list. `/book/[slug]` pages are prebuilt from the list and re-checked every 5 minutes; new services render on first visit. To refresh immediately after editing services, POST `{ "_type": "calEvents" }` to `/api/revalidate` with the webhook secret.
+
+**Failures:** `getEventTypes` throws when Cal.com errors. During a background refresh that leaves the last good page in place, and Next never caches a failed response. If nothing is cached yet, `/book` shows "We couldn't load our services just now" rather than an empty list, and the build skips prebuilding booking pages instead of failing the deploy.
 
 ```ts
 // Fetch all event types for the configured Cal.com username
