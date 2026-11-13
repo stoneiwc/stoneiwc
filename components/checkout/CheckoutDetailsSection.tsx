@@ -1,7 +1,7 @@
 "use client"
 
 import type { CartItem, AppliedCoupon } from "@/lib/cart-context"
-import type { AppliedGiftCard } from "@/app/checkout/page"
+import type { AppliedGiftCard } from "@/components/checkout/types"
 
 interface CheckoutDetailsSectionProps {
   items: CartItem[]

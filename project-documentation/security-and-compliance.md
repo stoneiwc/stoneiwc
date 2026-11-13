@@ -68,7 +68,7 @@ You can't rotate the secret without re-creating the endpoint (Stripe doesn't exp
 |---|---|
 | Card data never touches our server | Stripe Elements collects card details in an iframe sandboxed to Stripe's domain. Only the `paymentMethod` ID (a token) crosses our backend. We are out of PCI scope. |
 | Charge amount tampering | The server prices every order itself ([`lib/pricing.ts`](../lib/pricing.ts)): product prices, coupon, shipping method and gift card are re-read live from Sanity, and client-sent prices and totals are ignored. |
-| PaymentIntent ownership | Checkout reuses an earlier PaymentIntent only when the caller sends its client secret. The payment status route also requires the client secret, because it returns the customer's email. A PaymentIntent ID alone (it appears in URLs) grants nothing. |
+| PaymentIntent ownership | Checkout reuses an earlier PaymentIntent only when the caller sends its client secret, and the success page (server-rendered, `lib/payment-status.ts`) only shows a payment, including its email, when the client secret matches. A PaymentIntent ID alone (it appears in URLs) grants nothing. |
 | Payment without an order | If checkout can't record the pending order, it cancels the PaymentIntent and returns 503; the webhook recovers any paid PaymentIntent that still has no order and alerts the owner. See [webhooks.md](webhooks.md#recovered-orders). |
 | Gift card codes | Bearer credentials: generated with `crypto.randomInt` (`STONE-XXXX-XXXX`, ~1.1 trillion combinations), and the lookup endpoint is rate-limited. |
 | Webhook impersonation | Every webhook payload is signature-verified with `stripe.webhooks.constructEvent` using `STRIPE_WEBHOOK_SECRET`. A request without a valid signature returns 400 immediately. |

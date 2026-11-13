@@ -93,7 +93,7 @@ Collects:
 - Email, first name, last name, phone
 - Billing address (line1, line2, city, state, postal code, country)
 - Shipping address (or "same as billing" toggle)
-- Shipping method (radio list fetched from `/api/shipping-methods`)
+- Shipping method (radio list of the active Sanity shipping methods, read on the server by `app/checkout/page.tsx` and passed in)
 - Gift card code input (validated live against `/api/gift-cards/validate`)
 
 On "Continue to Payment":
@@ -155,9 +155,9 @@ await stripe.confirmPayment({ elements, redirect: 'if_required', ... })
 ```
 
 On success:
-- Redirects to `/checkout/success?payment_intent=pi_xxx`
-- Success page calls `GET /api/checkout/retrieve-stripe-payment-intent-status?payment_intent=pi_xxx`
-- Verifies `status === "succeeded"`, shows confirmation, clears cart
+- Redirects to `/checkout/success?payment_intent=pi_xxx&payment_intent_client_secret=…` (Stripe adds both on its own redirects; the form adds them when a card payment completes without one)
+- The success page is a server component. `getVerifiedPaymentStatus` ([`lib/payment-status.ts`](../lib/payment-status.ts)) retrieves the PaymentIntent and only trusts it if the client secret matches, so the PaymentIntent ID alone reveals nothing.
+- It shows the confirmation for `succeeded`, a processing or failed state otherwise, and "no payment found" without valid parameters. The cart is cleared only for a completed storefront order; gift card purchases leave it alone.
 
 ---
 
@@ -189,7 +189,7 @@ Displays in order:
 
 ## Shipping Methods
 
-Fetched from Sanity at checkout load time via `GET /api/shipping-methods`.
+Read live from Sanity (`getShippingMethods`, no cache) when `/checkout` renders on the server, and again by `lib/pricing.ts` when the PaymentIntent is created, so the price charged always matches an active method.
 
 **Sanity fields:** `id` (slug), `name`, `description`, `cost`, `isActive`, `order`
 

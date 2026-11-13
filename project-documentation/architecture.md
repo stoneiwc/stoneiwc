@@ -33,7 +33,6 @@ Everything is **one Vercel project**, deployed from this repo. There is no separ
 │  /api/gift-cards/create-payment-intent       ── Stripe   │  └───────────────┘
 │  /api/gift-cards/validate                    ── Sanity   │
 │  /api/validate-coupon                        ── Sanity   │
-│  /api/shipping-methods                       ── Sanity   │
 │  /api/contact                                ── Resend   │
 │  /api/revalidate                             ── Next.js  │
 │  /api/webhooks/stripe                ◀── Stripe → us ────┼──┐
@@ -163,12 +162,11 @@ The frontend **never writes to Sanity directly**. All writes go through API rout
 ```
 app/
 ├── api/                          Server routes (Stripe, Sanity writes, contact)
-│   ├── checkout/                 Storefront payment intent + status helpers
+│   ├── checkout/                 Storefront PaymentIntent creation
 │   ├── gift-cards/               Gift card PI creation + validation
 │   ├── webhooks/stripe/          Single Stripe webhook handler (both events + gift cards)
 │   ├── contact/                  Contact form + auto-reply
 │   ├── validate-coupon/          Coupon code check (server-only Sanity access)
-│   ├── shipping-methods/         Active shipping options
 │   └── revalidate/               On-demand ISR revalidation hook
 ├── products/                     Listing + detail pages (SSG + ISR)
 ├── checkout/                     Cart checkout + success page

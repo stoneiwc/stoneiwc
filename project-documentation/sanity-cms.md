@@ -146,7 +146,7 @@ Only coupons with `isActive == true` are returned by `getCoupons()`.
 
 ### Shipping Method (`studio/schemaTypes/shippingMethod.ts`)
 
-Available shipping options shown at checkout. Fetched via `GET /api/shipping-methods`.
+Available shipping options shown at checkout. Read live (`getShippingMethods`) by the checkout page and by server pricing.
 
 | Field | Type | Notes |
 |-------|------|-------|

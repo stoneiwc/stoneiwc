@@ -6,7 +6,7 @@ import { getStripe } from '@/lib/stripe-client'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
-import type { AppliedGiftCard } from '@/app/checkout/page'
+import type { AppliedGiftCard } from '@/components/checkout/types'
 import { HoneypotField } from '@/components/honeypot-field'
 import { HONEYPOT_FIELD } from '@/lib/honeypot'
 import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
@@ -132,6 +132,7 @@ interface SelfCheckoutSectionProps {
   appliedCoupon: { code?: string } | null
   discountAmount: number
   totalPrice: number
+  shippingMethods: SanityShippingMethod[]
   onShippingMethodChange: (method: string, cost: number) => void
   shippingCost: number
   appliedGiftCard: AppliedGiftCard | null
@@ -145,6 +146,7 @@ export default function SelfCheckoutSection({
   appliedCoupon,
   discountAmount,
   totalPrice,
+  shippingMethods,
   onShippingMethodChange,
   shippingCost,
   appliedGiftCard,
@@ -173,7 +175,6 @@ export default function SelfCheckoutSection({
     shippingMethod: '',
   }))
 
-  const [shippingMethods, setShippingMethods] = useState<SanityShippingMethod[]>([])
   const [stripePromise, setStripePromise] = useState<any>(null)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   // Remembered across re-initializations so editing details and continuing
@@ -212,22 +213,22 @@ export default function SelfCheckoutSection({
     }
   }
 
-  // Fetch shipping methods and restore saved selection
+  // Select the saved shipping method (or the first one). The methods come from
+  // the server with the page; localStorage is only readable after mount.
   useEffect(() => {
-    fetch('/api/shipping-methods')
-      .then((r) => r.json())
-      .then((methods: SanityShippingMethod[]) => {
-        setShippingMethods(methods)
-        const savedMethod =
-          (typeof window !== 'undefined' && localStorage.getItem('selectedShippingMethod')) ||
-          (methods[0]?.id ?? '')
-        const shipping = methods.find((m) => m.id === savedMethod)
-        if (shipping) {
-          setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
-          onShippingMethodChange(shipping.name, shipping.cost)
-        }
-      })
-  }, [onShippingMethodChange])
+    let savedMethod: string | null = null
+    try {
+      savedMethod = localStorage.getItem('selectedShippingMethod')
+    } catch {
+      // Storage blocked (private mode, etc.): fall back to the first method.
+    }
+    const shipping =
+      shippingMethods.find((m) => m.id === savedMethod) ?? shippingMethods[0]
+    if (shipping) {
+      setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
+      onShippingMethodChange(shipping.name, shipping.cost)
+    }
+  }, [shippingMethods, onShippingMethodChange])
 
   const updateField = <K extends keyof CheckoutFormState>(
     key: K,

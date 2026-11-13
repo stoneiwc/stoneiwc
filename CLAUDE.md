@@ -106,10 +106,8 @@ public/                Static assets
 | `POST /api/checkout/create-stripe-payment-intent` | Storefront checkout |
 | `POST /api/gift-cards/create-payment-intent` | Gift card purchase |
 | `GET  /api/gift-cards/validate` | Validate a gift card code |
-| `GET  /api/checkout/retrieve-stripe-payment-intent-status` | Payment status for the success page (needs the client secret) |
 | `POST /api/webhooks/stripe` | Stripe event handler (logic in `lib/stripe-webhook.ts`) |
 | `POST /api/validate-coupon` | Validate a Sanity coupon code |
-| `GET  /api/shipping-methods` | Fetch active shipping methods |
 | `POST /api/contact` | Contact form + auto-reply |
 | `POST /api/revalidate` | Trigger ISR cache revalidation |
 
