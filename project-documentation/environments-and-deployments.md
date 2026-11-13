@@ -66,11 +66,13 @@ Every variable below has a **scope**. Same key, different value per scope is sup
 
 This is used in some email templates and metadata. Wrong value → emails link to the wrong host.
 
-### Optional
+### Revalidation and rate limiting
 
-| Variable | Notes |
-|---|---|
-| `SANITY_WEBHOOK_SECRET` | If `/api/revalidate` is wired to Sanity webhooks; otherwise unused |
+| Variable | Production | Preview | Development | Notes |
+|---|---|---|---|---|
+| `SANITY_WEBHOOK_SECRET` | random secret | same or own | unset | Shared with the Sanity webhook (`x-webhook-secret` header). Without it `/api/revalidate` refuses every request. Setup: [sanity-cms.md](sanity-cms.md#on-demand-revalidation-sanity-webhook) |
+| `UPSTASH_REDIS_REST_URL` | Upstash REST URL | same | unset | Per-IP rate limits ([`lib/rate-limit.ts`](../lib/rate-limit.ts)). Unset → rate limiting is off (logged once). The Vercel Marketplace Upstash integration sets `KV_REST_API_URL` instead, which also works |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash REST token | same | unset | Pairs with the URL (or `KV_REST_API_TOKEN`). Secret |
 
 ---
 
@@ -93,7 +95,7 @@ Two webhook endpoints exist in Stripe — one in Test mode, one in Live mode. Ea
 
 | Mode | URL | Events | Used by |
 |---|---|---|---|
-| Test | `https://dev.stoneiwc.com/api/webhooks/stripe?x-vercel-protection-bypass=…&x-vercel-set-bypass-cookie=true` | `payment_intent.succeeded`, `payment_intent.payment_failed` | Preview deployments |
+| Test | `https://dev.stoneiwc.com/api/webhooks/stripe?x-vercel-protection-bypass=…&x-vercel-set-bypass-cookie=true` | `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled` | Preview deployments |
 | Live | `https://stoneiwc.com/api/webhooks/stripe` | Same | Production |
 
 > The `?x-vercel-protection-bypass=…` query string is only needed in Preview because **Vercel Deployment Protection** is enabled there by default — Stripe would otherwise hit a Vercel SSO/password challenge and get a 401. Production is public, so no bypass param is needed (or wanted — leaving it in production is a needless secret leak).
