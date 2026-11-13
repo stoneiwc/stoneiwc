@@ -14,6 +14,7 @@ next-env.d.ts
 project-documentation/last-point.md
 project-documentation/execution-map.md
 project-documentation/site-issues.md
+project-documentation/security-audit-*.md
 
 # Python
 scripts/venv/
