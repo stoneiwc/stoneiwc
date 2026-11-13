@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-vi.mock("@/lib/sanity.client", () => ({ client: { fetch: vi.fn() } }))
+vi.mock("@/lib/sanity.client", () => ({ readClient: { fetch: vi.fn() } }))
 vi.mock("@/lib/sanity.queries", () => ({ getCoupons: vi.fn(), getShippingMethods: vi.fn() }))
 vi.mock("@/lib/gift-cards", () => ({ getGiftCardByCode: vi.fn() }))
 
-import { client } from "@/lib/sanity.client"
+import { readClient as client } from "@/lib/sanity.client"
 import { getCoupons, getShippingMethods } from "@/lib/sanity.queries"
 import { getGiftCardByCode } from "@/lib/gift-cards"
 import { computeOrderPricing } from "@/lib/pricing"

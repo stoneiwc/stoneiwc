@@ -1,6 +1,6 @@
 import 'server-only'
 import { randomInt } from 'node:crypto'
-import { client } from './sanity.client'
+import { writeClient as client } from './sanity.client'
 import { isSanityConflict } from './sanity-errors'
 
 const VALID_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'

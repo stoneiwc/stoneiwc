@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("@/lib/sanity.client", () => ({
-  client: { fetch: vi.fn(), patch: vi.fn(), create: vi.fn() },
+  writeClient: { fetch: vi.fn(), patch: vi.fn(), create: vi.fn() },
 }))
 
-import { client } from "@/lib/sanity.client"
+import { writeClient as client } from "@/lib/sanity.client"
 import {
   claimGiftCardEmail,
   generateGiftCardCode,

@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import type { QueryParams } from '@sanity/client'
-import { client } from './sanity.client'
+import { readClient as client } from './sanity.client'
 import { Product } from './products'
 import { urlFor } from './sanity.image'
 import { CONTENT_REVALIDATE_SECONDS, type ContentType } from './sanity-tags'

@@ -123,7 +123,7 @@ public/                Static assets
 - **Prices in Stripe:** always in cents (e.g. `$100 → 10000`). Sanity and the cart use dollars.
 - **ISR revalidation:** page content goes through `contentFetch` in `lib/sanity.queries.ts` (cached, tagged with types from `lib/sanity-tags.ts`). Checkout data (coupons, shipping, pricing, orders, gift cards) is read live with `cache: 'no-store'`. Pages use `export const revalidate = 60`.
 - **Webhook idempotency:** every write is safe to repeat. Order emails go out only on the revision-checked `pending → paid` transition, gift cards are created once per PaymentIntent and emailed once (`emailedAt` claim), and the handler returns 500 whenever a Stripe retry could fix the problem. See `project-documentation/webhooks.md`.
-- **Server-only code:** `lib/sanity.client.ts` (holds the Sanity token) is `server-only`. Client components build image URLs with `lib/sanity.image.ts`, which doesn't import the client.
+- **Server-only code:** `lib/sanity.client.ts` (holds the Sanity token) is `server-only`. Use `readClient` for reads and `writeClient` only in `lib/orders.ts` and `lib/gift-cards.ts`. Client components build image URLs with `lib/sanity.image.ts`, which doesn't import the client.
 - **Metadata:** every page sets its own canonical URL and Open Graph tags with `pageMetadata()` from `lib/seo.ts`. The root layout deliberately sets neither.
 - **Public API routes** are rate-limited per IP with `rateLimit()` from `lib/rate-limit.ts` (Upstash Redis; off when its env vars are unset).
 - **Email reply-to:** all transactional emails set `replyTo: CONTACT_EMAIL_TO` so customer replies land in the team inbox.

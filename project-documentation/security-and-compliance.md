@@ -101,7 +101,7 @@ There is no formal data deletion API. Honor requests manually.
 ## Sanity access control
 
 - **The dataset must be private.** Orders (customer PII) and gift cards (bearer codes and balances) live in the same dataset as page content, and a public dataset lets anyone with the project ID (which is in the browser bundle) query every document. Check sanity.io/manage → Datasets → Visibility.
-- The `SANITY_API_TOKEN` used at runtime has **Editor** permission, needed to create and update orders and gift cards. Prefer separate tokens per Vercel environment so a leaked dev or preview token isn't a production write token.
+- The `SANITY_API_TOKEN` used at runtime has **Editor** permission, needed to create and update orders and gift cards. Only `writeClient` (`lib/orders.ts`, `lib/gift-cards.ts`) uses it; the read-only paths use `readClient`, which takes a Viewer token from `SANITY_READ_TOKEN` when set. Prefer separate tokens per Vercel environment so a leaked dev or preview token isn't a production write token.
 - Other tokens (e.g. for dev tools, Sanity Vision queries) should be **Viewer** unless they need to write. Delete tokens nobody uses (sanity.io/manage → API → Tokens), and never hard-code one, even as a fallback: the repo is public, so git history is public too.
 - Sanity Studio access is per-user — managed in Sanity Manage → Members. Don't share login credentials.
 - The browser never talks to Sanity. [`lib/sanity.client.ts`](../lib/sanity.client.ts) imports `server-only`, so the build fails if a client component ever imports it, and client components build image URLs with [`lib/sanity.image.ts`](../lib/sanity.image.ts), which doesn't touch the client or token. This is also why `SANITY_API_TOKEN` is *not* prefixed `NEXT_PUBLIC_*`.

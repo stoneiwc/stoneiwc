@@ -30,6 +30,7 @@ Every variable below has a **scope**. Same key, different value per scope is sup
 | `NEXT_PUBLIC_SANITY_DATASET` | `production` | `production` | `production` | We use one dataset for all environments |
 | `NEXT_PUBLIC_SANITY_API_VERSION` | same | same | same | A date string |
 | `SANITY_API_TOKEN` | Editor token | Editor token | Editor token | Same token; **Editor** permission required for order + gift card writes |
+| `SANITY_READ_TOKEN` | Viewer token (optional) | Viewer token (optional) | unset | Used by the read-only paths (pages, pricing, coupons, shipping) via `readClient`. Unset → they use `SANITY_API_TOKEN`. Lets those paths run without write access |
 
 > Why one dataset across all scopes: test orders in Sanity are easy to filter out (status, prefix, etc.) and there's no need to maintain a separate Studio. If this becomes painful, create a `development` Sanity dataset and split here.
 

@@ -27,7 +27,9 @@ Initialized with:
 - `dataset`: `NEXT_PUBLIC_SANITY_DATASET`
 - `apiVersion`: `NEXT_PUBLIC_SANITY_API_VERSION`
 - `useCdn: false`: reads go to the live API. Next's Data Cache does the caching (below); the API CDN could hand a just-published change back stale after a webhook revalidation.
-- `token`: `SANITY_API_TOKEN`, server-only (`lib/sanity.client.ts` imports `server-only`). Needed for writes (orders, gift cards) and for every read once the dataset is private.
+- Two clients, both server-only (`lib/sanity.client.ts` imports `server-only`):
+  - `readClient`: pages, pricing, coupons, shipping methods. Token: `SANITY_READ_TOKEN` (a Viewer token) if set, else `SANITY_API_TOKEN`. A token is needed for every read once the dataset is private.
+  - `writeClient`: orders and gift cards (and the reads that guard their writes). Token: `SANITY_API_TOKEN` (Editor).
 
 > **The `production` dataset must be private.** Orders (customer names, emails, addresses) and gift cards (codes and balances) live in it, and a public dataset lets anyone with the project ID query them. Set it in sanity.io/manage → Datasets. The site reads with the token, so nothing else changes.
 

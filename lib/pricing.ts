@@ -1,5 +1,5 @@
 import 'server-only'
-import { client } from './sanity.client'
+import { readClient as client } from './sanity.client'
 import { getCoupons, getShippingMethods } from './sanity.queries'
 import { getGiftCardByCode } from './gift-cards'
 import { giftCardAmount } from './gift-card-math'
