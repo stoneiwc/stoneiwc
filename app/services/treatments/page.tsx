@@ -1,13 +1,15 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import { PageHeader } from "@/components/page-header"
 const BOOKING_URL = "/book"
 import Link from "next/link"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Professional Treatments",
   description:
     "Over 100 holistic treatments addressing chronic conditions, skin imperfections, internal health, and more.",
-}
+  path: "/services/treatments",
+})
 
 const treatmentCategories = [
   {

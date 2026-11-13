@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import { PageHeader } from "@/components/page-header"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "StoneIWC Podcast",
   description: "Listen to the StoneIWC Podcast for wellness insights and conversations.",
-}
+  path: "/featured/podcast",
+})
 
 const SPOTIFY_SHOW_ID = "4o2EoOQx3dyY6BAFrorBql"
 const SPOTIFY_SHOW_URL = `https://open.spotify.com/show/${SPOTIFY_SHOW_ID}`

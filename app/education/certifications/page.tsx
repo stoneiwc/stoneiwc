@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -18,11 +19,12 @@ import {
 import { getCertificationImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Holistic Practitioner Certifications",
   description:
     "Earn your holistic practitioner certification at Stone IWC. Training programs in cupping, lymphatic drainage, non-invasive cosmetic procedures, bodywork, and more.",
-}
+  path: "/education/certifications",
+})
 
 const certificationPrograms = [
   {

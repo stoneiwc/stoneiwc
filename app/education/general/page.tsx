@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { BOOKING_URL } from "@/lib/navigation"
@@ -12,11 +13,12 @@ import {
   ArrowRight,
 } from "lucide-react"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "General Services Information",
   description:
     "Everything you need to know about Stone IWC services -- how our concierge model works, what to expect, and how we approach holistic wellness.",
-}
+  path: "/education/general",
+})
 
 const serviceTypes = [
   {

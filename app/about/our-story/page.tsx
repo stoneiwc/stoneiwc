@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -9,11 +10,12 @@ import { urlFor } from "@/lib/sanity.image"
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Our Story",
   description:
     "50 years of holistic healing, a Presidential award, and a mission to serve our community.",
-}
+  path: "/about/our-story",
+})
 
 const milestones = [
   {

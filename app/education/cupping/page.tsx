@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -6,11 +7,12 @@ import { Flame, Droplets, Wind, CircleDot, MoveRight, Zap } from "lucide-react"
 import { getCuppingImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Cupping Therapy",
   description:
     "Learn about traditional fire cupping -- our signature modality refined over 50 years. Types, benefits, and what to expect.",
-}
+  path: "/education/cupping",
+})
 
 const cuppingTypes = [
   {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -9,13 +10,11 @@ import { urlFor } from "@/lib/sanity.image"
 const DESCRIPTION =
   "Learn about Stone International Wellness Center -- holistic practitioners with 50 years of experience, honoring both Eastern and Western medicine."
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About Us",
   description: DESCRIPTION,
-  alternates: { canonical: "/about" },
-  openGraph: { title: "About Us | Stone IWC", description: DESCRIPTION, url: "/about", type: "website" },
-  twitter: { card: "summary_large_image", title: "About Us | Stone IWC", description: DESCRIPTION },
-}
+  path: "/about",
+})
 
 export const revalidate = 60
 

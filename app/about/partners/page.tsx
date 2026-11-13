@@ -1,14 +1,16 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import { PageHeader } from "@/components/page-header"
 import { getPartners } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 import { ArrowUpRight } from "lucide-react"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Partners & Affiliates",
   description: "Our trusted partners and affiliate network at Stone International Wellness Center.",
-}
+  path: "/about/partners",
+})
 
 export const revalidate = 60
 

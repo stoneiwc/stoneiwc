@@ -1,13 +1,15 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import { getPressItems } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 import { PageHeader } from "@/components/page-header"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Press",
   description: "Press coverage and news about Stone International Wellness Center.",
-}
+  path: "/featured/press",
+})
 
 export const revalidate = 60
 

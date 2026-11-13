@@ -8,7 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/studio/", "/checkout/", "/view-cart/"],
+        // No trailing slashes: "/checkout/" doesn't match "/checkout" itself.
+        disallow: ["/api/", "/checkout", "/view-cart"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

@@ -1,13 +1,15 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import { PageHeader } from "@/components/page-header"
 import { getQcShowFlyer, getQcShowEpisodes } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "The QC Show",
   description: "Watch The QC Show featuring Stone International Wellness Center.",
-}
+  path: "/featured/qc-show",
+})
 
 export const revalidate = 60
 

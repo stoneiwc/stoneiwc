@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Link from "next/link"
 import Image from "next/image"
 import { PageHeader } from "@/components/page-header"
@@ -16,11 +17,12 @@ import { urlFor } from "@/lib/sanity.image"
 
 const BOOKING_URL = "/book/consultation-virtual-free"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Virtual Holistic Consultations",
   description:
     "Online wellness consultations with our experienced holistic practitioners. Personalized guidance for lymphatic care, body contouring, nutrition, and more.",
-}
+  path: "/services/virtual-consultations",
+})
 
 const benefits = [
   {

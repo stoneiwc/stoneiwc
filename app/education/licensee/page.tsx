@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -16,11 +17,12 @@ import {
   Briefcase,
 } from "lucide-react"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Licensee Programs",
   description:
     "Become a licensed Stone IWC operator. Our licensee program allows qualified practitioners to operate under the Stone IWC brand and model in their market.",
-}
+  path: "/education/licensee",
+})
 
 const licenseeFeatures = [
   {

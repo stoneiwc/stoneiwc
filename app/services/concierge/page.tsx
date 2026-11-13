@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -17,11 +18,12 @@ import {
 import { getConciergeImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Concierge Services",
   description:
     "We come to you -- corporate offices, churches, events, homes, hotels, hospitals, and more. Many of our holistic services delivered to your location.",
-}
+  path: "/services/concierge",
+})
 
 const locations = [
   {

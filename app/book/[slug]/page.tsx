@@ -3,6 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Clock, ArrowLeft } from "lucide-react"
 import { CalBooker } from "@/components/cal-booker"
+import { pageMetadata } from "@/lib/seo"
 import {
   getEventTypes,
   getCategoryFromSlug,
@@ -35,10 +36,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const events = await getEventTypes(username).catch(() => [])
   const event = events.find((e) => e.slug === slug)
 
-  return {
+  return pageMetadata({
     title: event ? `Book ${event.title}` : "Book a Service",
-    description: event?.description ?? "Schedule your appointment with Stone IWC.",
-  }
+    // Cal.com descriptions can be long and contain newlines; keep the meta tag short.
+    description: (event?.description ?? "Schedule your appointment with Stone IWC.").replace(/\s+/g, " ").slice(0, 300),
+    path: `/book/${slug}`,
+  })
 }
 
 export default async function BookingSlugPage({ params }: Props) {

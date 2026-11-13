@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { getAllProductSlugs, getProductBySlug } from "@/lib/sanity.queries"
 import { ProductDetail } from "@/components/products/product-detail"
 import { JsonLd } from "@/components/seo/json-ld"
+import { pageMetadata } from "@/lib/seo"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -18,31 +19,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const product = await getProductBySlug(slug)
-  if (!product) return { title: "Product Not Found" }
+  if (!product) return { title: "Product Not Found", robots: { index: false } }
 
-  const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com"
-  const canonicalUrl = `${baseUrl}/products/${slug}`
-
-  return {
+  return pageMetadata({
     title: product.name,
     description: product.shortDescription,
-    alternates: { canonical: canonicalUrl },
-    openGraph: {
-      title: product.name,
-      description: product.shortDescription,
-      url: canonicalUrl,
-      type: "website",
-      ...(product.image && {
-        images: [{ url: product.image, alt: product.name }],
-      }),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: product.name,
-      description: product.shortDescription,
-      ...(product.image && { images: [product.image] }),
-    },
-  }
+    path: `/products/${slug}`,
+    images: product.image ? [{ url: product.image, alt: product.name }] : undefined,
+  })
 }
 
 export default async function ProductPage({ params }: Props) {

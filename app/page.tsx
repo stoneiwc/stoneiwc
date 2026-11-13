@@ -7,7 +7,22 @@ import { ProductsSection } from "@/components/home/products-section"
 import { Testimonials } from "@/components/home/testimonials"
 import { PoliciesSection } from "@/components/home/policies-section"
 import { CTASection } from "@/components/home/cta-section"
+import type { Metadata } from "next"
 import { getHeroSlides, getHomePageImages } from "@/lib/sanity.queries"
+
+// Title and description come from the root layout; only the URL is the
+// homepage's own. openGraph is repeated whole because Next replaces it
+// rather than merging it with the root's.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Stone International Wellness Center",
+    title: "Stone International Wellness Center",
+    url: "/",
+    locale: "en_US",
+  },
+}
 
 // Revalidate this page every 60 seconds
 export const revalidate = 60

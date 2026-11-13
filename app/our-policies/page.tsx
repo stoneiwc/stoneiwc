@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import { PageHeader } from "@/components/page-header"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Our Policies",
   description:
     "Review Stone International Wellness Center policies before scheduling your appointment.",
-}
+  path: "/our-policies",
+})
 
 const policies = [
   {

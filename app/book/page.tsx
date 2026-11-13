@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { Clock, ArrowRight } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { pageMetadata } from "@/lib/seo"
 import { BookingSidebar } from "@/components/booking-sidebar"
 import { BookingSearch } from "@/components/booking-search"
 import { BookingMobileBar } from "@/components/booking-mobile-bar"
@@ -93,13 +94,11 @@ const gridClass = "grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
 const DESCRIPTION =
   "Schedule a professional treatment, concierge visit, or virtual consultation with Stone IWC."
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Book a Service",
   description: DESCRIPTION,
-  alternates: { canonical: "/book" },
-  openGraph: { title: "Book a Service | Stone IWC", description: DESCRIPTION, url: "/book", type: "website" },
-  twitter: { card: "summary_large_image", title: "Book a Service | Stone IWC", description: DESCRIPTION },
-}
+  path: "/book",
+})
 
 type Props = {
   searchParams: Promise<{ category?: string; search?: string }>
