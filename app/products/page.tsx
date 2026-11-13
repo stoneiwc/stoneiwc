@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/seo"
 import { Suspense } from "react"
 import { PageHeader } from "@/components/page-header"
 import { ProductsGrid } from "@/components/products/products-grid"
+import { ProductsGridFallback } from "@/components/products/products-grid-fallback"
 import { getAllProducts, getAllCategories } from "@/lib/sanity.queries"
 
 const DESCRIPTION =
@@ -32,7 +33,7 @@ export default async function ProductsPage() {
         subtitle="Premium wellness essentials hand-selected by our practitioners to complement your healing journey."
       />
       <section className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
-        <Suspense>
+        <Suspense fallback={<ProductsGridFallback products={products} />}>
           <ProductsGrid products={products} categories={categories} />
         </Suspense>
       </section>
