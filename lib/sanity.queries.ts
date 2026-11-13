@@ -1,4 +1,4 @@
-import type { QueryParams } from 'next-sanity'
+import type { QueryParams } from '@sanity/client'
 import { client } from './sanity.client'
 import { Product } from './products'
 import { urlFor } from './sanity.image'

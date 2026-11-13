@@ -12,7 +12,7 @@ All data access goes through GROQ queries in `lib/sanity.queries.ts`. The fronte
 
 | File | Purpose |
 |------|---------|
-| `lib/sanity.client.ts` | Sanity client initialization |
+| `lib/sanity.client.ts` | Sanity client initialization (`@sanity/client` directly; `next-sanity` was dropped because it pulled the whole Studio and its ~150 vulnerable transitive packages into the website's dependencies) |
 | `lib/sanity.queries.ts` | All GROQ queries and TypeScript types |
 | `lib/sanity.image.ts` | Image URL builder (`urlFor`) |
 | `studio/schemaTypes/` | Schema definitions for all content types |

@@ -1,5 +1,5 @@
 import 'server-only'
-import { createClient } from 'next-sanity'
+import { createClient } from '@sanity/client'
 
 export const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
