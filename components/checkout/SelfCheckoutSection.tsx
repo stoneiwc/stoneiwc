@@ -827,13 +827,22 @@ export default function SelfCheckoutSection({
               </div>
               <div>{form.email}</div>
               <div>{form.phone}</div>
-              <div>
-                {form.addressLine1}
-                {form.addressLine2 && `, ${form.addressLine2}`}
+              {/* The address the order ships to: the separate shipping address
+                  when one was entered (that's what the server sends to Stripe
+                  and the order), otherwise the billing address. */}
+              <div className="pt-1">
+                <span className="text-foreground">Ships to: </span>
+                {form.shippingSameAsBilling
+                  ? `${form.addressLine1}${form.addressLine2 ? `, ${form.addressLine2}` : ''}, ${form.city}, ${form.state} ${form.postalCode}`
+                  : `${form.shippingAddressLine1}${form.shippingAddressLine2 ? `, ${form.shippingAddressLine2}` : ''}, ${form.shippingCity}, ${form.shippingState} ${form.shippingPostalCode}`}
               </div>
-              <div>
-                {form.city}, {form.state} {form.postalCode}
-              </div>
+              {!form.shippingSameAsBilling && (
+                <div>
+                  <span className="text-foreground">Billing: </span>
+                  {form.addressLine1}
+                  {form.addressLine2 && `, ${form.addressLine2}`}, {form.city}, {form.state} {form.postalCode}
+                </div>
+              )}
             </div>
           </div>
 
