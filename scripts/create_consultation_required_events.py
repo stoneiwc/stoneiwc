@@ -1,6 +1,12 @@
 import requests
 from config import BASE_URL, LOCATION_ADDRESS, WORK_HOURS_SCHEDULE_ID, HEADERS as headers
 
+# Price of every consultation-required service, in cents. Matches what these
+# events are set to in Cal.com ($250 as of the 2026-10-31 booking review).
+# This script overwrites the price of existing events, so check Cal.com before
+# running it and update this if the price has changed.
+CONSULTATION_REQUIRED_PRICE_CENTS = 25000
+
 
 def get_existing_events():
     """Fetch all existing event types and return a dict of slug -> id."""
@@ -75,7 +81,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "Scalp Micropigmentation",
         "slug": "micropigmentation-consultation-scalp-micropigmentation",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first.\n\n"
@@ -90,7 +96,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "Campbell Spot",
         "slug": "skin-imperfection-consultation-campbell-spot",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first.\n\n"
@@ -103,7 +109,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "Cherry Angioma",
         "slug": "skin-imperfection-consultation-cherry-angioma",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first.\n\n"
@@ -116,7 +122,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "Large Cyst Removal",
         "slug": "skin-imperfection-consultation-large-cyst-removal",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first.\n\n"
@@ -129,7 +135,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "Skin Imperfection - Pigmentation Removal",
         "slug": "skin-imperfection-consultation-pigmentation-removal",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first.\n\n"
@@ -143,7 +149,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "StoneIWC Cooking On-Site",
         "slug": "wellness-consultation-stoneiwc-cooking-on-site",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first."
@@ -154,7 +160,7 @@ CONSULTATION_REQUIRED_SERVICES = [
         "title": "Construction Wellness Challenge Package",
         "slug": "concierge-consultation-construction-wellness-challenge-package",
         "length_minutes": 30,
-        "price_cents": 0,
+        "price_cents": CONSULTATION_REQUIRED_PRICE_CENTS,
         "description": (
             "A consultation is required before booking this service. "
             "Please schedule a consultation appointment first."
