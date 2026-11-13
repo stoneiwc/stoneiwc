@@ -5,7 +5,7 @@ export interface Product {
   price: number
   isDiscount?: boolean
   originalPrice?: number
-  description: string
+  description?: string
   shortDescription: string
   image: string
   category: string

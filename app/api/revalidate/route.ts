@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto"
 import { revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
+import { CAL_EVENTS_REVALIDATE_TYPE, CAL_EVENTS_TAG, isContentType } from "@/lib/sanity-tags"
 
 // Constant-time comparison. Hashing first gives both sides the same length,
 // which timingSafeEqual requires.
@@ -10,27 +11,12 @@ function secretMatches(provided: string | null, expected: string): boolean {
   return timingSafeEqual(digest(provided), digest(expected))
 }
 
-// Map Sanity _type → cache tag(s) to revalidate
-const TYPE_TAG_MAP: Record<string, string[]> = {
-  product:                       ["product"],
-  category:                      ["category"],
-  heroSlide:                     ["heroSlide"],
-  homePageImages:                ["homePageImages"],
-  servicesPageImages:            ["servicesPageImages"],
-  conciergeImages:               ["conciergeImages"],
-  virtualConsultationsImages:    ["virtualConsultationsImages"],
-  certificationImages:           ["certificationImages"],
-  licenseeProgramImages:         ["licenseeProgramImages"],
-  cuppingImages:                 ["cuppingImages"],
-  pressItem:                     ["pressItem"],
-  mediaItem:                     ["mediaItem"],
-  qcShowFlyer:                   ["qcShowFlyer"],
-  qcShowEpisode:                 ["qcShowEpisode"],
-  ourStoryImages:                ["ourStoryImages"],
-  teamMember:                    ["teamMember"],
-  partner:                       ["partner"],
-  coupon:                        ["coupon"],
-  shippingMethod:                ["shippingMethod"],
+// Each content type is its own cache tag (lib/sanity-tags.ts). Coupons,
+// shipping methods, orders and gift cards are read live, so publishing them
+// needs no revalidation.
+function tagFor(type: string): string | null {
+  if (type === CAL_EVENTS_REVALIDATE_TYPE) return CAL_EVENTS_TAG
+  return isContentType(type) ? type : null
 }
 
 export async function POST(req: NextRequest) {
@@ -44,24 +30,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
   }
 
-  let body: { _type?: string }
+  let body: { _type?: unknown }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ message: "Invalid JSON" }, { status: 400 })
   }
 
-  const type = body._type
-  if (!type) {
+  const type = body?._type
+  if (typeof type !== "string" || !type) {
     return NextResponse.json({ message: "Missing _type" }, { status: 400 })
   }
 
-  const tags = TYPE_TAG_MAP[type]
-  if (!tags) {
-    return NextResponse.json({ message: `Unknown type: ${type}` }, { status: 200 })
+  const tag = tagFor(type)
+  if (!tag) {
+    // 200 so Sanity doesn't retry publishes of types no page caches.
+    return NextResponse.json({ revalidated: false, message: `Nothing cached for type: ${type}` })
   }
 
-  for (const tag of tags) revalidateTag(tag, "default")
-
-  return NextResponse.json({ revalidated: true, tags })
+  revalidateTag(tag, "default")
+  return NextResponse.json({ revalidated: true, tags: [tag] })
 }

@@ -52,6 +52,7 @@ async function getGiftCardByPaymentIntent(paymentIntentId: string): Promise<Gift
   const result = await client.fetch<GiftCardDoc | null>(
     `*[_type == "giftCard" && paymentIntentId == $pid][0]{ ${GIFT_CARD_FIELDS} }`,
     { pid: paymentIntentId },
+    { cache: 'no-store' },
   )
   return result ?? null
 }
@@ -70,6 +71,7 @@ export async function getOrCreateGiftCardForPayment(input: CreateGiftCardInput):
     const collision = await client.fetch<{ _id: string } | null>(
       `*[_type == "giftCard" && code == $code][0]{ _id }`,
       { code },
+      { cache: 'no-store' },
     )
     if (collision) continue
 
@@ -129,6 +131,7 @@ export async function getGiftCardByCode(code: string): Promise<GiftCardDoc | nul
   const result = await client.fetch<GiftCardDoc | null>(
     `*[_type == "giftCard" && code == $code][0]{ ${GIFT_CARD_FIELDS} }`,
     { code: normalized },
+    { cache: 'no-store' },
   )
   return result ?? null
 }

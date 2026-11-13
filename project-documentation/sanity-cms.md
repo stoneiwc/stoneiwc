@@ -26,32 +26,43 @@ Initialized with:
 - `projectId`: `NEXT_PUBLIC_SANITY_PROJECT_ID`
 - `dataset`: `NEXT_PUBLIC_SANITY_DATASET`
 - `apiVersion`: `NEXT_PUBLIC_SANITY_API_VERSION`
-- `useCdn: true` for reads (cached CDN)
-- `token`: `SANITY_API_TOKEN` for write access (used in revalidation)
+- `useCdn: false`: reads go to the live API. Next's Data Cache does the caching (below); the API CDN could hand a just-published change back stale after a webhook revalidation.
+- `token`: `SANITY_API_TOKEN`, server-only (`lib/sanity.client.ts` imports `server-only`). Needed for writes (orders, gift cards) and for every read once the dataset is private.
+
+> **The `production` dataset must be private.** Orders (customer names, emails, addresses) and gift cards (codes and balances) live in it, and a public dataset lets anyone with the project ID query them. Set it in sanity.io/manage → Datasets. The site reads with the token, so nothing else changes.
 
 ---
 
 ## Caching & ISR
 
-All Sanity queries use Next.js fetch cache tags for selective invalidation:
+Two kinds of reads in [`lib/sanity.queries.ts`](../lib/sanity.queries.ts):
+
+- **Page content** goes through `contentFetch`, which caches the result in Next's Data Cache for `CONTENT_REVALIDATE_SECONDS` and tags it with the document types it reads.
+- **Checkout data** (coupons, shipping methods, and everything in `lib/pricing.ts`, `lib/orders.ts`, `lib/gift-cards.ts`) is read live with `cache: 'no-store'`, so a deactivated coupon or a price change applies to the next order.
 
 ```ts
-client.fetch(query, params, { next: { tags: ["product"] } })
+contentFetch(query, params, ['product', 'category'])
 ```
 
-**Pages that use ISR:**
+Each content type is its own cache tag. The list is `CONTENT_TYPES` in [`lib/sanity-tags.ts`](../lib/sanity-tags.ts); `contentFetch` only accepts types from it, so a query can't use a tag the webhook doesn't know.
 
-| Page | Revalidate |
-|------|-----------|
-| `/` (homepage) | 60s |
-| `/about` | 60s |
-| `/education` | 60s |
-| `/featured` | 60s |
-| `/products` | 60s |
-| `/products/[slug]` | 60s |
-| `/education/articles/[slug]` | 60s |
+Pages backed by Sanity export `revalidate = 60`, matching `CONTENT_REVALIDATE_SECONDS`.
 
-**Cache invalidation:** `POST /api/revalidate` can trigger on-demand revalidation using Sanity webhooks or manual calls.
+### On-demand revalidation (Sanity webhook)
+
+`POST /api/revalidate` revalidates the tag named by the body's `_type`. It needs the `x-webhook-secret` header to match `SANITY_WEBHOOK_SECRET`, compared in constant time, and refuses everything if the variable is unset.
+
+To wire it up, go to sanity.io/manage → API → Webhooks → Create:
+- **URL:** `https://stoneiwc.com/api/revalidate` (and a second webhook for the Preview URL if wanted)
+- **Trigger on:** Create, Update, Delete
+- **Filter:** leave empty
+- **Projection:** `{_type}`
+- **HTTP method:** POST
+- **HTTP headers:** `x-webhook-secret: <SANITY_WEBHOOK_SECRET>`
+
+Once publishes are confirmed to refresh pages within seconds, raise `CONTENT_REVALIDATE_SECONDS` and every page's `export const revalidate` from 60 to 3600. That way Sanity is read hourly instead of every minute.
+
+`{ "_type": "calEvents" }` refreshes the booking pages straight after a change in Cal.com (they otherwise refresh every 5 minutes).
 
 ---
 

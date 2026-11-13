@@ -80,6 +80,7 @@ export async function computeOrderPricing(input: {
       _id, name, "slug": slug.current, price, isDiscount, discountedPrice
     }`,
     { ids },
+    { cache: 'no-store' },
   )
   const byId = new Map(products.map((p) => [p._id, p]))
  

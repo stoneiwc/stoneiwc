@@ -74,6 +74,7 @@ async function uniqueOrderNumber(preferred?: string): Promise<string> {
     const collision = await client.fetch<{ _id: string } | null>(
       `*[_type == "order" && orderNumber == $orderNumber][0]{ _id }`,
       { orderNumber },
+      { cache: 'no-store' },
     )
     if (!collision) return orderNumber
   }
@@ -95,6 +96,7 @@ export async function createPendingOrder(
   } | null>(
     `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, orderNumber, status }`,
     { pid: input.stripePaymentIntentId },
+    { cache: 'no-store' },
   )
   if (existing) {
     if (existing.status === 'pending') {
@@ -191,6 +193,7 @@ export async function markOrderPaid(
       shippingMethod, shippingCost, giftCardCode, giftCardApplied, total
     }`,
     { pid: stripePaymentIntentId },
+    { cache: 'no-store' },
   )
   if (!order) {
     return { transitioned: false, order: null }
@@ -297,6 +300,7 @@ export async function markOrderFailed(stripePaymentIntentId: string): Promise<vo
   const order = await client.fetch<{ _id: string; status: OrderStatus } | null>(
     `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, status }`,
     { pid: stripePaymentIntentId },
+    { cache: 'no-store' },
   )
   if (!order) return
   if (order.status !== 'pending') return
@@ -308,6 +312,7 @@ export async function markOrderCanceled(stripePaymentIntentId: string): Promise<
   const order = await client.fetch<{ _id: string; status: OrderStatus } | null>(
     `*[_type == "order" && stripePaymentIntentId == $pid][0]{ _id, status }`,
     { pid: stripePaymentIntentId },
+    { cache: 'no-store' },
   )
   if (!order) return
   if (order.status !== 'pending') return
