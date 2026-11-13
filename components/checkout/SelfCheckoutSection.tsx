@@ -178,7 +178,12 @@ export default function SelfCheckoutSection({
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   // Remembered across re-initializations so editing details and continuing
   // again reuses the same PaymentIntent instead of creating a duplicate order.
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
+  // The server only reuses it when the client secret matches, which proves
+  // this browser created it.
+  const [reusablePaymentIntent, setReusablePaymentIntent] = useState<{
+    id: string
+    clientSecret: string
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -317,7 +322,8 @@ export default function SelfCheckoutSection({
           phone: form.phone,
           giftCardCode: appliedGiftCard?.code,
           giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
-          paymentIntentId,
+          paymentIntentId: reusablePaymentIntent?.id,
+          paymentIntentClientSecret: reusablePaymentIntent?.clientSecret,
           [HONEYPOT_FIELD]: honeypotRef.current?.value ?? '',
           billingSameAsShipping: form.shippingSameAsBilling,
           shippingAddress: {
@@ -350,7 +356,7 @@ export default function SelfCheckoutSection({
       }
 
       if (data.paymentIntentId) {
-        setPaymentIntentId(data.paymentIntentId)
+        setReusablePaymentIntent({ id: data.paymentIntentId, clientSecret: data.clientSecret })
       }
       setClientSecret(data.clientSecret)
     } catch (err) {

@@ -46,6 +46,7 @@ type CreateStripePaymentIntentBody = HoneypotFields & {
   giftCardCode?: string
   giftCardAppliedAmount?: number
   paymentIntentId?: string
+  paymentIntentClientSecret?: string
 }
 
 export async function POST(request: Request) {
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
       phone,
       giftCardCode,
       paymentIntentId: existingPaymentIntentId,
+      paymentIntentClientSecret: existingClientSecret,
     } = body
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -160,11 +162,19 @@ export async function POST(request: Request) {
         }
       : undefined
 
+    // Reuse the caller's earlier PaymentIntent (the customer went back to edit
+    // their details) only when they also present its client secret. A
+    // PaymentIntent ID alone isn't proof of ownership, and reusing it would let
+    // anyone who learned one change its amount, email and pending order.
     let paymentIntent: Stripe.PaymentIntent | null = null
-    if (existingPaymentIntentId) {
+    if (existingPaymentIntentId && existingClientSecret) {
       try {
         const existing = await stripe.paymentIntents.retrieve(existingPaymentIntentId)
-        if (existing.status === 'requires_payment_method') {
+        if (
+          existing.client_secret === existingClientSecret &&
+          existing.metadata?.order_type === 'storefront' &&
+          existing.status === 'requires_payment_method'
+        ) {
           paymentIntent = await stripe.paymentIntents.update(existing.id, {
             amount: amountInCents,
             receipt_email: email,
