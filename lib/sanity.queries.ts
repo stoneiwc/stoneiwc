@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import type { QueryParams } from '@sanity/client'
 import { client } from './sanity.client'
 import { Product } from './products'
@@ -124,13 +125,15 @@ export async function getAllProducts(): Promise<Product[]> {
   return products.map(transformProduct)
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+// cache(): generateMetadata and the page both ask for the product; this makes
+// it one query per request.
+export const getProductBySlug = cache(async (slug: string): Promise<Product | null> => {
   const query = `*[_type == "product" && slug.current == $slug][0] {
     ${productDetailProjection}
   }`
   const product = await contentFetch<SanityProduct | null>(query, { slug }, PRODUCT_TAGS)
   return product ? transformProduct(product) : null
-}
+})
 
 export async function getFeaturedProducts(): Promise<Product[]> {
   const query = `*[_type == "product" && featured == true] | order(name asc) {

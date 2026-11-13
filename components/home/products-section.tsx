@@ -1,16 +1,19 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Gift } from "lucide-react"
-import { getFeaturedProducts, getProductBySlug } from "@/lib/sanity.queries"
+import type { Product } from "@/lib/products"
 import { ProductCard } from "@/components/products/product-card"
 import { GIFT_CARD_SLUG } from "@/lib/constants"
 
-export async function ProductsSection() {
-  const [giftCard, featuredProducts] = await Promise.all([
-    getProductBySlug(GIFT_CARD_SLUG),
-    getFeaturedProducts(),
-  ])
-
+// Data comes from the home page, which fetches everything in one Promise.all
+// rather than this section starting a second round of queries after it.
+export function ProductsSection({
+  giftCard,
+  featuredProducts,
+}: {
+  giftCard: Product | null
+  featuredProducts: Product[]
+}) {
   const featuredWithoutGiftCard = featuredProducts.filter(
     (p) => p.slug !== GIFT_CARD_SLUG
   )

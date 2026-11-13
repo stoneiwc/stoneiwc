@@ -10,6 +10,15 @@ export type CalEventType = {
   currency: string
 }
 
+// What client components (booking search) get. Cal.com's API returns far
+// more per event (locations, booking fields, host settings); passing whole
+// objects to a client component serializes all of it into every /book page.
+export type CalEventSummary = Pick<CalEventType, "id" | "slug" | "title" | "description">
+
+export function toEventSummaries(events: CalEventType[]): CalEventSummary[] {
+  return events.map(({ id, slug, title, description }) => ({ id, slug, title, description }))
+}
+
 export const BOOKING_CATEGORIES = [
   // Head
   { value: "hair",                         label: "Hair",                               slugPrefix: "hair-" },

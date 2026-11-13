@@ -12,6 +12,7 @@ import {
   getEventTypes,
   filterEventsByCategory,
   filterEventsBySearch,
+  toEventSummaries,
   type BookingCategory,
   type CalEventType,
 } from "@/lib/cal-api"
@@ -120,6 +121,8 @@ export default async function BookPage({ searchParams }: Props) {
   }
   const categoryFiltered = filterEventsByCategory(allEvents, activeCategory)
   const events = filterEventsBySearch(categoryFiltered, search ?? "")
+  // Only the fields the client-side search needs go into the page payload.
+  const searchableEvents = toEventSummaries(allEvents)
 
   // On the unfiltered view, pin the general consultation and group the rest
   // by category; filtered and search views stay a flat grid.
@@ -158,13 +161,13 @@ export default async function BookPage({ searchParams }: Props) {
             <Suspense>
               {/* Desktop sidebar */}
               <aside className="hidden lg:block w-56 shrink-0 sticky top-28">
-                <BookingSearch events={allEvents} />
+                <BookingSearch events={searchableEvents} />
                 <BookingSidebar />
               </aside>
 
               {/* Mobile search + filter sheet */}
               <div className="lg:hidden">
-                <BookingMobileBar events={allEvents} />
+                <BookingMobileBar events={searchableEvents} />
               </div>
             </Suspense>
 

@@ -8,7 +8,13 @@ import { Testimonials } from "@/components/home/testimonials"
 import { PoliciesSection } from "@/components/home/policies-section"
 import { CTASection } from "@/components/home/cta-section"
 import type { Metadata } from "next"
-import { getHeroSlides, getHomePageImages } from "@/lib/sanity.queries"
+import {
+  getFeaturedProducts,
+  getHeroSlides,
+  getHomePageImages,
+  getProductBySlug,
+} from "@/lib/sanity.queries"
+import { GIFT_CARD_SLUG } from "@/lib/constants"
 
 // Title and description come from the root layout; only the URL is the
 // homepage's own. openGraph is repeated whole because Next replaces it
@@ -28,9 +34,11 @@ export const metadata: Metadata = {
 export const revalidate = 60
 
 export default async function HomePage() {
-  const [heroSlides, homePageImages] = await Promise.all([
+  const [heroSlides, homePageImages, giftCard, featuredProducts] = await Promise.all([
     getHeroSlides(),
     getHomePageImages(),
+    getProductBySlug(GIFT_CARD_SLUG),
+    getFeaturedProducts(),
   ])
 
   return (
@@ -44,7 +52,7 @@ export default async function HomePage() {
       />
       <WhereWeServe />
       
-      <ProductsSection />
+      <ProductsSection giftCard={giftCard} featuredProducts={featuredProducts} />
       <Testimonials />
       <PoliciesSection />
       <CTASection />
