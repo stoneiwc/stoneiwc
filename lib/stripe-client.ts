@@ -1,4 +1,7 @@
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
+// The /pure entry only loads Stripe.js when loadStripe() is called; the main
+// entry injects the script as soon as any module imports it.
+import { loadStripe } from '@stripe/stripe-js/pure'
+import type { Stripe } from '@stripe/stripe-js'
 
 // Browser-side Stripe.js, loaded once on first use. The publishable key is
 // public (NEXT_PUBLIC_), so it's read straight from the bundle rather than
