@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 import { getAllProductSlugs } from "@/lib/sanity.queries"
 import { getEventTypes } from "@/lib/cal-api"
-import { navigation } from "@/lib/navigation"
+import { allNavLinks } from "@/lib/navigation"
 
 // Rebuilt hourly so new products and services appear without a deploy.
 // Publishing a product also refreshes it through the "product" cache tag.
@@ -21,15 +21,13 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${BASE_URL}/our-policies`, priority: 0.3, changeFrequency: "yearly" },
 ]
 
-// Every page in the nav dropdowns, so a page added to the menu is in the
-// sitemap too.
-const SUBPAGE_ROUTES: MetadataRoute.Sitemap = navigation.flatMap((item) =>
-  (item.children ?? []).map((child) => ({
-    url: `${BASE_URL}${child.href}`,
-    priority: 0.7,
-    changeFrequency: "monthly" as const,
-  })),
-)
+// Every page in the menu, so a page added to the menu is in the sitemap too
+// (minus the ones already listed above).
+const STATIC_URLS = new Set(STATIC_ROUTES.map((route) => route.url))
+const SUBPAGE_ROUTES: MetadataRoute.Sitemap = allNavLinks()
+  .map((link) => `${BASE_URL}${link.href}`)
+  .filter((url, i, all) => !STATIC_URLS.has(url) && all.indexOf(url) === i)
+  .map((url) => ({ url, priority: 0.7, changeFrequency: "monthly" as const }))
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [productSlugs, events] = await Promise.all([

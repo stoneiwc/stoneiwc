@@ -66,10 +66,10 @@ export function SocialIcons() {
           href={social.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-background/60 transition-colors hover:text-primary"
-          aria-label={social.label}
+          className="flex h-11 w-11 items-center justify-center rounded-md text-background/70 transition-colors hover:bg-background/10 hover:text-primary"
+          aria-label={`${social.label} (opens in a new tab)`}
         >
-          <social.icon className="h-5 w-5" />
+          <social.icon className="h-5 w-5" aria-hidden="true" />
         </a>
       ))}
     </>

@@ -14,20 +14,20 @@ import { SITE_NAME } from "@/lib/seo";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-cormorant",
 });
 
 const lato = Lato({
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
+  weight: ["400", "700"],
   variable: "--font-lato",
 });
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com";
 
 const DESCRIPTION =
-  "A concierge holistic wellness retreat devoted to restoring the body from the inside out. Personalized lymphatic care, non-surgical body contouring, restorative hand & foot care, holistic nourishment guidance, and refined semi-permanent aesthetics.";
+  "Holistic wellness practitioners in Plano, TX: cupping, lymphatic care, body contouring, hand and foot care, and skin treatments, with many services available at your location.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#C5A44E",
+  themeColor: "#DB9824",
 };
 
 export default function RootLayout({
