@@ -1,15 +1,19 @@
 import type { Metadata } from "next"
-import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
+import { pageMetadata } from "@/lib/seo"
 import { PageHeader } from "@/components/page-header"
+import { PageSection, SectionHeading } from "@/components/ui/section"
+import { LinkCard } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { CtaBand } from "@/components/ui/cta-band"
 import { BOOKING_URL } from "@/lib/navigation"
-import { ArrowRight, Stethoscope, MapPin } from "lucide-react"
+import { BOOKING_CATEGORIES } from "@/lib/cal-api"
 import { getServicesPageImages } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 
 const DESCRIPTION =
-  "Over 100 holistic wellness services -- professional treatments in Plano, plus many of our services brought to your location."
+  "Holistic treatments at our Plano clinic, at your home or office, or by video: cupping, massage, body contouring, skin care, and more."
 
 export const metadata: Metadata = pageMetadata({
   title: "Services",
@@ -19,127 +23,100 @@ export const metadata: Metadata = pageMetadata({
 
 export const revalidate = 60
 
-const highlights = [
-  { value: "100+", label: "Holistic Services" },
-  { value: "50", label: "Years Experience" },
-  
-  { value: "8+", label: "Location Types Served" },
-]
+// Booking categories that aren't a kind of treatment.
+const NOT_A_SERVICE_AREA = new Set(["consultation", "concierge"])
 
 export default async function ServicesPage() {
   const images = await getServicesPageImages()
 
-  const serviceCategories = [
+  const ways = [
     {
-      icon: Stethoscope,
-      title: "Professional Treatments",
-      description:
-        "Over 100 holistic treatments addressing chronic conditions at the root -- from traditional fire cupping and lymphatic drainage to skin imperfection removal, chronic acne care, and weight loss programs.",
+      title: "At our clinic",
+      text: "Treatment rooms at 1108 W Parker Rd, Plano.",
       href: "/services/treatments",
       image: images?.treatmentsImage?.asset
         ? urlFor(images.treatmentsImage).width(900).height(675).url()
         : "/images/treatment-room.jpg",
-      imageAlt: images?.treatmentsImage?.alt ?? "Professional Treatments",
+      alt: images?.treatmentsImage?.alt ?? "A treatment room at the Plano clinic",
     },
     {
-      icon: MapPin,
-      title: "Concierge Services",
-      description:
-        "Many of our services can be brought to you -- corporate offices, churches, events, private homes, hotels, hospitals, and hospice.",
+      title: "Where you are",
+      text: "Concierge visits to homes, offices, hotels, churches, and events.",
       href: "/services/concierge",
       image: images?.conciergeImage?.asset
         ? urlFor(images.conciergeImage).width(900).height(675).url()
         : "/images/concierge-service.jpg",
-      imageAlt: images?.conciergeImage?.alt ?? "Concierge Services",
+      alt: images?.conciergeImage?.alt ?? "A concierge treatment on location",
+    },
+    {
+      title: "By video",
+      text: "Virtual consultations when you can't come in.",
+      href: "/services/virtual-consultations",
+      image: "/images/virtual-consultation.jpg",
+      alt: "A virtual consultation on a laptop",
     },
   ]
+
+  const areas = BOOKING_CATEGORIES.filter((c) => !NOT_A_SERVICE_AREA.has(c.value))
 
   return (
     <>
       <PageHeader
-        title="Our Services"
-        subtitle="Over 100 holistic services addressing chronic conditions at the root -- in Plano, with many of our services available at your location."
-      />
+        eyebrow="Services"
+        title="Our services"
+        subtitle="Holistic treatments at our Plano clinic, at your location, or by video."
+      >
+        <Button asChild size="lg">
+          <Link href={BOOKING_URL}>Book an appointment</Link>
+        </Button>
+      </PageHeader>
 
-      <section className="py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
-            {highlights.map((h) => (
-              <div key={h.label} className="text-center">
-                <p className="font-sans text-3xl font-semibold text-primary md:text-4xl">
-                  {h.value}
-                </p>
-                <p className="mt-2 text-sm font-body text-muted-foreground">
-                  {h.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-border py-20 lg:py-28">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col gap-20">
-            {serviceCategories.map((cat, i) => (
-              <div
-                key={cat.title}
-                className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2"
+      <PageSection>
+        <SectionHeading title="Three ways to see us" />
+        <ul className="mt-10 grid gap-6 md:grid-cols-3">
+          {ways.map((way) => (
+            <li key={way.title}>
+              <LinkCard
+                href={way.href}
+                title={way.title}
+                media={<Image src={way.image} alt={way.alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />}
               >
-                <div className={i % 2 === 1 ? "lg:order-2" : ""}>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10">
-                    <cat.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h2 className="mt-6 font-sans text-2xl font-semibold text-foreground md:text-3xl">
-                    {cat.title}
-                  </h2>
-                  <p className="mt-4 text-base leading-relaxed text-muted-foreground font-body lg:text-lg">
-                    {cat.description}
-                  </p>
-                  <Link
-                    href={cat.href}
-                    className="mt-6 inline-flex items-center gap-2 text-sm font-body font-bold text-primary transition-colors hover:text-primary/80"
-                  >
-                    <span>Learn More</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-                <div
-                  className={`relative aspect-[4/3] overflow-hidden rounded-sm ${
-                    i % 2 === 1 ? "lg:order-1" : ""
-                  }`}
-                >
-                  <Image
-                    src={cat.image}
-                    alt={cat.imageAlt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+                {way.text}
+              </LinkCard>
+            </li>
+          ))}
+        </ul>
+      </PageSection>
 
-      <section className="border-t border-border bg-foreground py-20 lg:py-28">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="font-sans text-3xl font-semibold tracking-wide text-background md:text-4xl text-balance">
-            Ready to Begin?
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-background/70 font-body">
-            Schedule a consultation and let us create a personalized
-            treatment plan for your needs.
-          </p>
-          <Link
-            href={BOOKING_URL}
-            className="mt-8 inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90"
-          >
-            Schedule a Consultation
+      <PageSection tone="card">
+        <SectionHeading title="Service areas">
+          Choose an area to see its treatments, prices, and open times.
+        </SectionHeading>
+        <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {areas.map((area) => (
+            <li key={area.value}>
+              <Link
+                href={`/book?category=${area.value}`}
+                className="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-border bg-background px-5 font-body font-bold text-foreground transition-colors hover:border-primary-strong/40 hover:text-primary-strong"
+              >
+                {area.label}
+                <span aria-hidden="true" className="text-primary-strong">&rarr;</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-8 font-body text-sm text-muted-foreground">
+          Not sure what you need?{" "}
+          <Link href="/book/consultation-in-person" className="font-bold text-primary-strong underline-offset-4 hover:underline">
+            Book a consultation
           </Link>
-        </div>
-      </section>
+          .
+        </p>
+      </PageSection>
+
+      <CtaBand title="Book an appointment" secondary={{ label: "Ask a question", href: "/contact" }}>
+        Book online, or call us and we&apos;ll help you choose.
+      </CtaBand>
     </>
   )
 }

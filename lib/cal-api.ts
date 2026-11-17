@@ -23,8 +23,8 @@ export const BOOKING_CATEGORIES = [
   // Head
   { value: "hair",                         label: "Hair",                               slugPrefix: "hair-" },
   { value: "face",                         label: "Face",                               slugPrefix: "face-" },
-  { value: "lash-extension",               label: "Lash Extension",                     slugPrefix: "lash-extension-" },
-  { value: "micropigmentation",            label: "Micropigmentation Semi-Permanent",   slugPrefix: "micropigmentation-" },
+  { value: "lash-extension",               label: "Lash Extensions",                    slugPrefix: "lash-extension-" },
+  { value: "micropigmentation",            label: "Semi-Permanent Micropigmentation",   slugPrefix: "micropigmentation-" },
   { value: "skin-imperfection",            label: "Skin Imperfection",                  slugPrefix: "skin-imperfection-" },
   // Upper Body
   { value: "acupuncture",                  label: "Acupuncture",                        slugPrefix: "acupuncture-" },
@@ -32,12 +32,12 @@ export const BOOKING_CATEGORIES = [
   { value: "massage-body",                 label: "Massage & Body Treatments",          slugPrefix: "massage-body-" },
   { value: "chiropractic",                 label: "Chiropractic",                       slugPrefix: "chiropractic-" },
   // Mid / Lower Body
-  { value: "body-transformation",          label: "Body Transformation",                slugPrefix: "body-transformation-" },
+  { value: "body-transformation",          label: "Body Contouring",                    slugPrefix: "body-transformation-" },
   { value: "lipo-treatments",              label: "Lipo Treatments",                    slugPrefix: "lipo-treatments-" },
   { value: "waxing",                       label: "Waxing",                             slugPrefix: "waxing-" },
   { value: "chronic-venous-insufficiency", label: "Chronic Venous Insufficiency",       slugPrefix: "chronic-venous-insufficiency-" },
   // Extremities
-  { value: "nail",                         label: "Nail",                               slugPrefix: "nail-" },
+  { value: "nail",                         label: "Nails",                              slugPrefix: "nail-" },
   // General
   { value: "wellness",                     label: "Wellness",                           slugPrefix: "wellness-" },
   { value: "consultation",                 label: "Consultation",                       slugPrefix: "consultation-" },

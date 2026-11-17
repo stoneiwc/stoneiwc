@@ -1,13 +1,11 @@
-import { Hero } from "@/components/home/hero"
-import { Philosophy } from "@/components/home/philosophy"
-import { AboutSection } from "@/components/home/about-section"
-import { ServicesPreview } from "@/components/home/services-preview"
-import { WhereWeServe } from "@/components/home/where-we-serve"
-import { ProductsSection } from "@/components/home/products-section"
-import { Testimonials } from "@/components/home/testimonials"
-import { PoliciesSection } from "@/components/home/policies-section"
-import { CTASection } from "@/components/home/cta-section"
 import type { Metadata } from "next"
+import { Hero } from "@/components/home/hero"
+import { Offerings } from "@/components/home/offerings"
+import { AboutFeature } from "@/components/home/about-feature"
+import { ConciergeFeature } from "@/components/home/concierge-feature"
+import { ShopFeature } from "@/components/home/shop-feature"
+import { Review } from "@/components/home/review"
+import { CtaBand } from "@/components/ui/cta-band"
 import {
   getFeaturedProducts,
   getHeroSlides,
@@ -30,7 +28,6 @@ export const metadata: Metadata = {
   },
 }
 
-// Revalidate this page every 60 seconds
 export const revalidate = 60
 
 export default async function HomePage() {
@@ -44,18 +41,17 @@ export default async function HomePage() {
   return (
     <>
       <Hero slides={heroSlides} />
-      <Philosophy />
-      <AboutSection image={homePageImages?.aboutImage} />
-      <ServicesPreview
-        conciergeImage={homePageImages?.servicesConciergeImage}
-        treatmentRoomImage={homePageImages?.servicesTreatmentRoomImage}
-      />
-      <WhereWeServe />
-      
-      <ProductsSection giftCard={giftCard} featuredProducts={featuredProducts} />
-      <Testimonials />
-      <PoliciesSection />
-      <CTASection />
+      <Offerings />
+      <AboutFeature image={homePageImages?.aboutImage} />
+      <ConciergeFeature image={homePageImages?.servicesConciergeImage} />
+      <ShopFeature giftCard={giftCard} featuredProducts={featuredProducts} />
+      <Review />
+      <CtaBand
+        title="Book an appointment"
+        secondary={{ label: "Our policies", href: "/our-policies" }}
+      >
+        Appointments only, paid when you book. Cancel at least 24 hours ahead for a refund.
+      </CtaBand>
     </>
   )
 }

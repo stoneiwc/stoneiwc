@@ -2,24 +2,26 @@ import Link from "next/link"
 import { BOOKING_URL } from "@/lib/navigation"
 import { urlFor } from "@/lib/sanity.image"
 import type { SanityHeroSlide } from "@/lib/sanity.queries"
+import { Button } from "@/components/ui/button"
 import { HeroCarousel, type HeroSlide } from "@/components/home/hero-carousel"
 
-const SLOGAN = "Your Modern Holistic Path to Health & Wellness"
+const EYEBROW = "Holistic wellness · Plano, Texas"
 
+// Shown only if Sanity has no hero slides.
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
-    image: "/images/hero-wellness.jpg",
-    subtitle: "Concierge Holistic Wellness Retreat",
-    title: "Restoring the Body from the Inside Out",
+    image: "/images/hero-cupping.jpg",
+    subtitle: "",
+    title: "Hands-on holistic care, 50 years in practice",
     description:
-      "Personalized lymphatic care, non-surgical body contouring, restorative hand and foot care, holistic nourishment guidance, and refined semi-permanent aesthetics -- in Plano, with many of our services available at your location.",
+      "Cupping, lymphatic care, body contouring, and skin treatments at our Plano clinic, with many services available at your home or office.",
   },
   {
-    image: "/images/hero-cupping.jpg",
-    subtitle: "Eastern & Western Medicine United",
-    title: "Holistic Precision. 50 Years Deep.",
+    image: "/images/hero-wellness.jpg",
+    subtitle: "",
+    title: "We come to you",
     description:
-      "We honor both Eastern and Western medicine -- each for its intended purpose. Over 100 services refined across 50 years of hands-on experience, treating chronic conditions at the root.",
+      "Book a concierge visit and our practitioners bring the treatment to your home, office, hotel, or event.",
   },
 ]
 
@@ -44,21 +46,15 @@ export function Hero({ slides: sanitySlides }: HeroProps) {
   return (
     <HeroCarousel
       slides={slides}
-      slogan={SLOGAN}
+      slogan={EYEBROW}
       actions={
         <>
-          <Link
-            href={BOOKING_URL}
-            className="inline-flex items-center justify-center rounded-sm bg-primary px-10 py-3.5 text-sm font-body font-bold tracking-wider text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-xl"
-          >
-            Schedule a Consultation
-          </Link>
-          <Link
-            href="/services"
-            className="inline-flex items-center justify-center rounded-sm border border-background/30 px-10 py-3.5 text-sm font-body font-bold tracking-wider text-background transition-all hover:border-primary hover:text-primary"
-          >
-            Our Approach
-          </Link>
+          <Button asChild size="lg">
+            <Link href={BOOKING_URL}>Book an appointment</Link>
+          </Button>
+          <Button asChild size="lg" variant="inverse">
+            <Link href="/services">View services</Link>
+          </Button>
         </>
       }
     />

@@ -70,8 +70,9 @@ export function HeroCarousel({ slides, slogan, actions }: HeroCarouselProps) {
 
   return (
     <section
-      className="relative h-[90vh] min-h-[600px] overflow-hidden"
+      className="relative flex min-h-[560px] items-end overflow-hidden bg-foreground md:h-[78vh] md:max-h-[820px] md:items-center"
       aria-roledescription="carousel"
+      aria-label="Introduction"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setHovered(true)}
@@ -83,7 +84,7 @@ export function HeroCarousel({ slides, slogan, actions }: HeroCarouselProps) {
           aria-hidden="true"
           className={cn(
             "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-            index === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            index === current ? "opacity-100" : "opacity-0"
           )}
         >
           {loaded.has(index) && (
@@ -98,86 +99,75 @@ export function HeroCarousel({ slides, slogan, actions }: HeroCarouselProps) {
               loading={index === 0 ? "eager" : "lazy"}
             />
           )}
-          <div className="absolute inset-0 bg-foreground/60" />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
         </div>
       ))}
+      {/* Darkens the side the text sits on, so the photo stays visible. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/55 to-foreground/20 md:bg-gradient-to-r md:from-foreground/85 md:via-foreground/50 md:to-transparent" />
 
-      <div className="relative z-20 flex h-full items-center justify-center px-6">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="mb-4 font-sans text-lg font-medium tracking-widest text-primary sm:text-xl md:text-2xl">
-            {slogan}
-          </p>
-          <div className="mx-auto mb-6 h-px w-24 bg-primary/60" />
+      <div className="relative mx-auto w-full max-w-7xl px-5 pb-16 pt-28 md:px-8 md:py-0">
+        <div className="max-w-2xl">
+          <p className="text-eyebrow text-primary">{slogan}</p>
 
           {/* Every slide's text sits invisibly in the same grid cell as the
               visible one, so this block is always as tall as the longest slide
               and the buttons below don't jump when the slide changes. */}
-          <div className="grid">
+          <div className="mt-5 grid">
             {slides.map((item, index) => (
               <div key={index} aria-hidden="true" className="invisible [grid-area:1/1]">
-                <p className="font-body text-xs font-bold uppercase tracking-[0.3em]">{item.subtitle}</p>
-                <p className="mt-4 font-sans text-4xl font-semibold leading-tight tracking-wide md:text-5xl lg:text-6xl text-balance">
-                  {item.title}
-                </p>
-                <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed font-body lg:text-lg">
-                  {item.description}
-                </p>
+                <p className="text-display">{item.title}</p>
+                <p className="mt-5 font-body text-base leading-relaxed md:text-lg">{item.description}</p>
               </div>
             ))}
             <div key={current} className="[grid-area:1/1]" aria-live="polite">
-              <p className="font-body text-xs font-bold uppercase tracking-[0.3em] text-background/60 animate-in fade-in duration-700">
-                {slide.subtitle}
-              </p>
-              <h1 className="mt-4 font-sans text-4xl font-semibold leading-tight tracking-wide text-background md:text-5xl lg:text-6xl text-balance animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <h1 className="text-display text-background animate-in fade-in slide-in-from-bottom-2 duration-700">
                 {slide.title}
               </h1>
-              <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-background/80 font-body lg:text-lg animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+              <p className="mt-5 font-body text-base leading-relaxed text-background/85 md:text-lg animate-in fade-in duration-700">
                 {slide.description}
               </p>
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            {actions}
-          </div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">{actions}</div>
         </div>
       </div>
 
       {count > 1 && (
-        <>
+        <div className="absolute bottom-6 right-5 z-10 flex items-center gap-1 md:right-8">
           <button
+            type="button"
             onClick={() => show(current - 1)}
-            className="absolute left-4 top-1/2 z-30 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-background/20 bg-foreground/30 text-background backdrop-blur-sm transition-all hover:bg-primary hover:border-primary hover:text-primary-foreground md:left-8"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-background/80 transition-colors hover:bg-background/10 hover:text-background"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
+          {slides.map((_, index) => (
+            <button
+              type="button"
+              key={index}
+              onClick={() => show(index)}
+              className="group flex h-11 w-7 items-center justify-center"
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={index === current ? "true" : undefined}
+            >
+              <span
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-500",
+                  index === current ? "w-5 bg-primary" : "w-1.5 bg-background/50 group-hover:bg-background/80"
+                )}
+              />
+            </button>
+          ))}
           <button
+            type="button"
             onClick={() => show(current + 1)}
-            className="absolute right-4 top-1/2 z-30 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full border border-background/20 bg-foreground/30 text-background backdrop-blur-sm transition-all hover:bg-primary hover:border-primary hover:text-primary-foreground md:right-8"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-background/80 transition-colors hover:bg-background/10 hover:text-background"
             aria-label="Next slide"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
-
-          <div className="absolute bottom-8 left-1/2 z-30 -translate-x-1/2 flex items-center gap-3">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => show(index)}
-                className={cn(
-                  "h-2 rounded-full transition-all duration-500",
-                  index === current
-                    ? "w-8 bg-primary"
-                    : "w-2 bg-background/40 hover:bg-background/60"
-                )}
-                aria-label={`Go to slide ${index + 1}`}
-                aria-current={index === current ? "true" : undefined}
-              />
-            ))}
-          </div>
-        </>
+        </div>
       )}
     </section>
   )
