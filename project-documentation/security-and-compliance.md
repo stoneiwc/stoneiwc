@@ -160,7 +160,17 @@ Set for every response in [`next.config.mjs`](../next.config.mjs):
 
 `X-Powered-By` is turned off (`poweredByHeader: false`). The image optimizer only accepts this project's Sanity images and YouTube thumbnails (`images.remotePatterns`).
 
-**Not yet:** a Content-Security-Policy. The site loads Stripe, Cal.com, Google Analytics, Vercel Analytics, YouTube and Spotify embeds and Next's inline scripts, so roll one out as `Content-Security-Policy-Report-Only` first, test checkout (including 3-D Secure), booking and the media pages, then enforce it.
+**Content-Security-Policy: report-only.** `next.config.mjs` sends `Content-Security-Policy-Report-Only`. Browsers log violations but block nothing. The policy allows only the origins the site uses (Stripe, Google Analytics, the Cal.com embed, the Spotify player, Sanity and YouTube images, and Vercel Analytics on this origin), plus `'unsafe-inline'` for Next's inline scripts (nonces would make every page dynamic). It also sets `object-src 'none'`, `base-uri 'self'`, `form-action 'self'` and `frame-ancestors 'self'`.
+
+To enforce it:
+1. On a preview deploy, open the browser console and run through:
+   - a checkout with a 3-D Secure test card (`4000 0027 6000 3184`)
+   - a gift card purchase
+   - a booking page
+   - `/featured/podcast` and `/featured/media`
+   - the home page with analytics loading
+2. Add any origin that shows up as `[Report Only] Refused to …` to the matching directive.
+3. Rename the header key to `Content-Security-Policy`.
 
 **CORS:** no API route sends `Access-Control-Allow-Origin`, so browsers block other sites from calling or reading them. Keep it that way: none of the routes are meant to be called from other origins. The API has no cookie or session auth, so CSRF isn't a concern; abuse of the public routes is handled by rate limits and the honeypot.
 
