@@ -422,7 +422,16 @@ export default defineConfig({
   ],
 
   document: {
+    // Orders and gift cards are created only by the website, with private IDs
+    // ("order.…", "giftCard.…") that the public API can't read (see
+    // lib/sanity-ids.ts). A document created or duplicated here would get an
+    // ordinary, publicly readable ID, so neither is offered.
+    newDocumentOptions: (prev) =>
+      prev.filter((item) => !['order', 'giftCard'].includes(item.templateId)),
     actions: (prev, context) => {
+      if (['order', 'giftCard'].includes(context.schemaType)) {
+        prev = prev.filter(({action}) => action !== 'duplicate')
+      }
       const singletonTypes = [
         'homePageImages',
         'aboutPageImages',

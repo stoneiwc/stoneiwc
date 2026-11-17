@@ -28,10 +28,10 @@ Initialized with:
 - `apiVersion`: `NEXT_PUBLIC_SANITY_API_VERSION`
 - `useCdn: false`: reads go to the live API. Next's Data Cache does the caching (below); the API CDN could hand a just-published change back stale after a webhook revalidation.
 - Two clients, both server-only (`lib/sanity.client.ts` imports `server-only`):
-  - `readClient`: pages, pricing, coupons, shipping methods. Token: `SANITY_READ_TOKEN` (a Viewer token) if set, else `SANITY_API_TOKEN`. A token is needed for every read once the dataset is private.
+  - `readClient`: pages, pricing, coupons, shipping methods. Token: `SANITY_READ_TOKEN` (a Viewer token) if set, else `SANITY_API_TOKEN`. (Private orders and gift cards are only readable with a token, see below.)
   - `writeClient`: orders and gift cards (and the reads that guard their writes). Token: `SANITY_API_TOKEN` (Editor).
 
-> **The `production` dataset must be private.** Orders (customer names, emails, addresses) and gift cards (codes and balances) live in it, and a public dataset lets anyone with the project ID query them. Set it in sanity.io/manage → Datasets. The site reads with the token, so nothing else changes.
+> **Customer data in a public dataset.** Private datasets aren't available on Sanity's free plan, so `production` is public: anyone with the project ID (it's in the browser bundle) can query it without a token. Orders (customer names, emails, addresses) and gift cards (bearer codes and balances) stay private because their document IDs contain a period: `order.<id>` and `giftCard.<id>`. Sanity only serves root-path IDs to unauthenticated requests. The site creates every order and gift card this way (`privateId()` in [`lib/sanity-ids.ts`](../lib/sanity-ids.ts)). Studio can't create or duplicate them (`studio/sanity.config.ts`), because Studio would assign a public ID. Older documents were moved with `scripts/migrate-private-ids.mjs`, which is safe to re-run. Coupons and shipping methods are created in Studio with public IDs, so coupon codes are readable; keep that in mind before creating high-value codes. If the project moves to a paid plan, make the dataset private as well.
 
 ---
 

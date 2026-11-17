@@ -68,7 +68,7 @@ A storefront order with a gift card applied has `order_type = 'storefront'` AND 
 
 ### Recovered orders
 
-Checkout creates a `pending` Sanity order before the customer pays. If that write fails, it cancels the PaymentIntent and answers 503 to the browser, so normally every payment has an order. If a paid PaymentIntent still has no order (a pending order was deleted by hand, or something slipped through), `recoverPaidOrder` in [`lib/orders.ts`](../lib/orders.ts) creates a `paid` order from the PaymentIntent metadata: customer, shipping address, totals, coupon and gift card. Its `_id` is `order-recovered-<paymentIntentId>` and it has **no line items**. The item summary from Stripe goes in `internalNotes`, and the owner gets a `[Needs review] Paid order …` email. Check the items in the Stripe payment before fulfilling.
+Checkout creates a `pending` Sanity order before the customer pays. If that write fails, it cancels the PaymentIntent and answers 503 to the browser, so normally every payment has an order. If a paid PaymentIntent still has no order (a pending order was deleted by hand, or something slipped through), `recoverPaidOrder` in [`lib/orders.ts`](../lib/orders.ts) creates a `paid` order from the PaymentIntent metadata: customer, shipping address, totals, coupon and gift card. Its `_id` is `order.recovered-<paymentIntentId>` and it has **no line items**. The item summary from Stripe goes in `internalNotes`, and the owner gets a `[Needs review] Paid order …` email. Check the items in the Stripe payment before fulfilling.
 
 ---
 
@@ -101,7 +101,7 @@ Stripe **will** retry webhook delivery on failure, and staff can resend events f
 | Order emails | Sent only by the delivery that won the `pending → paid` transition |
 | `recoverPaidOrder` | The `_id` is derived from the PaymentIntent, so a second create fails with 409 → `{ created: false }`, and no second alert is sent |
 | `markOrderFailed` / `markOrderCanceled` | Only transition from `pending`; finalized states are not overwritten |
-| `getOrCreateGiftCardForPayment` | Looks up the card by `paymentIntentId` first; creates with `_id: giftCard-<paymentIntentId>`, so a concurrent create gets 409 and returns the existing card. One card per payment |
+| `getOrCreateGiftCardForPayment` | Looks up the card by `paymentIntentId` first; creates with `_id: giftCard.<paymentIntentId>`, so a concurrent create gets 409 and returns the existing card. One card per payment |
 | Gift card email | `claimGiftCardEmail` sets `emailedAt` with `ifRevisionId` *before* sending; a card that already has `emailedAt` (or loses the claim race) is not emailed again. If the send fails, `releaseGiftCardEmail` clears the claim and the handler returns 500 so Stripe retries the email |
 | `redeemGiftCard` | Skips the deduction if `redemptions` already has an entry with this `paymentIntentId` as `orderId`. Commits with `ifRevisionId` and re-reads + retries on a conflict (up to 5 attempts). If it still fails, the handler returns 500 so Stripe retries. See [`lib/gift-cards.ts`](../lib/gift-cards.ts) |
 

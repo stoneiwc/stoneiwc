@@ -38,7 +38,7 @@ const order = {
 }
 
 const giftCard = {
-  _id: "giftCard-pi_gc",
+  _id: "giftCard.pi_gc",
   _rev: "r1",
   code: "STONE-AAAA-BBBB",
   originalAmount: 50,
@@ -146,7 +146,7 @@ describe("gift card purchase succeeded", () => {
     vi.mocked(giftCards.claimGiftCardEmail).mockResolvedValue(true)
     send.mockResolvedValueOnce({ error: { message: "rate limited" } })
     expect((await handleStripeEvent(giftCardPaid())).status).toBe(500)
-    expect(giftCards.releaseGiftCardEmail).toHaveBeenCalledWith("giftCard-pi_gc")
+    expect(giftCards.releaseGiftCardEmail).toHaveBeenCalledWith("giftCard.pi_gc")
     expect(send).toHaveBeenCalledTimes(1)
   })
 

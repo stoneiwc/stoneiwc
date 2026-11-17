@@ -28,7 +28,7 @@ function patchBuilder(commit: ReturnType<typeof vi.fn>) {
 }
 
 const card = (overrides: Record<string, unknown> = {}) => ({
-  _id: "giftCard-1",
+  _id: "giftCard.1",
   _rev: "rev-1",
   code: "STONE-AAAA-BBBB",
   status: "active",
@@ -102,7 +102,7 @@ describe("getOrCreateGiftCardForPayment", () => {
 
   it("returns the existing card for a retried payment without creating another", async () => {
     fetchMock.mockResolvedValueOnce(card() as never)
-    expect(await getOrCreateGiftCardForPayment(input)).toMatchObject({ _id: "giftCard-1" })
+    expect(await getOrCreateGiftCardForPayment(input)).toMatchObject({ _id: "giftCard.1" })
     expect(createMock).not.toHaveBeenCalled()
   })
 
@@ -110,17 +110,17 @@ describe("getOrCreateGiftCardForPayment", () => {
     fetchMock
       .mockResolvedValueOnce(null as never) // no card for this payment yet
       .mockResolvedValueOnce(null as never) // code is unused
-      .mockResolvedValueOnce(card({ _id: "giftCard-pi_9" }) as never)
+      .mockResolvedValueOnce(card({ _id: "giftCard.pi_9" }) as never)
     await getOrCreateGiftCardForPayment(input)
-    expect(createMock).toHaveBeenCalledWith(expect.objectContaining({ _id: "giftCard-pi_9", currentBalance: 50 }))
+    expect(createMock).toHaveBeenCalledWith(expect.objectContaining({ _id: "giftCard.pi_9", currentBalance: 50 }))
   })
 
   it("returns the winner's card when a concurrent delivery created it first", async () => {
     fetchMock
       .mockResolvedValueOnce(null as never)
       .mockResolvedValueOnce(null as never)
-      .mockResolvedValueOnce(card({ _id: "giftCard-pi_9" }) as never)
+      .mockResolvedValueOnce(card({ _id: "giftCard.pi_9" }) as never)
     createMock.mockRejectedValueOnce(conflict)
-    expect(await getOrCreateGiftCardForPayment(input)).toMatchObject({ _id: "giftCard-pi_9" })
+    expect(await getOrCreateGiftCardForPayment(input)).toMatchObject({ _id: "giftCard.pi_9" })
   })
 })

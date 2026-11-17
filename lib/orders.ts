@@ -1,7 +1,8 @@
 import 'server-only'
-import { randomInt } from 'node:crypto'
+import { randomInt, randomUUID } from 'node:crypto'
 import { writeClient as client } from './sanity.client'
 import { isSanityConflict } from './sanity-errors'
+import { privateId } from './sanity-ids'
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -139,6 +140,8 @@ export async function createPendingOrder(
 
   const orderNumber = await uniqueOrderNumber()
   const created = await client.create({
+    // Private ID: never readable without a token (lib/sanity-ids.ts).
+    _id: privateId('order', randomUUID()),
     _type: 'order',
     orderNumber,
     status: 'pending' as OrderStatus,
@@ -248,7 +251,7 @@ export async function recoverPaidOrder(
   const now = new Date().toISOString()
 
   const order: PaidOrderSnapshot = {
-    _id: `order-recovered-${pi.id}`,
+    _id: privateId('order', `recovered-${pi.id}`),
     orderNumber: await uniqueOrderNumber(m.order_number),
     customer: {
       email: pi.receipt_email || m.customer_email || '',

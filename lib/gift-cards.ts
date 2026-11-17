@@ -2,6 +2,7 @@ import 'server-only'
 import { randomInt } from 'node:crypto'
 import { writeClient as client } from './sanity.client'
 import { isSanityConflict } from './sanity-errors'
+import { privateId } from './sanity-ids'
 
 const VALID_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -77,7 +78,7 @@ export async function getOrCreateGiftCardForPayment(input: CreateGiftCardInput):
 
     try {
       await client.create({
-        _id: `giftCard-${input.paymentIntentId}`,
+        _id: privateId('giftCard', input.paymentIntentId),
         _type: 'giftCard',
         code,
         originalAmount: input.amount,
