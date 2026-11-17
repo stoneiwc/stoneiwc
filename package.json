@@ -58,7 +58,6 @@
       "picomatch@2": "^2.3.2",
       "picomatch@4": "^4.0.4",
       "postcss-selector-parser@6": "^6.1.5",
-      "vite": "^7.3.7",
       "undici": "^7.30.1",
       "yaml": "^2.8.3"
     }
