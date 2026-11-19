@@ -6,6 +6,7 @@ import {
   useReducer,
   useCallback,
   useEffect,
+  useState,
   type ReactNode,
 } from "react"
 import type { Product } from "@/lib/products"
@@ -111,6 +112,9 @@ interface CartContextValue {
   removeCoupon: () => void
   discountAmount: number
   totalPrice: number
+  // True once the saved cart has been read from localStorage. Until then
+  // `items` is the empty initial state, not the customer's cart.
+  isHydrated: boolean
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -121,6 +125,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isOpen: false,
     coupon: null,
   })
+
+  // False until the saved cart has been read. Saving waits for it: otherwise
+  // the first save runs with the initial empty cart and overwrites the saved
+  // one (React StrictMode then reads that empty cart back and the cart is lost).
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -143,11 +152,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("Failed to load cart from localStorage:", error)
+    } finally {
+      setIsHydrated(true)
     }
   }, [])
 
-  // Save cart to localStorage whenever items change
+  // Save cart to localStorage whenever items change, once the saved cart is loaded
   useEffect(() => {
+    if (!isHydrated) return
     try {
       localStorage.setItem(
         "stone-iwc-cart",
@@ -156,7 +168,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to save cart to localStorage:", error)
     }
-  }, [state.items, state.coupon])
+  }, [isHydrated, state.items, state.coupon])
 
   const setOpen = useCallback(
     (isOpen: boolean) => dispatch({ type: "SET_OPEN", isOpen }),
@@ -227,6 +239,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeCoupon,
         discountAmount,
         totalPrice,
+        isHydrated,
       }}
     >
       {children}

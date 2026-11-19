@@ -1,29 +1,33 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Lato } from "next/font/google";
-import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { CartProvider } from "@/lib/cart-context";
 import { JsonLd } from "@/components/seo/json-ld";
+import { CONTACT_INFO } from "@/lib/navigation";
+import { SITE_NAME } from "@/lib/seo";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-cormorant",
 });
 
 const lato = Lato({
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
+  weight: ["400", "700"],
   variable: "--font-lato",
 });
 
 const BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_URL ?? "https://stoneiwc.com";
 
 const DESCRIPTION =
-  "A concierge holistic wellness retreat devoted to restoring the body from the inside out. Personalized lymphatic care, non-surgical body contouring, restorative hand & foot care, holistic nourishment guidance, and refined semi-permanent aesthetics.";
+  "Holistic wellness practitioners in Plano, TX: cupping, lymphatic care, body contouring, hand and foot care, and skin treatments, with many services available at your location.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -32,12 +36,14 @@ export const metadata: Metadata = {
     template: "%s | Stone IWC",
   },
   description: DESCRIPTION,
+  // No url or canonical here: pages inherit any key they don't set, so a
+  // root canonical made every page claim to be the homepage. Pages set their
+  // own through pageMetadata() (lib/seo.ts).
   openGraph: {
     type: "website",
-    siteName: "Stone International Wellness Center",
-    title: "Stone International Wellness Center",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
     description: DESCRIPTION,
-    url: BASE_URL,
     locale: "en_US",
   },
   twitter: {
@@ -53,13 +59,10 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
-  alternates: {
-    canonical: BASE_URL,
-  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#C5A44E",
+  themeColor: "#DB9824",
 };
 
 export default function RootLayout({
@@ -67,20 +70,42 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // @graph sits at the top level: nested inside the LocalBusiness, Google
+  // read it as a property of the business rather than a second entity.
   const organizationSchema = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": `${BASE_URL}/#organization`,
-    name: "Stone International Wellness Center",
-    url: BASE_URL,
-    logo: `${BASE_URL}/stoneiwc-logo.png`,
-    description: DESCRIPTION,
     "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": `${BASE_URL}/#organization`,
+        name: SITE_NAME,
+        url: BASE_URL,
+        logo: `${BASE_URL}/images/logo.png`,
+        image: `${BASE_URL}/images/logo.png`,
+        description: DESCRIPTION,
+        email: CONTACT_INFO.email,
+        telephone: CONTACT_INFO.phone,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "1108 W Parker Rd Ste 102",
+          addressLocality: "Plano",
+          addressRegion: "TX",
+          postalCode: "75075",
+          addressCountry: "US",
+        },
+        sameAs: [
+          "https://www.facebook.com/stoneiwc/",
+          "https://x.com/stoneiwc_",
+          "https://www.instagram.com/stoneiwc_/",
+          "https://www.tiktok.com/@stoneiwc",
+          "https://www.youtube.com/@stoneiwc",
+        ],
+      },
       {
         "@type": "WebSite",
         "@id": `${BASE_URL}/#website`,
         url: BASE_URL,
-        name: "Stone International Wellness Center",
+        name: SITE_NAME,
         publisher: { "@id": `${BASE_URL}/#organization` },
       },
     ],
@@ -88,17 +113,17 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
-      <head>
-        <GoogleTagManager gtmId="G-K90NGHL09B" />
-      </head>
       <body className="font-body antialiased" suppressHydrationWarning>
-        <GoogleAnalytics gaId="G-K90NGHL09B" />
         <JsonLd data={organizationSchema} />
         <CartProvider>
           <Navbar />
           <main>{children}</main>
           <Footer />
         </CartProvider>
+        {/* One Google tag: G-… is a GA4 measurement ID, not a GTM container. */}
+        <GoogleAnalytics gaId="G-K90NGHL09B" />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

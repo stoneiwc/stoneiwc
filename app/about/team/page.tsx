@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
@@ -6,10 +7,11 @@ import { getTeamMembers } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
 import { BOOKING_URL } from "@/lib/navigation"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Team Members",
   description: "Meet the dedicated professionals at Stone International Wellness Center.",
-}
+  path: "/about/team",
+})
 
 export const revalidate = 60
 

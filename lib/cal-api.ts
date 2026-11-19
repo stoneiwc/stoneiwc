@@ -1,3 +1,5 @@
+import { CAL_EVENTS_REVALIDATE_SECONDS, CAL_EVENTS_TAG } from "./sanity-tags"
+
 export type CalEventType = {
   id: number
   title: string
@@ -8,12 +10,21 @@ export type CalEventType = {
   currency: string
 }
 
+// What client components (booking search) get. Cal.com's API returns far
+// more per event (locations, booking fields, host settings); passing whole
+// objects to a client component serializes all of it into every /book page.
+export type CalEventSummary = Pick<CalEventType, "id" | "slug" | "title" | "description">
+
+export function toEventSummaries(events: CalEventType[]): CalEventSummary[] {
+  return events.map(({ id, slug, title, description }) => ({ id, slug, title, description }))
+}
+
 export const BOOKING_CATEGORIES = [
   // Head
   { value: "hair",                         label: "Hair",                               slugPrefix: "hair-" },
   { value: "face",                         label: "Face",                               slugPrefix: "face-" },
-  { value: "lash-extension",               label: "Lash Extension",                     slugPrefix: "lash-extension-" },
-  { value: "micropigmentation",            label: "Micropigmentation Semi-Permanent",   slugPrefix: "micropigmentation-" },
+  { value: "lash-extension",               label: "Lash Extensions",                    slugPrefix: "lash-extension-" },
+  { value: "micropigmentation",            label: "Semi-Permanent Micropigmentation",   slugPrefix: "micropigmentation-" },
   { value: "skin-imperfection",            label: "Skin Imperfection",                  slugPrefix: "skin-imperfection-" },
   // Upper Body
   { value: "acupuncture",                  label: "Acupuncture",                        slugPrefix: "acupuncture-" },
@@ -21,12 +32,12 @@ export const BOOKING_CATEGORIES = [
   { value: "massage-body",                 label: "Massage & Body Treatments",          slugPrefix: "massage-body-" },
   { value: "chiropractic",                 label: "Chiropractic",                       slugPrefix: "chiropractic-" },
   // Mid / Lower Body
-  { value: "body-transformation",          label: "Body Transformation",                slugPrefix: "body-transformation-" },
+  { value: "body-transformation",          label: "Body Contouring",                    slugPrefix: "body-transformation-" },
   { value: "lipo-treatments",              label: "Lipo Treatments",                    slugPrefix: "lipo-treatments-" },
   { value: "waxing",                       label: "Waxing",                             slugPrefix: "waxing-" },
   { value: "chronic-venous-insufficiency", label: "Chronic Venous Insufficiency",       slugPrefix: "chronic-venous-insufficiency-" },
   // Extremities
-  { value: "nail",                         label: "Nail",                               slugPrefix: "nail-" },
+  { value: "nail",                         label: "Nails",                              slugPrefix: "nail-" },
   // General
   { value: "wellness",                     label: "Wellness",                           slugPrefix: "wellness-" },
   { value: "consultation",                 label: "Consultation",                       slugPrefix: "consultation-" },
@@ -41,23 +52,30 @@ export function getCategoryFromSlug(slug: string): BookingCategory | null {
   return match ? (match.value as BookingCategory) : null
 }
 
+// The bookable services, cached for CAL_EVENTS_REVALIDATE_SECONDS so the
+// booking pages don't call Cal.com on every request.
+//
+// Throws when Cal.com fails rather than returning an empty list: an empty
+// list would be rendered as "no services" or a 404, while an error during a
+// background refresh leaves the last good page in place. (Next only caches
+// 200 responses, so a failure never overwrites good data.)
 export async function getEventTypes(username: string): Promise<CalEventType[]> {
-  try {
-    const res = await fetch(
-      `https://api.cal.com/v2/event-types?username=${username}`,
-      {
-        headers: { "cal-api-version": "2024-06-14" },
-        cache: "no-store",
-      }
-    )
-
-    if (!res.ok) return []
-
-    const data = await res.json()
-    return Array.isArray(data?.data) ? data.data : []
-  } catch {
-    return []
+  const res = await fetch(
+    `https://api.cal.com/v2/event-types?username=${encodeURIComponent(username)}`,
+    {
+      headers: { "cal-api-version": "2024-06-14" },
+      next: { revalidate: CAL_EVENTS_REVALIDATE_SECONDS, tags: [CAL_EVENTS_TAG] },
+    }
+  )
+  if (!res.ok) {
+    throw new Error(`Cal.com event types request failed: ${res.status}`)
   }
+
+  const data = await res.json()
+  if (!Array.isArray(data?.data)) {
+    throw new Error("Cal.com event types response had no data array")
+  }
+  return data.data
 }
 
 export function filterEventsByCategory(

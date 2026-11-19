@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { Clock, ArrowRight } from "lucide-react"
 import { PageHeader } from "@/components/page-header"
+import { pageMetadata } from "@/lib/seo"
 import { BookingSidebar } from "@/components/booking-sidebar"
 import { BookingSearch } from "@/components/booking-search"
 import { BookingMobileBar } from "@/components/booking-mobile-bar"
@@ -11,6 +12,7 @@ import {
   getEventTypes,
   filterEventsByCategory,
   filterEventsBySearch,
+  toEventSummaries,
   type BookingCategory,
   type CalEventType,
 } from "@/lib/cal-api"
@@ -93,13 +95,11 @@ const gridClass = "grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
 const DESCRIPTION =
   "Schedule a professional treatment, concierge visit, or virtual consultation with Stone IWC."
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Book a Service",
   description: DESCRIPTION,
-  alternates: { canonical: "/book" },
-  openGraph: { title: "Book a Service | Stone IWC", description: DESCRIPTION, url: "/book", type: "website" },
-  twitter: { card: "summary_large_image", title: "Book a Service | Stone IWC", description: DESCRIPTION },
-}
+  path: "/book",
+})
 
 type Props = {
   searchParams: Promise<{ category?: string; search?: string }>
@@ -110,9 +110,19 @@ export default async function BookPage({ searchParams }: Props) {
   const activeCategory = (category ?? "all") as BookingCategory | "all"
 
   const username = process.env.NEXT_PUBLIC_CAL_USERNAME!
-  const allEvents = await getEventTypes(username)
+  let allEvents: CalEventType[] = []
+  let servicesUnavailable = false
+  try {
+    allEvents = await getEventTypes(username)
+  } catch (err) {
+    // Only reached when Cal.com fails and nothing is cached yet.
+    console.error("Could not load services from Cal.com:", err)
+    servicesUnavailable = true
+  }
   const categoryFiltered = filterEventsByCategory(allEvents, activeCategory)
   const events = filterEventsBySearch(categoryFiltered, search ?? "")
+  // Only the fields the client-side search needs go into the page payload.
+  const searchableEvents = toEventSummaries(allEvents)
 
   // On the unfiltered view, pin the general consultation and group the rest
   // by category; filtered and search views stay a flat grid.
@@ -151,13 +161,13 @@ export default async function BookPage({ searchParams }: Props) {
             <Suspense>
               {/* Desktop sidebar */}
               <aside className="hidden lg:block w-56 shrink-0 sticky top-28">
-                <BookingSearch events={allEvents} />
+                <BookingSearch events={searchableEvents} />
                 <BookingSidebar />
               </aside>
 
               {/* Mobile search + filter sheet */}
               <div className="lg:hidden">
-                <BookingMobileBar events={allEvents} />
+                <BookingMobileBar events={searchableEvents} />
               </div>
             </Suspense>
 
@@ -166,10 +176,12 @@ export default async function BookPage({ searchParams }: Props) {
               {events.length === 0 ? (
                 <div className="rounded-sm border border-border bg-card p-12 text-center">
                   <p className="font-sans text-xl font-semibold text-foreground">
-                    No services available in this category yet.
+                    {servicesUnavailable
+                      ? "We couldn't load our services just now."
+                      : "No services available in this category yet."}
                   </p>
                   <p className="mt-3 text-sm font-body text-muted-foreground">
-                    Please check back soon or{" "}
+                    {servicesUnavailable ? "Please try again in a few minutes or" : "Please check back soon or"}{" "}
                     <Link
                       href="/contact"
                       className="text-primary underline-offset-4 hover:underline"

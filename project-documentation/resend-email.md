@@ -81,23 +81,17 @@ app/api/
 
 ---
 
-## Rate Limiting (`lib/email/rate-limit.ts`)
+## Rate Limiting (`lib/rate-limit.ts`)
 
-Used only for the contact form endpoint to prevent abuse.
-
-**Implementation:** In-memory `Map<ip, { count, resetAt }>`. Resets on cold start (serverless).
-
-**Limits:**
-- Window: 1 hour
-- Max requests: 3 per IP per hour
+The contact form (and the other public API routes) are rate-limited per IP with a sliding window stored in Upstash Redis, so the count holds across all serverless instances. The contact form allows 3 submissions per IP per hour.
 
 **How it works:**
 ```ts
-const { allowed, retryAfterSeconds } = checkRateLimit(ip)
-if (!allowed) {
-  return 429 with Retry-After header
-}
+const limited = await rateLimit("contact", req, "Too many submissions. Please try again later.")
+if (limited) return limited // 429 with a Retry-After header
 ```
+
+Limits for every route are in the `LIMITS` table at the top of `lib/rate-limit.ts`. Without `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (local dev) limiting is off; if Redis errors, requests are allowed.
 
 **IP detection order:**
 1. `x-forwarded-for` header (first IP in the list, used by Vercel/proxies)
@@ -152,7 +146,7 @@ if (error) {
 ```
 
 3. If the email is customer-facing (not internal), add `replyTo` only if appropriate.
-4. If the endpoint is public-facing (user-submitted), add rate limiting using `checkRateLimit` from `lib/email/rate-limit.ts`, and the spam honeypot (`<HoneypotField />` in the form, `isHoneypotTripped` in the route — see [security-and-compliance.md](security-and-compliance.md#spam-honeypot)).
+4. If the endpoint is public-facing (user-submitted), add rate limiting with `rateLimit` from `lib/rate-limit.ts` (add an entry to its `LIMITS` table), and the spam honeypot (`<HoneypotField />` in the form, `isHoneypotTripped` in the route — see [security-and-compliance.md](security-and-compliance.md#spam-honeypot)).
 
 ---
 
@@ -167,7 +161,8 @@ if (error) {
 
 **`resend.emails.send()` returns an error but the route still returns 200:**
 - The contact form route returns `500` on email error.
-- The Stripe webhook handler logs the error but still returns `{ received: true }` — this is intentional so Stripe does not retry the webhook unnecessarily.
+- Order emails: the Stripe webhook logs a failed send and still returns 200, so a retry doesn't re-send emails that did go out.
+- Gift card emails: a failed send to the recipient returns 500 so Stripe retries; the `emailedAt` claim on the card makes sure it's only ever sent once (see [webhooks.md](webhooks.md)).
 
 **Rate limit hitting legitimate users:**
-- The contact form allows 3 submissions per IP per hour. This is intentionally strict. If it needs loosening, edit `MAX_REQUESTS` in `lib/email/rate-limit.ts`.
+- The contact form allows 3 submissions per IP per hour. This is intentionally strict. If it needs loosening, edit the `contact` entry in the `LIMITS` table in `lib/rate-limit.ts`.

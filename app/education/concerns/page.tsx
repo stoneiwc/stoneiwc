@@ -1,13 +1,15 @@
 import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { ConcernsExplorer } from "@/components/education/concerns-explorer"
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Health Concerns",
   description:
     "Explore the health concerns we address at Stone International Wellness Center. From muscle and joint health to mental wellness and internal health.",
-}
+  path: "/education/concerns",
+})
 
 export default function ConcernsPage() {
   return (

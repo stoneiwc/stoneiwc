@@ -1,126 +1,111 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Mail, Phone, MapPin } from "lucide-react"
-import { CONTACT_INFO, SOCIAL_LINKS, BOOKING_URL } from "@/lib/navigation"
+import { navigation, CONTACT_INFO, BOOKING_URL } from "@/lib/navigation"
 import { SocialIcons } from "@/components/social-icons"
+import { Button } from "@/components/ui/button"
 
-const footerLinks = [
-  {
-    title: "About",
-    links: [
-      { label: "Our Story", href: "/about/our-story" },
-      { label: "Team Members", href: "/about/team" },
-      { label: "Partners & Affiliates", href: "/about/partners" },
-    ],
-  },
-  {
-    title: "Services",
-    links: [
-      { label: "Professional Treatments", href: "/services/treatments" },
-      { label: "Concierge", href: "/services/concierge" },
-      { label: "Patient Forms", href: "/services/forms" },
-    ],
-  },
-  {
-    title: "Explore",
-    links: [
-      { label: "Products", href: "/products" },
-      { label: "Education", href: "/education" },
-      { label: "Featured On", href: "/featured" },
-      { label: "Contact Us", href: "/contact" },
-      { label: "Our Policies", href: "/our-policies" },
-    ],
-  },
+const telHref = (phone: string) => `tel:${phone.replace(/[^+\d]/g, "")}`
+
+const SOURCE_OF_HOPE_URL = "https://thesourceofhope.org"
+const linkClass =
+  "inline-flex min-h-9 items-center font-body text-sm text-background/75 transition-colors hover:text-primary"
+
+// Link columns come from the main menu, so the footer never links to a page
+// the menu doesn't have. Groups only (the menu's plain links are in "More").
+const linkGroups = navigation.filter((item) => item.children)
+const moreLinks = [
+  { label: "Shop", href: "/products" },
+  { label: "Book an appointment", href: BOOKING_URL },
+  { label: "Contact", href: "/contact" },
+  { label: "Our policies", href: "/faq#policies" },
 ]
 
 export function Footer() {
   return (
     <footer className="bg-foreground text-background">
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <Link href="/">
+      <div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-20">
+        <div className="grid gap-12 lg:grid-cols-[1.2fr_2fr]">
+          <div className="flex flex-col gap-6">
+            <Link href="/" aria-label="Stone International Wellness Center, home" className="self-start">
               <Image
                 src="/images/logo.png"
-                alt="Stone International Wellness Center"
-                width={180}
-                height={60}
-                className="h-16 w-auto brightness-0 invert"
+                alt=""
+                width={300}
+                height={146}
+                className="h-14 w-auto brightness-0 invert"
               />
             </Link>
-            <p className="max-w-sm text-sm leading-relaxed text-background/70 font-body">
-              A concierge holistic wellness retreat devoted to restoring the
-              body from the inside out. Personalized lymphatic care,
-              non-surgical body contouring, restorative hand and foot care,
-              holistic nourishment guidance, and refined semi-permanent
-              aesthetics. All proceeds fund The Source of Hope foundation.
-            </p>
-            <div className="flex flex-col gap-3 text-sm font-body">
+            <p className="max-w-sm font-body text-sm leading-relaxed text-background/75">
+              Holistic wellness practitioners in Plano, Texas. All proceeds support{" "}
               <a
-                href={`mailto:${CONTACT_INFO.email}`}
-                className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary"
+                href={SOURCE_OF_HOPE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-background underline underline-offset-4 hover:text-primary"
               >
-                <Mail className="h-4 w-4 text-primary" />
+                The Source of Hope
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+              , our nonprofit foundation.
+            </p>
+            <address className="flex flex-col gap-2 font-body text-sm not-italic text-background/75">
+              <span>{CONTACT_INFO.address}</span>
+              <a href={telHref(CONTACT_INFO.phoneGeneral)} className="hover:text-primary">
+                {CONTACT_INFO.phoneGeneral} (general)
+              </a>
+              <a href={telHref(CONTACT_INFO.phoneConcierge)} className="hover:text-primary">
+                {CONTACT_INFO.phoneConcierge} (concierge)
+              </a>
+              <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-primary">
                 {CONTACT_INFO.email}
               </a>
-              <a
-                href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
-                className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary"
-              >
-                <Phone className="h-4 w-4 text-primary" />
-                General Info: {CONTACT_INFO.phoneGeneral}
-              </a>
-              <a
-                href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
-                className="flex items-center gap-3 text-background/70 transition-colors hover:text-primary"
-              >
-                <Phone className="h-4 w-4 text-primary" />
-                Concierge Services: {CONTACT_INFO.phoneConcierge}
-              </a>
-              <div className="flex items-start gap-3 text-background/70">
-                <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                {CONTACT_INFO.address}
-              </div>
-            </div>
+            </address>
+            <Button asChild variant="inverse" className="self-start">
+              <Link href={BOOKING_URL}>Book an appointment</Link>
+            </Button>
           </div>
 
-          {footerLinks.map((group) => (
-            <div key={group.title}>
-              <h3 className="font-sans text-lg font-semibold tracking-wide text-primary mb-4">
-                {group.title}
-              </h3>
-              <ul className="flex flex-col gap-2.5">
-                {group.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm font-body text-background/70 transition-colors hover:text-primary"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+            {[...linkGroups, { label: "More", children: moreLinks }].map((group) => (
+              <div key={group.label}>
+                <h2 className="mb-4 font-body text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  {group.label}
+                </h2>
+                <ul className="flex flex-col gap-1">
+                  {group.children?.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className={linkClass}>
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                  {group.label === "More" && (
+                    <li>
+                      <a href={SOURCE_OF_HOPE_URL} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                        The Source of Hope
+                        <span className="sr-only"> (opens in a new tab)</span>
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
 
-        <div className="mt-16 flex flex-col items-center gap-8 border-t border-background/10 pt-10 md:flex-row md:justify-between">
-          <div className="flex items-center gap-5">
-            <SocialIcons />
-          </div>
-
-          <Link
-            href={BOOKING_URL}
-            className="rounded-sm border border-primary px-8 py-2.5 text-sm font-body font-bold tracking-wider text-primary transition-all hover:bg-primary hover:text-primary-foreground"
-          >
-            Book an Appointment
-          </Link>
-
-          <p className="text-xs font-body text-background/50">
-            &copy; {new Date().getFullYear()} Stone International Wellness
-            Center. All rights reserved.
+        <div className="mt-14 flex flex-col gap-6 border-t border-background/15 pt-8">
+          <p className="max-w-3xl font-body text-xs leading-relaxed text-background/60">
+            Our services do not replace medical diagnosis or treatment. Talk to your physician
+            about any medical condition.
           </p>
+          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="-ml-3 flex flex-wrap items-center">
+              <SocialIcons />
+            </div>
+            <p className="font-body text-xs text-background/60">
+              &copy; {new Date().getFullYear()} Stone International Wellness Center
+            </p>
+          </div>
         </div>
       </div>
     </footer>

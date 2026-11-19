@@ -5,9 +5,10 @@ import {
   contactAutoReplyHtml,
   contactAutoReplyText,
 } from "@/lib/email/contact-autoreply-template"
-import { checkRateLimit } from "@/lib/email/rate-limit"
+import { rateLimit } from "@/lib/rate-limit"
 import { isHoneypotTripped, type HoneypotFields } from "@/lib/honeypot"
 import { isFilledTooFast, spamSignals, type FillTimeFields } from "@/lib/contact-spam"
+import { isValidEmail } from "@/lib/validation"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -19,31 +20,12 @@ export interface ContactFormPayload extends HoneypotFields, FillTimeFields {
   message: string
 }
 
-function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
-
-function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  )
-}
+// Generous for real messages; stops oversized payloads reaching Resend.
+const MAX_LENGTH = { name: 100, phone: 40, message: 5000 }
 
 export async function POST(req: NextRequest) {
-  const ip = getClientIp(req)
-  const { allowed, retryAfterSeconds } = checkRateLimit(ip)
-
-  if (!allowed) {
-    return NextResponse.json(
-      { error: "Too many submissions. Please try again later." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(retryAfterSeconds) },
-      }
-    )
-  }
+  const limited = await rateLimit("contact", req, "Too many submissions. Please try again later.")
+  if (limited) return limited
 
   let body: ContactFormPayload
   try {
@@ -66,15 +48,34 @@ export async function POST(req: NextRequest) {
 
   const { firstName, lastName, email, phone, message } = body
 
-  if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !message?.trim()) {
+  const isText = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0
+  if (!isText(firstName) || !isText(lastName) || !isText(email) || !isText(message)) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
-  if (!isValidEmail(email)) {
+  const data = {
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    email: email.trim(),
+    phone: typeof phone === "string" ? phone.trim() : undefined,
+    message: message.trim(),
+  }
+
+  if (!isValidEmail(data.email)) {
     return NextResponse.json({ error: "Invalid email address" }, { status: 400 })
   }
 
-  const data = { firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), phone: phone?.trim(), message: message.trim() }
+  if (
+    data.firstName.length > MAX_LENGTH.name ||
+    data.lastName.length > MAX_LENGTH.name ||
+    (data.phone?.length ?? 0) > MAX_LENGTH.phone ||
+    data.message.length > MAX_LENGTH.message
+  ) {
+    return NextResponse.json(
+      { error: `Please keep names under ${MAX_LENGTH.name} characters and the message under ${MAX_LENGTH.message}.` },
+      { status: 400 },
+    )
+  }
   const signals = spamSignals(data)
   if (signals.length > 0) {
     console.warn(`Contact form flagged as possible spam: ${signals.join(", ")}`)

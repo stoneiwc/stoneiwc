@@ -1,5 +1,5 @@
 import 'server-only'
-import { client } from './sanity.client'
+import { readClient as client } from './sanity.client'
 import { getCoupons, getShippingMethods } from './sanity.queries'
 import { getGiftCardByCode } from './gift-cards'
 import { giftCardAmount } from './gift-card-math'
@@ -80,6 +80,7 @@ export async function computeOrderPricing(input: {
       _id, name, "slug": slug.current, price, isDiscount, discountedPrice
     }`,
     { ids },
+    { cache: 'no-store' },
   )
   const byId = new Map(products.map((p) => [p._id, p]))
  

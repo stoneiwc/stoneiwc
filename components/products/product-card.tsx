@@ -6,7 +6,7 @@ import { ShoppingBag, Minus, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
-import { GIFT_CARD_SLUG } from "@/components/products/gift-card-purchase"
+import { GIFT_CARD_SLUG } from "@/lib/constants"
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity } = useCart()

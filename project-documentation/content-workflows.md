@@ -60,7 +60,7 @@ The left sidebar is the **map of everything you can edit**. The top-level sectio
 | **Gift Cards** | Issued + manually created gift cards |
 | **Shipping & Coupons** | Discount codes and shipping options shown at checkout |
 
-Within **Pages**, the layout mirrors the site navigation. So **Pages → About Us → Our Story → Images** edits the images on the `/about/our-story` URL.
+Within **Pages**, the layout mirrors the site navigation. So **Pages → Services → Concierge → Images** edits the images on `/services/concierge`. A few merged pages keep their old Studio location: Our Story's image now shows on `/about`, Certifications and Licensee Programs on `/training`, Virtual Consultations on `/services`, and the Featured On items (press, media, QC Show) on `/media`.
 
 ### 4. Drafts vs Published — the most important thing to know
 

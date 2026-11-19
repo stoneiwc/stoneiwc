@@ -3,6 +3,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Clock, ArrowLeft } from "lucide-react"
 import { CalBooker } from "@/components/cal-booker"
+import { pageMetadata } from "@/lib/seo"
 import {
   getEventTypes,
   getCategoryFromSlug,
@@ -13,16 +14,34 @@ type Props = {
   params: Promise<{ slug: string }>
 }
 
+// Re-check Cal.com every 5 minutes (CAL_EVENTS_REVALIDATE_SECONDS; route
+// config must be a literal). Services added since the last build render on
+// first visit.
+export const revalidate = 300
+
+export async function generateStaticParams() {
+  try {
+    const events = await getEventTypes(process.env.NEXT_PUBLIC_CAL_USERNAME!)
+    return events.map((event) => ({ slug: event.slug }))
+  } catch (err) {
+    // Don't fail the deploy because Cal.com is down; pages render on demand.
+    console.error("Could not prebuild booking pages:", err)
+    return []
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const username = process.env.NEXT_PUBLIC_CAL_USERNAME!
-  const events = await getEventTypes(username)
+  const events = await getEventTypes(username).catch(() => [])
   const event = events.find((e) => e.slug === slug)
 
-  return {
+  return pageMetadata({
     title: event ? `Book ${event.title}` : "Book a Service",
-    description: event?.description ?? "Schedule your appointment with Stone IWC.",
-  }
+    // Cal.com descriptions can be long and contain newlines; keep the meta tag short.
+    description: (event?.description ?? "Schedule your appointment with Stone IWC.").replace(/\s+/g, " ").slice(0, 300),
+    path: `/book/${slug}`,
+  })
 }
 
 export default async function BookingSlugPage({ params }: Props) {

@@ -4,6 +4,8 @@ import { createPendingOrder } from '@/lib/orders'
 import { computeOrderPricing } from '@/lib/pricing'
 import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
 import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
+import { isValidEmail } from '@/lib/validation'
+import { rateLimit } from '@/lib/rate-limit'
 
 type CheckoutItem = {
   id?: string
@@ -44,19 +46,13 @@ type CreateStripePaymentIntentBody = HoneypotFields & {
   giftCardCode?: string
   giftCardAppliedAmount?: number
   paymentIntentId?: string
-}
-
-export async function GET() {
-  return NextResponse.json({
-    message: 'Stripe payment intent endpoint is available. Use POST to create a payment intent.',
-  })
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: { Allow: 'GET,POST,OPTIONS' } })
+  paymentIntentClientSecret?: string
 }
 
 export async function POST(request: Request) {
+  const limited = await rateLimit('checkout', request)
+  if (limited) return limited
+
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY
     if (!stripeSecretKey) {
@@ -87,10 +83,17 @@ export async function POST(request: Request) {
       phone,
       giftCardCode,
       paymentIntentId: existingPaymentIntentId,
+      paymentIntentClientSecret: existingClientSecret,
     } = body
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Cart items are required' }, { status: 400 })
+    }
+
+    // The order confirmation goes to this address, and Stripe rejects a
+    // malformed receipt_email, so check it before pricing anything.
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: 'A valid email address is required.' }, { status: 400 })
     }
 
     const pricing = await computeOrderPricing({ items, couponCode, shippingMethod, giftCardCode })
@@ -109,10 +112,9 @@ export async function POST(request: Request) {
 
     const truncate = (s: string, max = 500) =>
       s.length <= max ? s : s.slice(0, max - 1) + '…'
+    // Names and quantities from server pricing, not from the client.
     const itemsSummary = truncate(
-      items
-        .map((i) => `${Number(i.quantity ?? 1)}× ${i.name ?? i.title ?? 'item'}`)
-        .join(', '),
+      pricing.items.map((i) => `${i.quantity}× ${i.name}`).join(', '),
       480,
     )
     const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
@@ -121,7 +123,7 @@ export async function POST(request: Request) {
       order_type: 'storefront',
       customer_email: email || '',
       customer_name: fullName,
-      items_count: String(items.length),
+      items_count: String(pricing.items.length),
       items_summary: itemsSummary,
       subtotal: pricing.subtotal.toFixed(2),
       shipping_method: shippingMethod || 'standard',
@@ -160,11 +162,19 @@ export async function POST(request: Request) {
         }
       : undefined
 
+    // Reuse the caller's earlier PaymentIntent (the customer went back to edit
+    // their details) only when they also present its client secret. A
+    // PaymentIntent ID alone isn't proof of ownership, and reusing it would let
+    // anyone who learned one change its amount, email and pending order.
     let paymentIntent: Stripe.PaymentIntent | null = null
-    if (existingPaymentIntentId) {
+    if (existingPaymentIntentId && existingClientSecret) {
       try {
         const existing = await stripe.paymentIntents.retrieve(existingPaymentIntentId)
-        if (existing.status === 'requires_payment_method') {
+        if (
+          existing.client_secret === existingClientSecret &&
+          existing.metadata?.order_type === 'storefront' &&
+          existing.status === 'requires_payment_method'
+        ) {
           paymentIntent = await stripe.paymentIntents.update(existing.id, {
             amount: amountInCents,
             receipt_email: email,
@@ -252,7 +262,18 @@ export async function POST(request: Request) {
         console.error('Failed to update Stripe metadata with order_number', updateErr)
       }
     } catch (err) {
+      // No order means nobody would know to fulfil this payment. Cancel the
+      // PaymentIntent so it can't be paid, and let the customer retry.
       console.error('Sanity order creation failed for PaymentIntent', paymentIntent.id, err)
+      try {
+        await stripe.paymentIntents.cancel(paymentIntent.id)
+      } catch (cancelErr) {
+        console.error('Could not cancel PaymentIntent after order failure', paymentIntent.id, cancelErr)
+      }
+      return NextResponse.json(
+        { error: 'We could not start your order. Please try again in a moment.' },
+        { status: 503 },
+      )
     }
 
     return NextResponse.json({
@@ -262,10 +283,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Payment Intent creation error:', error)
-    const details = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json(
-      { error: 'Failed to create payment intent', details },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to create payment intent' }, { status: 500 })
   }
 }

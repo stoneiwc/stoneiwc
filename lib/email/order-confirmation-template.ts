@@ -421,3 +421,64 @@ export function ownerOrderNotificationText(data: OwnerOrderNotificationData): st
 
   return lines.join('\n')
 }
+
+// Sent to the owner when a storefront payment succeeds but no order was
+// recorded for it (see recoverPaidOrder in lib/orders.ts). The order was
+// rebuilt from Stripe metadata without line items, so it needs a human check.
+export interface RecoveredOrderAlertData {
+  orderNumber: string
+  paymentIntentId: string
+  customerName?: string
+  customerEmail?: string
+  itemsSummary?: string
+  total: number
+  shippingAddress: OrderConfirmationAddress
+}
+
+export function recoveredOrderAlertHtml(data: RecoveredOrderAlertData): string {
+  const rows: Array<[string, string]> = [
+    ['Order', data.orderNumber],
+    ['Stripe payment', data.paymentIntentId],
+    ['Customer', [data.customerName, data.customerEmail].filter(Boolean).join(' · ') || 'Unknown'],
+    ['Charged', money(data.total)],
+    ['Items (from Stripe)', data.itemsSummary || 'Unknown'],
+    ['Ship to', formatAddressLines(data.shippingAddress).join(', ') || 'Unknown'],
+  ]
+  const rowHtml = rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:6px 12px 6px 0;color:#555;vertical-align:top;white-space:nowrap;">${escapeHtml(label)}</td><td style="padding:6px 0;color:#1a1a1a;">${escapeHtml(value)}</td></tr>`,
+    )
+    .join('')
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><title>Paid order needs review</title></head>
+<body style="margin:0;padding:24px;background:#f4f4f0;font-family:Georgia,serif;">
+  <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e0ddd5;padding:24px;">
+    <tr><td>
+      <h1 style="margin:0 0 12px;font-size:20px;font-weight:normal;color:#1a1a1a;">Paid order needs review</h1>
+      <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#555;">A customer paid, but the website could not record the order at checkout. A replacement order was created in Sanity from the Stripe payment, without line items. Check the items in Stripe before fulfilling.</p>
+      <table cellpadding="0" cellspacing="0" style="font-size:14px;">${rowHtml}</table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+export function recoveredOrderAlertText(data: RecoveredOrderAlertData): string {
+  return [
+    'PAID ORDER NEEDS REVIEW',
+    '',
+    'A customer paid, but the website could not record the order at checkout.',
+    'A replacement order was created in Sanity from the Stripe payment, without',
+    'line items. Check the items in Stripe before fulfilling.',
+    '',
+    `Order: ${data.orderNumber}`,
+    `Stripe payment: ${data.paymentIntentId}`,
+    `Customer: ${[data.customerName, data.customerEmail].filter(Boolean).join(' · ') || 'Unknown'}`,
+    `Charged: ${money(data.total)}`,
+    `Items (from Stripe): ${data.itemsSummary || 'Unknown'}`,
+    `Ship to: ${formatAddressLines(data.shippingAddress).join(', ') || 'Unknown'}`,
+  ].join('\n')
+}

@@ -14,7 +14,7 @@ export function CalBooker({ calLink }: CalBookerProps) {
       config={{
         layout: "month_view",
         theme: "light",
-        brandColor: "#D4921A",
+        brandColor: "#DB9824",
       }}
     />
   )

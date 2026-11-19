@@ -1,5 +1,8 @@
 import 'server-only'
-import { client } from './sanity.client'
+import { randomInt } from 'node:crypto'
+import { writeClient as client } from './sanity.client'
+import { isSanityConflict } from './sanity-errors'
+import { privateId } from './sanity-ids'
 
 const VALID_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
@@ -17,15 +20,21 @@ export interface GiftCardDoc {
   note?: string
   paymentIntentId?: string
   expiresAt: string
+  // Set once the gift card email has been sent (see claimGiftCardEmail).
+  emailedAt?: string
   redemptions?: Array<{ orderId: string; amount: number; redeemedAt: string }>
 }
 
+const GIFT_CARD_FIELDS = `
+  _id, _rev, code, originalAmount, currentBalance, status,
+  purchaserName, purchaserEmail, recipientName, recipientEmail,
+  note, paymentIntentId, expiresAt, emailedAt, redemptions
+`
+
+// Codes are bearer credentials, so they come from a CSPRNG.
 export function generateGiftCardCode(): string {
   const segment = () =>
-    Array.from(
-      { length: 4 },
-      () => VALID_CHARS[Math.floor(Math.random() * VALID_CHARS.length)],
-    ).join('')
+    Array.from({ length: 4 }, () => VALID_CHARS[randomInt(VALID_CHARS.length)]).join('')
   return `STONE-${segment()}-${segment()}`
 }
 
@@ -40,46 +49,90 @@ interface CreateGiftCardInput {
   expiresAt: Date
 }
 
-export async function createGiftCard(input: CreateGiftCardInput): Promise<GiftCardDoc> {
+async function getGiftCardByPaymentIntent(paymentIntentId: string): Promise<GiftCardDoc | null> {
+  const result = await client.fetch<GiftCardDoc | null>(
+    `*[_type == "giftCard" && paymentIntentId == $pid][0]{ ${GIFT_CARD_FIELDS} }`,
+    { pid: paymentIntentId },
+    { cache: 'no-store' },
+  )
+  return result ?? null
+}
+
+// Returns the gift card for a purchase, creating it on the first call.
+//
+// Safe under Stripe retries and concurrent deliveries of the same event: the
+// document _id is derived from the PaymentIntent, so a second create fails
+// with 409 and the existing card is returned instead of minting another.
+export async function getOrCreateGiftCardForPayment(input: CreateGiftCardInput): Promise<GiftCardDoc> {
+  const existing = await getGiftCardByPaymentIntent(input.paymentIntentId)
+  if (existing) return existing
+
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateGiftCardCode()
-    const existing = await client.fetch<{ _id: string } | null>(
+    const collision = await client.fetch<{ _id: string } | null>(
       `*[_type == "giftCard" && code == $code][0]{ _id }`,
       { code },
+      { cache: 'no-store' },
     )
-    if (existing) continue
+    if (collision) continue
 
-    const created = await client.create({
-      _type: 'giftCard',
-      code,
-      originalAmount: input.amount,
-      currentBalance: input.amount,
-      status: 'active',
-      purchaserName: input.purchaserName,
-      purchaserEmail: input.purchaserEmail,
-      recipientName: input.recipientName,
-      recipientEmail: input.recipientEmail,
-      note: input.note,
-      paymentIntentId: input.paymentIntentId,
-      expiresAt: input.expiresAt.toISOString(),
-      redemptions: [],
-    })
-
-    return created as unknown as GiftCardDoc
+    try {
+      await client.create({
+        _id: privateId('giftCard', input.paymentIntentId),
+        _type: 'giftCard',
+        code,
+        originalAmount: input.amount,
+        currentBalance: input.amount,
+        status: 'active',
+        purchaserName: input.purchaserName,
+        purchaserEmail: input.purchaserEmail,
+        recipientName: input.recipientName,
+        recipientEmail: input.recipientEmail,
+        note: input.note,
+        paymentIntentId: input.paymentIntentId,
+        expiresAt: input.expiresAt.toISOString(),
+        redemptions: [],
+      })
+    } catch (err) {
+      if (!isSanityConflict(err)) throw err
+      // Another delivery created it first.
+    }
+    const card = await getGiftCardByPaymentIntent(input.paymentIntentId)
+    if (card) return card
+    throw new Error(`Gift card for ${input.paymentIntentId} missing after create.`)
   }
 
   throw new Error('Failed to generate a unique gift card code after 5 attempts.')
 }
 
+// Marks the card's email as sent, before sending it. Returns false if it was
+// already claimed (sent, or being sent by a concurrent delivery). Pair a
+// failed send with releaseGiftCardEmail so a Stripe retry can try again.
+export async function claimGiftCardEmail(card: Pick<GiftCardDoc, '_id' | '_rev' | 'emailedAt'>): Promise<boolean> {
+  if (card.emailedAt) return false
+  try {
+    await client
+      .patch(card._id)
+      .ifRevisionId(card._rev)
+      .set({ emailedAt: new Date().toISOString() })
+      .commit()
+    return true
+  } catch (err) {
+    if (isSanityConflict(err)) return false
+    throw err
+  }
+}
+
+export async function releaseGiftCardEmail(cardId: string): Promise<void> {
+  await client.patch(cardId).unset(['emailedAt']).commit()
+}
+
 export async function getGiftCardByCode(code: string): Promise<GiftCardDoc | null> {
   const normalized = code.trim().toUpperCase()
   const result = await client.fetch<GiftCardDoc | null>(
-    `*[_type == "giftCard" && code == $code][0]{
-      _id, _rev, code, originalAmount, currentBalance, status,
-      purchaserName, purchaserEmail, recipientName, recipientEmail,
-      note, paymentIntentId, expiresAt, redemptions
-    }`,
+    `*[_type == "giftCard" && code == $code][0]{ ${GIFT_CARD_FIELDS} }`,
     { code: normalized },
+    { cache: 'no-store' },
   )
   return result ?? null
 }
@@ -93,10 +146,6 @@ export interface RedeemResult {
 const MAX_REDEEM_ATTEMPTS = 5
 
 const round2 = (n: number) => Math.round(n * 100) / 100
-
-function isRevisionConflict(err: unknown): boolean {
-  return (err as { statusCode?: number } | null)?.statusCode === 409
-}
 
 // Deducts the order's amount from the card, at most once per order.
 //
@@ -146,7 +195,7 @@ export async function redeemGiftCard(
         .commit()
       return { applied, remainingBalance, status: newStatus }
     } catch (err) {
-      if (!isRevisionConflict(err) || attempt === MAX_REDEEM_ATTEMPTS) throw err
+      if (!isSanityConflict(err) || attempt === MAX_REDEEM_ATTEMPTS) throw err
     }
   }
 

@@ -2,93 +2,57 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { ChevronDown, Phone, Mail, MapPin } from "lucide-react"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { navigation, BOOKING_URL, CONTACT_INFO } from "@/lib/navigation"
+import { navigation, BOOKING_URL, CONTACT_INFO, type NavItem } from "@/lib/navigation"
 
-export function MobileNav({
-  open,
-  onClose,
-}: {
-  open: boolean
-  onClose: () => void
-}) {
+const telHref = (phone: string) => `tel:${phone.replace(/[^+\d]/g, "")}`
+
+export function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname()
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0 [&>button]:top-10 [&>button]:h-8 [&>button]:w-8 [&>button_svg]:h-5 [&>button_svg]:w-5">
-        <SheetHeader className="shrink-0 p-6 pb-4 border-b border-border pr-14">
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-          <Link href="/" onClick={onClose} className="inline-block">
-            <Image
-              src="/images/logo.png"
-              alt="Stone International Wellness Center"
-              width={150}
-              height={50}
-              className="h-12 w-auto"
-            />
-          </Link>
+      <SheetContent side="right" className="flex w-full flex-col p-0 sm:max-w-md">
+        <SheetHeader className="shrink-0 border-b border-border px-6 py-5">
+          <SheetTitle className="text-left font-sans text-2xl">Menu</SheetTitle>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="flex flex-col py-4">
+          <ul className="flex flex-col py-2">
             {navigation.map((item) => (
-              <MobileNavItem
-                key={item.href}
-                item={item}
-                pathname={pathname}
-                onClose={onClose}
-              />
+              <li key={item.label}>
+                <MobileNavItem item={item} pathname={pathname} onClose={onClose} />
+              </li>
             ))}
+          </ul>
+
+          <div className="px-6 pb-6 pt-2">
+            <Button asChild size="lg" className="w-full">
+              <Link href={BOOKING_URL} onClick={onClose}>Book now</Link>
+            </Button>
           </div>
 
-          <div className="px-6 pb-4">
-            <Link
-              href={BOOKING_URL}
-              className="block w-full rounded-sm bg-primary py-3.5 text-center text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90"
-              onClick={onClose}
-            >
-              Book Now
-            </Link>
-          </div>
-
-          <div className="border-t border-border px-6 py-6">
-            <div className="flex flex-col gap-4 text-sm font-body text-muted-foreground">
-              <a
-                href={`mailto:${CONTACT_INFO.email}`}
-                className="flex items-center gap-3 hover:text-primary transition-colors"
-              >
-                <Mail className="h-4 w-4 shrink-0 text-primary" />
-                {CONTACT_INFO.email}
-              </a>
-              <a
-                href={`tel:${CONTACT_INFO.phoneGeneral.replace(/\s/g, "")}`}
-                className="flex items-center gap-3 hover:text-primary transition-colors"
-              >
-                <Phone className="h-4 w-4 shrink-0 text-primary" />
-                General Info: {CONTACT_INFO.phoneGeneral}
-              </a>
-              <a
-                href={`tel:${CONTACT_INFO.phoneConcierge.replace(/\s/g, "")}`}
-                className="flex items-center gap-3 hover:text-primary transition-colors"
-              >
-                <Phone className="h-4 w-4 shrink-0 text-primary" />
-                Concierge Services: {CONTACT_INFO.phoneConcierge}
-              </a>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 shrink-0 text-primary mt-0.5" />
-                {CONTACT_INFO.address}
-              </div>
-            </div>
+          <div className="flex flex-col gap-4 border-t border-border px-6 py-6 font-body text-sm text-muted-foreground">
+            <a href={telHref(CONTACT_INFO.phoneGeneral)} className="flex items-center gap-3 hover:text-primary-strong">
+              <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {CONTACT_INFO.phoneGeneral} (general)
+            </a>
+            <a href={telHref(CONTACT_INFO.phoneConcierge)} className="flex items-center gap-3 hover:text-primary-strong">
+              <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {CONTACT_INFO.phoneConcierge} (concierge)
+            </a>
+            <a href={`mailto:${CONTACT_INFO.email}`} className="flex items-center gap-3 hover:text-primary-strong">
+              <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {CONTACT_INFO.email}
+            </a>
+            <p className="flex items-start gap-3">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              {CONTACT_INFO.address}
+            </p>
           </div>
         </div>
       </SheetContent>
@@ -96,89 +60,48 @@ export function MobileNav({
   )
 }
 
-function MobileNavItem({
-  item,
-  pathname,
-  onClose,
-}: {
-  item: (typeof navigation)[0]
-  pathname: string
-  onClose: () => void
-}) {
-  const [expanded, setExpanded] = useState(false)
-  const isActive =
-    pathname === item.href ||
-    item.children?.some((child) => pathname === child.href)
+function MobileNavItem({ item, pathname, onClose }: { item: NavItem; pathname: string; onClose: () => void }) {
+  const active = item.children ? item.children.some((c) => c.href.split("#")[0] === pathname) : item.href === pathname
+  const [expanded, setExpanded] = useState(active)
+  const rowClass = cn(
+    "flex min-h-12 w-full items-center justify-between px-6 font-body text-base font-bold transition-colors hover:text-primary-strong",
+    active ? "text-primary-strong" : "text-foreground",
+  )
 
   if (!item.children) {
     return (
-      <Link
-        href={item.href}
-        onClick={onClose}
-        className={cn(
-          "px-6 py-3.5 text-base font-body font-bold tracking-wide transition-colors hover:text-primary",
-          isActive ? "text-primary" : "text-foreground"
-        )}
-      >
+      <Link href={item.href} onClick={onClose} className={rowClass} aria-current={active ? "page" : undefined}>
         {item.label}
       </Link>
     )
   }
 
+  const listId = `mobile-menu-${item.label.toLowerCase()}`
   return (
-    <div>
-      <div className="flex items-center">
-        <Link
-          href={item.href}
-          onClick={onClose}
-          className={cn(
-            "flex-1 px-6 py-3.5 text-base font-body font-bold tracking-wide transition-colors hover:text-primary",
-            isActive ? "text-primary" : "text-foreground"
-          )}
-        >
-          {item.label}
-        </Link>
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className={cn(
-            "px-4 py-3.5 transition-colors hover:text-primary",
-            isActive ? "text-primary" : "text-foreground"
-          )}
-          aria-label={`Toggle ${item.label} submenu`}
-        >
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 transition-transform duration-200",
-              expanded && "rotate-180"
-            )}
-          />
-        </button>
-      </div>
-
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-200",
-          expanded ? "max-h-96" : "max-h-0"
-        )}
-      >
-        <div className="bg-muted/50 py-2">
+    <>
+      <button type="button" className={rowClass} aria-expanded={expanded} aria-controls={listId} onClick={() => setExpanded((v) => !v)}>
+        {item.label}
+        <ChevronDown className={cn("h-5 w-5 transition-transform", expanded && "rotate-180")} aria-hidden="true" />
+      </button>
+      {expanded && (
+        <ul id={listId} className="bg-muted/60 py-1">
           {item.children.map((child) => (
-            <Link
-              key={child.href}
-              href={child.href}
-              onClick={onClose}
-              className={cn(
-                "block px-10 py-2.5 text-sm font-body tracking-wide transition-colors hover:text-primary",
-                pathname === child.href
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
-            >
-              {child.label}
-            </Link>
+            <li key={child.href}>
+              <Link
+                href={child.href}
+                onClick={onClose}
+                aria-current={pathname === child.href ? "page" : undefined}
+                className={cn(
+                  "flex min-h-11 items-center px-10 font-body text-sm transition-colors hover:text-primary-strong",
+                  pathname === child.href ? "font-bold text-primary-strong" : "text-muted-foreground",
+                )}
+              >
+                {child.label}
+              </Link>
+            </li>
           ))}
-        </div>
-      </div>
-    </div>
+        </ul>
+      )}
+    </>
   )
 }

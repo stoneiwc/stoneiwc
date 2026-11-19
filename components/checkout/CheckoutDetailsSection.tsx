@@ -1,7 +1,7 @@
 "use client"
 
 import type { CartItem, AppliedCoupon } from "@/lib/cart-context"
-import type { AppliedGiftCard } from "@/app/checkout/page"
+import type { AppliedGiftCard } from "@/components/checkout/types"
 
 interface CheckoutDetailsSectionProps {
   items: CartItem[]
@@ -53,7 +53,10 @@ export default function CheckoutDetailsSection({
       <div className="mt-6 space-y-3 text-sm font-body">
         <div className="flex items-center justify-between text-muted-foreground">
           <span>Items</span>
-          <span className="text-foreground">{items.length}</span>
+          {/* Total quantity, not the number of distinct lines. */}
+          <span className="text-foreground">
+            {items.reduce((total, item) => total + item.quantity, 0)}
+          </span>
         </div>
 
         <div className="flex items-center justify-between text-muted-foreground">

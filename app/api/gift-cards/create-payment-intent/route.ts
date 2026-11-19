@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { decoyPaymentIntent, isHoneypotTripped, type HoneypotFields } from '@/lib/honeypot'
+import { GIFT_CARD_MAX, GIFT_CARD_MIN } from '@/lib/gift-card-math'
+import { isValidEmail } from '@/lib/validation'
+import { rateLimit } from '@/lib/rate-limit'
 
-const MAX_CUSTOM_AMOUNT = 500
 const NOTE_MAX_LENGTH = 500
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: Request) {
+  const limited = await rateLimit('giftCardPurchase', request)
+  if (limited) return limited
+
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY
   if (!stripeSecretKey) {
     return NextResponse.json({ error: 'Stripe is not configured.' }, { status: 500 })
@@ -35,9 +39,14 @@ export async function POST(request: Request) {
 
   const { amount, senderName, purchaserEmail, recipientName, recipientEmail, note } = body
 
-  if (!amount || typeof amount !== 'number' || amount < 1 || amount > MAX_CUSTOM_AMOUNT) {
+  if (
+    typeof amount !== 'number' ||
+    !Number.isFinite(amount) ||
+    amount < GIFT_CARD_MIN ||
+    amount > GIFT_CARD_MAX
+  ) {
     return NextResponse.json(
-      { error: `Amount must be between $1 and $${MAX_CUSTOM_AMOUNT}.` },
+      { error: `Amount must be between $${GIFT_CARD_MIN} and $${GIFT_CARD_MAX}.` },
       { status: 400 },
     )
   }
@@ -47,11 +56,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Your name is required.' }, { status: 400 })
   }
 
-  if (!purchaserEmail || !EMAIL_REGEX.test(purchaserEmail)) {
+  if (!isValidEmail(purchaserEmail)) {
     return NextResponse.json({ error: 'A valid sender email address is required.' }, { status: 400 })
   }
 
-  if (!recipientEmail || !EMAIL_REGEX.test(recipientEmail)) {
+  if (!isValidEmail(recipientEmail)) {
     return NextResponse.json({ error: 'A valid recipient email address is required.' }, { status: 400 })
   }
 

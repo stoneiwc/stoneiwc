@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, X, ArrowRight, SlidersHorizontal, ChevronDown } from "lucide-react"
-import { BOOKING_CATEGORIES, type CalEventType } from "@/lib/cal-api"
+import { BOOKING_CATEGORIES, type CalEventSummary } from "@/lib/cal-api"
 
 const SECTIONS = [
   { label: "Head", values: ["hair", "face", "lash-extension", "micropigmentation", "skin-imperfection"] },
@@ -17,7 +17,7 @@ const SECTIONS = [
 const categoryMap = Object.fromEntries(BOOKING_CATEGORIES.map((c) => [c.value, c.label]))
 
 type Props = {
-  events: CalEventType[]
+  events: CalEventSummary[]
 }
 
 export function BookingMobileBar({ events }: Props) {

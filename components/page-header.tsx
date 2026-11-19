@@ -1,26 +1,30 @@
+import type { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
+
 interface PageHeaderProps {
+  /** The page's single <h1>. */
   title: string
+  /** One sentence under the title. */
   subtitle?: string
+  /** Short label above the title (e.g. the section the page belongs to). */
+  eyebrow?: string
+  /** Buttons or links under the subtitle. */
+  children?: ReactNode
+  /** Smaller header for detail pages (a product, a booking). */
+  compact?: boolean
 }
 
-export function PageHeader({ title, subtitle }: PageHeaderProps) {
+// The banner at the top of every page except the homepage. Light and
+// left-aligned, so the page's own content carries the colour.
+export function PageHeader({ title, subtitle, eyebrow, children, compact = false }: PageHeaderProps) {
   return (
-    <section className="relative bg-foreground py-16 lg:py-20 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,hsl(var(--primary)/0.18),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_70%,hsl(var(--accent)/0.10),transparent_50%)]" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      <div className="relative mx-auto max-w-7xl px-6 text-center">
-        <div className="mx-auto mb-6 h-px w-16 bg-primary/50" />
-        <h1 className="font-sans text-4xl font-semibold tracking-wide text-background md:text-5xl lg:text-6xl text-balance">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-background/70 font-body lg:text-lg">
-            {subtitle}
-          </p>
-        )}
-        <div className="mx-auto mt-8 h-px w-16 bg-primary/50" />
+    <header className={cn('border-b border-border bg-card', compact ? 'py-10 md:py-12' : 'py-14 md:py-20')}>
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 md:px-8">
+        {eyebrow && <p className="text-eyebrow">{eyebrow}</p>}
+        <h1 className={cn(compact ? 'text-h2' : 'text-h1', 'max-w-3xl')}>{title}</h1>
+        {subtitle && <p className="text-lead max-w-2xl">{subtitle}</p>}
+        {children && <div className="mt-2 flex flex-wrap gap-3">{children}</div>}
       </div>
-    </section>
+    </header>
   )
 }
