@@ -52,11 +52,6 @@ export const CONCERNS: Record<string, { title: string; content: string }[]> = {
         "Chronic Venous Insufficiency, or CVI, causes blood clots, poor circulation, or high blood pressure. Here at StoneIWC, we have a variety of treatments dedicated to treating CVI.",
     },
     {
-      title: "Cardiovascular System",
-      content:
-        "Palpitations of the heart or problems with blood pressure? Worrying about potential heart problems? StoneIWC has treatments that help relax the body and promote good circulation and cleanse the body of toxins to help prevent future heart problems and help strengthen the heart.",
-    },
-    {
       title: "Toxin Removal",
       content:
         "Toxins are found in everything that is manufactured — medicine, food, water, and even the air we breathe. We are surrounded by synthetic chemicals that can build up and become harmful. When our bodies are healthy and functioning properly, we can effectively deal with a fair amount of daily toxicity. However, when a toxic overload occurs problems start to occur, including fatigue, weakness, depression, or pain.",
