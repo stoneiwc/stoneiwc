@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button"
 
 const telHref = (phone: string) => `tel:${phone.replace(/[^+\d]/g, "")}`
 
+const SOURCE_OF_HOPE_URL = "https://thesourceofhope.org"
+const linkClass =
+  "inline-flex min-h-9 items-center font-body text-sm text-background/75 transition-colors hover:text-primary"
+
 // Link columns come from the main menu, so the footer never links to a page
 // the menu doesn't have. Groups only (Shop and Contact are in "More").
 const linkGroups = navigation.filter((item) => item.children)
@@ -32,8 +36,17 @@ export function Footer() {
               />
             </Link>
             <p className="max-w-sm font-body text-sm leading-relaxed text-background/75">
-              Holistic wellness practitioners in Plano, Texas. All proceeds support
-              The Source of Hope, our nonprofit foundation.
+              Holistic wellness practitioners in Plano, Texas. All proceeds support{" "}
+              <a
+                href={SOURCE_OF_HOPE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-background underline underline-offset-4 hover:text-primary"
+              >
+                The Source of Hope
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+              , our nonprofit foundation.
             </p>
             <address className="flex flex-col gap-2 font-body text-sm not-italic text-background/75">
               <span>{CONTACT_INFO.address}</span>
@@ -61,14 +74,19 @@ export function Footer() {
                 <ul className="flex flex-col gap-1">
                   {group.children?.map((link) => (
                     <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="inline-flex min-h-9 items-center font-body text-sm text-background/75 transition-colors hover:text-primary"
-                      >
+                      <Link href={link.href} className={linkClass}>
                         {link.label}
                       </Link>
                     </li>
                   ))}
+                  {group.label === "More" && (
+                    <li>
+                      <a href={SOURCE_OF_HOPE_URL} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                        The Source of Hope
+                        <span className="sr-only"> (opens in a new tab)</span>
+                      </a>
+                    </li>
+                  )}
                 </ul>
               </div>
             ))}

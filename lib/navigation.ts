@@ -16,7 +16,7 @@ export const navigation: NavItem[] = [
     children: [
       { label: "All services", href: "/services" },
       { label: "Treatments", href: "/services/treatments" },
-      { label: "Concierge (we come to you)", href: "/services/concierge" },
+      { label: "Concierge", href: "/services/concierge" },
       { label: "Virtual consultations", href: "/services/virtual-consultations" },
     ],
   },
