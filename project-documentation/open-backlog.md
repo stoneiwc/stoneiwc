@@ -162,9 +162,9 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 
 ### No CI / pre-merge checks
 
-**What:** No GitHub Actions workflow. No PR builds beyond what Vercel does. `pnpm lint` doesn't work: Next 16 removed `next lint`, and the repo has no ESLint config or install.
+**What:** No GitHub Actions workflow. No PR builds beyond what Vercel does. `pnpm lint` runs (ESLint 9 + `eslint-config-next`, `eslint.config.mjs`), but it still reports pre-existing errors (unescaped apostrophes in page copy, `any` types and setState-in-effect in checkout), so it can't gate merges yet.
 
-**Future fix:** Add ESLint (flat config with `eslint-config-next`) and point `pnpm lint` at `eslint .`. Then add a workflow that runs `pnpm lint`, `pnpm test`, `pnpm tsc --noEmit` and `pnpm build` on every PR, and block merging on failure.
+**Future fix:** Clear the existing lint errors, then add a workflow that runs `pnpm lint`, `pnpm test`, `pnpm tsc --noEmit` and `pnpm build` on every PR, and block merging on failure.
 
 ### Test coverage is partial
 

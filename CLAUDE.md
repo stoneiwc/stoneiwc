@@ -28,7 +28,7 @@ Stone International Wellness Center is a Next.js 16 (App Router) full-stack web 
 pnpm dev        # Start Next.js with Turbopack
 pnpm build      # Production build (type-checks; type errors fail the build)
 pnpm test       # Vitest unit tests (lib/__tests__/)
-# pnpm lint is currently broken: Next 16 removed `next lint` and there's no ESLint config yet
+pnpm lint       # ESLint (eslint.config.mjs; Next 16 removed `next lint`)
 
 # Sanity Studio (run separately)
 cd studio && pnpm dev   # http://localhost:3333
