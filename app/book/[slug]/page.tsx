@@ -131,9 +131,9 @@ export default async function BookingSlugPage({ params }: Props) {
           </aside>
 
           {/* Right: Cal.com embed */}
-          <main className="min-h-[600px]">
+          <div className="min-h-[600px]">
             <CalBooker calLink={`${username}/${slug}`} />
-          </main>
+          </div>
         </div>
       </div>
     </section>
