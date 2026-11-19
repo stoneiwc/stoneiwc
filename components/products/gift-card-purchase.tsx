@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
+import { stripeElementsOptions } from '@/lib/stripe-appearance'
 import { getStripe } from '@/lib/stripe-client'
 import { HoneypotField } from '@/components/honeypot-field'
 import { HONEYPOT_FIELD } from '@/lib/honeypot'
@@ -325,7 +326,7 @@ export function GiftCardPurchase() {
               Edit
             </button>
           </div>
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <Elements stripe={stripePromise} options={stripeElementsOptions(clientSecret)}>
             <PaymentForm amount={finalAmount} onSuccess={() => setIsSuccess(true)} />
           </Elements>
         </div>

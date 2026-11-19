@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { Stripe } from '@stripe/stripe-js'
 import { getStripe } from '@/lib/stripe-client'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
+import { stripeElementsOptions } from '@/lib/stripe-appearance'
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
 import type { AppliedGiftCard } from '@/components/checkout/types'
@@ -852,7 +853,7 @@ export default function SelfCheckoutSection({
               Payment Information
             </h3>
 
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <Elements stripe={stripePromise} options={stripeElementsOptions(clientSecret)}>
               <PaymentForm
                 clientSecret={clientSecret}
                 total={totalPrice}
