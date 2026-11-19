@@ -14,7 +14,6 @@ import {virtualConsultationsImagesType} from './virtualConsultationsImages'
 import {certificationImagesType} from './certificationImages'
 import {licenseeProgramImagesType} from './licenseeProgramImages'
 import {cuppingImagesType} from './cuppingImages'
-import {articleType} from './article'
 import {pressItemType} from './pressItem'
 import {mediaItemType} from './mediaItem'
 import {qcShowFlyerType} from './qcShowFlyer'
@@ -23,7 +22,6 @@ import {couponType} from './coupon'
 import {giftCardType} from './giftCard'
 import {orderType} from './order'
 import {shippingMethodType} from './shippingMethod'
-import {awardItemType} from './awardItem'
 
 export const schemaTypes = [
   categoryType,
@@ -42,7 +40,6 @@ export const schemaTypes = [
   certificationImagesType,
   licenseeProgramImagesType,
   cuppingImagesType,
-  articleType,
   pressItemType,
   mediaItemType,
   qcShowFlyerType,
@@ -51,5 +48,4 @@ export const schemaTypes = [
   giftCardType,
   orderType,
   shippingMethodType,
-  awardItemType,
 ]

@@ -35,7 +35,7 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 CVI_SERVICES = [
     {
-        "title": "Lymphatic Drainage For Body CVI (CPT-97032)",
+        "title": "Lymphatic Drainage for Circulation – Body",
         "slug": "chronic-venous-insufficiency-lymphatic-drainage",
         "length_minutes": 60,
         "price_cents": 45000,

@@ -17,18 +17,16 @@ Dynamically generated via Next.js `MetadataRoute.Sitemap`. On every build, it fe
 | `/` | 1.0 | weekly |
 | `/products` | 0.9 | daily |
 | `/book` | 0.9 | weekly |
-| `/education` | 0.8 | weekly |
 | `/services` | 0.8 | monthly |
 | `/about` | 0.7 | monthly |
-| `/featured` | 0.7 | weekly |
 | `/contact` | 0.6 | yearly |
-| `/our-policies` | 0.3 | yearly |
+| Every other menu link (`allNavLinks()`) | 0.7 | monthly |
 | `/products/[slug]` (all) | 0.8 | weekly |
-| `/education/articles/[slug]` (all) | 0.7 | monthly |
+| `/book/[slug]` (all Cal.com services) | 0.7 | weekly |
 
 Accessible at: `{NEXT_PUBLIC_FRONTEND_URL}/sitemap.xml`
 
-**Note:** `/book/[slug]` booking pages are not included in the sitemap because they are rendered dynamically via Cal.com at runtime and should not be indexed independently.
+Booking pages come from Cal.com's event list; if Cal.com is down, the sitemap is built without them rather than failing.
 
 ---
 
@@ -86,7 +84,7 @@ Both `generateMetadata` functions were extended with:
 
 The following pages had `openGraph`, `twitter`, and `alternates.canonical` added:
 
-`/about`, `/book`, `/services`, `/contact`, `/products`, `/education`, `/featured`
+`/about`, `/book`, `/services`, `/contact`, `/products`, `/faq`, `/training`, `/media`
 
 Canonical URLs use relative paths (e.g. `/about`) which Next.js resolves against `metadataBase`.
 

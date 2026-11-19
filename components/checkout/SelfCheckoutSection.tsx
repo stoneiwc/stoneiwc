@@ -1,11 +1,15 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
+import type { Stripe } from '@stripe/stripe-js'
+import { getStripe } from '@/lib/stripe-client'
 import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import type { CartItem } from '@/lib/cart-context'
 import type { SanityShippingMethod } from '@/lib/sanity.queries'
-import type { AppliedGiftCard } from '@/app/checkout/page'
+import type { AppliedGiftCard } from '@/components/checkout/types'
+import { HoneypotField } from '@/components/honeypot-field'
+import { HONEYPOT_FIELD } from '@/lib/honeypot'
+import { MIN_STRIPE_CHARGE } from '@/lib/gift-card-math'
 
 interface CheckoutFormState {
   email: string
@@ -128,6 +132,7 @@ interface SelfCheckoutSectionProps {
   appliedCoupon: { code?: string } | null
   discountAmount: number
   totalPrice: number
+  shippingMethods: SanityShippingMethod[]
   onShippingMethodChange: (method: string, cost: number) => void
   shippingCost: number
   appliedGiftCard: AppliedGiftCard | null
@@ -141,6 +146,7 @@ export default function SelfCheckoutSection({
   appliedCoupon,
   discountAmount,
   totalPrice,
+  shippingMethods,
   onShippingMethodChange,
   shippingCost,
   appliedGiftCard,
@@ -169,12 +175,16 @@ export default function SelfCheckoutSection({
     shippingMethod: '',
   }))
 
-  const [shippingMethods, setShippingMethods] = useState<SanityShippingMethod[]>([])
   const [stripePromise, setStripePromise] = useState<any>(null)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   // Remembered across re-initializations so editing details and continuing
   // again reuses the same PaymentIntent instead of creating a duplicate order.
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
+  // The server only reuses it when the client secret matches, which proves
+  // this browser created it.
+  const [reusablePaymentIntent, setReusablePaymentIntent] = useState<{
+    id: string
+    clientSecret: string
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -203,22 +213,22 @@ export default function SelfCheckoutSection({
     }
   }
 
-  // Fetch shipping methods and restore saved selection
+  // Select the saved shipping method (or the first one). The methods come from
+  // the server with the page; localStorage is only readable after mount.
   useEffect(() => {
-    fetch('/api/shipping-methods')
-      .then((r) => r.json())
-      .then((methods: SanityShippingMethod[]) => {
-        setShippingMethods(methods)
-        const savedMethod =
-          (typeof window !== 'undefined' && localStorage.getItem('selectedShippingMethod')) ||
-          (methods[0]?.id ?? '')
-        const shipping = methods.find((m) => m.id === savedMethod)
-        if (shipping) {
-          setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
-          onShippingMethodChange(shipping.name, shipping.cost)
-        }
-      })
-  }, [onShippingMethodChange])
+    let savedMethod: string | null = null
+    try {
+      savedMethod = localStorage.getItem('selectedShippingMethod')
+    } catch {
+      // Storage blocked (private mode, etc.): fall back to the first method.
+    }
+    const shipping =
+      shippingMethods.find((m) => m.id === savedMethod) ?? shippingMethods[0]
+    if (shipping) {
+      setForm((prev) => ({ ...prev, shippingMethod: shipping.id }))
+      onShippingMethodChange(shipping.name, shipping.cost)
+    }
+  }, [shippingMethods, onShippingMethodChange])
 
   const updateField = <K extends keyof CheckoutFormState>(
     key: K,
@@ -269,7 +279,9 @@ export default function SelfCheckoutSection({
     )
   }
 
+  const belowMinimum = totalPrice < MIN_STRIPE_CHARGE
   const isInitializingRef = useRef(false)
+  const honeypotRef = useRef<HTMLInputElement>(null)
 
   const initializePayment = async () => {
     // Guard against a fast double-click firing two concurrent calls before the
@@ -280,18 +292,10 @@ export default function SelfCheckoutSection({
       setIsLoading(true)
       setError(null)
 
-      // Fetch Stripe publishable key
-      const keyResponse = await fetch('/api/checkout/retrieve-stripe-publishable-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      const keyData = await keyResponse.json()
-
-      if (keyData.error || !keyData.publishableKey) {
+      const stripe = await getStripe()
+      if (!stripe) {
         throw new Error('Failed to load payment system')
       }
-
-      const stripe = await loadStripe(keyData.publishableKey)
       setStripePromise(stripe)
 
       // Create Payment Intent
@@ -319,7 +323,9 @@ export default function SelfCheckoutSection({
           phone: form.phone,
           giftCardCode: appliedGiftCard?.code,
           giftCardAppliedAmount: appliedGiftCard ? giftCardDiscount : undefined,
-          paymentIntentId,
+          paymentIntentId: reusablePaymentIntent?.id,
+          paymentIntentClientSecret: reusablePaymentIntent?.clientSecret,
+          [HONEYPOT_FIELD]: honeypotRef.current?.value ?? '',
           billingSameAsShipping: form.shippingSameAsBilling,
           shippingAddress: {
             firstName: form.shippingSameAsBilling ? form.firstName : form.firstName,
@@ -351,7 +357,7 @@ export default function SelfCheckoutSection({
       }
 
       if (data.paymentIntentId) {
-        setPaymentIntentId(data.paymentIntentId)
+        setReusablePaymentIntent({ id: data.paymentIntentId, clientSecret: data.clientSecret })
       }
       setClientSecret(data.clientSecret)
     } catch (err) {
@@ -375,7 +381,12 @@ export default function SelfCheckoutSection({
     }
     // Redirect to success page
     if (typeof window !== 'undefined') {
-      window.location.href = `/checkout/success?payment_intent=${paymentIntent.id}`
+      // Same parameters Stripe adds when it redirects; the success page needs both.
+      const params = new URLSearchParams({
+        payment_intent: paymentIntent.id,
+        payment_intent_client_secret: paymentIntent.client_secret,
+      })
+      window.location.href = `/checkout/success?${params}`
     }
   }
 
@@ -772,6 +783,8 @@ export default function SelfCheckoutSection({
             )}
           </div>
 
+          <HoneypotField ref={honeypotRef} />
+
           {error && (
             <div className="rounded-sm border border-red-200 bg-red-50 p-4">
               <p className="text-sm font-semibold text-red-800">{error}</p>
@@ -781,11 +794,16 @@ export default function SelfCheckoutSection({
           <button
             type="button"
             onClick={initializePayment}
-            disabled={!isFormValid() || isLoading}
+            disabled={!isFormValid() || isLoading || belowMinimum}
             className="w-full rounded-sm bg-primary px-6 py-3 text-sm font-body font-bold tracking-wider text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted"
           >
             {isLoading ? 'Loading...' : 'Continue to Payment'}
           </button>
+          {belowMinimum && (
+            <p className="mt-3 text-center text-sm font-body text-muted-foreground">
+              Orders must total at least ${MIN_STRIPE_CHARGE.toFixed(2)} to check out. Please add items to your cart.
+            </p>
+          )}
         </div>
       ) : stripePromise && clientSecret ? (
         <>
@@ -809,13 +827,22 @@ export default function SelfCheckoutSection({
               </div>
               <div>{form.email}</div>
               <div>{form.phone}</div>
-              <div>
-                {form.addressLine1}
-                {form.addressLine2 && `, ${form.addressLine2}`}
+              {/* The address the order ships to: the separate shipping address
+                  when one was entered (that's what the server sends to Stripe
+                  and the order), otherwise the billing address. */}
+              <div className="pt-1">
+                <span className="text-foreground">Ships to: </span>
+                {form.shippingSameAsBilling
+                  ? `${form.addressLine1}${form.addressLine2 ? `, ${form.addressLine2}` : ''}, ${form.city}, ${form.state} ${form.postalCode}`
+                  : `${form.shippingAddressLine1}${form.shippingAddressLine2 ? `, ${form.shippingAddressLine2}` : ''}, ${form.shippingCity}, ${form.shippingState} ${form.shippingPostalCode}`}
               </div>
-              <div>
-                {form.city}, {form.state} {form.postalCode}
-              </div>
+              {!form.shippingSameAsBilling && (
+                <div>
+                  <span className="text-foreground">Billing: </span>
+                  {form.addressLine1}
+                  {form.addressLine2 && `, ${form.addressLine2}`}, {form.city}, {form.state} {form.postalCode}
+                </div>
+              )}
             </div>
           </div>
 

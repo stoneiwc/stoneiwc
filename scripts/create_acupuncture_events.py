@@ -35,14 +35,14 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 ACUPUNCTURE_SERVICES = [
     {
-        "title": "Acupuncture; 15 min (CPT-97810)",
+        "title": "Acupuncture – 15 min",
         "slug": "acupuncture-15min",
         "length_minutes": 15,
         "price_cents": 4500,
         "description": "Acupuncture with one or more needles, initial 15-minute session without electrical stimulation.\nCPT Code: CPT-97810",
     },
     {
-        "title": "Acupuncture; 25 min (CPT-97811)",
+        "title": "Acupuncture – 25 min",
         "slug": "acupuncture-25min",
         "length_minutes": 25,
         "price_cents": 7500,

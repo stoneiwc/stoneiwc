@@ -35,7 +35,7 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 SKIN_IMPERFECTION_SERVICES = [
     {
-        "title": "Wart Removal (CPT-17999)",
+        "title": "Wart Removal",
         "slug": "skin-imperfection-wart-removal",
         "length_minutes": 10,
         "price_cents": 8500,

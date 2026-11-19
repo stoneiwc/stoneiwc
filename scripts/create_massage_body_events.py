@@ -35,14 +35,14 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 MASSAGE_BODY_SERVICES = [
     {
-        "title": "Hot/Cold-Pack (CPT-97010)",
+        "title": "Hot & Cold Pack Therapy",
         "slug": "massage-body-hot-cold-pack",
         "length_minutes": 20,
         "price_cents": 1000,
         "description": "Therapeutic hot or cold pack application to reduce inflammation and ease muscle tension.\nCPT Code: CPT-97010",
     },
     {
-        "title": "Manual Therapy (CPT-97140)",
+        "title": "Manual Therapy (Hands-On Mobilization)",
         "slug": "massage-body-manual-therapy",
         "length_minutes": 10,
         "price_cents": 12500,

@@ -12,7 +12,7 @@ All data access goes through GROQ queries in `lib/sanity.queries.ts`. The fronte
 
 | File | Purpose |
 |------|---------|
-| `lib/sanity.client.ts` | Sanity client initialization |
+| `lib/sanity.client.ts` | Sanity client initialization (`@sanity/client` directly; `next-sanity` was dropped because it pulled the whole Studio and its ~150 vulnerable transitive packages into the website's dependencies) |
 | `lib/sanity.queries.ts` | All GROQ queries and TypeScript types |
 | `lib/sanity.image.ts` | Image URL builder (`urlFor`) |
 | `studio/schemaTypes/` | Schema definitions for all content types |
@@ -26,32 +26,45 @@ Initialized with:
 - `projectId`: `NEXT_PUBLIC_SANITY_PROJECT_ID`
 - `dataset`: `NEXT_PUBLIC_SANITY_DATASET`
 - `apiVersion`: `NEXT_PUBLIC_SANITY_API_VERSION`
-- `useCdn: true` for reads (cached CDN)
-- `token`: `SANITY_API_TOKEN` for write access (used in revalidation)
+- `useCdn: false`: reads go to the live API. Next's Data Cache does the caching (below); the API CDN could hand a just-published change back stale after a webhook revalidation.
+- Two clients, both server-only (`lib/sanity.client.ts` imports `server-only`):
+  - `readClient`: pages, pricing, coupons, shipping methods. Token: `SANITY_READ_TOKEN` (a Viewer token) if set, else `SANITY_API_TOKEN`. (Private orders and gift cards are only readable with a token, see below.)
+  - `writeClient`: orders and gift cards (and the reads that guard their writes). Token: `SANITY_API_TOKEN` (Editor).
+
+> **Customer data in a public dataset.** Private datasets aren't available on Sanity's free plan, so `production` is public: anyone with the project ID (it's in the browser bundle) can query it without a token. Orders (customer names, emails, addresses) and gift cards (bearer codes and balances) stay private because their document IDs contain a period: `order.<id>` and `giftCard.<id>`. Sanity only serves root-path IDs to unauthenticated requests. The site creates every order and gift card this way (`privateId()` in [`lib/sanity-ids.ts`](../lib/sanity-ids.ts)). Studio can't create or duplicate them (`studio/sanity.config.ts`), because Studio would assign a public ID. Older documents were moved with `scripts/migrate-private-ids.mjs`, which is safe to re-run. Coupons and shipping methods are created in Studio with public IDs, so coupon codes are readable; keep that in mind before creating high-value codes. If the project moves to a paid plan, make the dataset private as well.
 
 ---
 
 ## Caching & ISR
 
-All Sanity queries use Next.js fetch cache tags for selective invalidation:
+Two kinds of reads in [`lib/sanity.queries.ts`](../lib/sanity.queries.ts):
+
+- **Page content** goes through `contentFetch`, which caches the result in Next's Data Cache for `CONTENT_REVALIDATE_SECONDS` and tags it with the document types it reads.
+- **Checkout data** (coupons, shipping methods, and everything in `lib/pricing.ts`, `lib/orders.ts`, `lib/gift-cards.ts`) is read live with `cache: 'no-store'`, so a deactivated coupon or a price change applies to the next order.
 
 ```ts
-client.fetch(query, params, { next: { tags: ["product"] } })
+contentFetch(query, params, ['product', 'category'])
 ```
 
-**Pages that use ISR:**
+Each content type is its own cache tag. The list is `CONTENT_TYPES` in [`lib/sanity-tags.ts`](../lib/sanity-tags.ts); `contentFetch` only accepts types from it, so a query can't use a tag the webhook doesn't know.
 
-| Page | Revalidate |
-|------|-----------|
-| `/` (homepage) | 60s |
-| `/about` | 60s |
-| `/education` | 60s |
-| `/featured` | 60s |
-| `/products` | 60s |
-| `/products/[slug]` | 60s |
-| `/education/articles/[slug]` | 60s |
+Pages backed by Sanity export `revalidate = 60`, matching `CONTENT_REVALIDATE_SECONDS`.
 
-**Cache invalidation:** `POST /api/revalidate` can trigger on-demand revalidation using Sanity webhooks or manual calls.
+### On-demand revalidation (Sanity webhook)
+
+`POST /api/revalidate` revalidates the tag named by the body's `_type`. It needs the `x-webhook-secret` header to match `SANITY_WEBHOOK_SECRET`, compared in constant time, and refuses everything if the variable is unset.
+
+To wire it up, go to sanity.io/manage → API → Webhooks → Create:
+- **URL:** `https://stoneiwc.com/api/revalidate` (and a second webhook for the Preview URL if wanted)
+- **Trigger on:** Create, Update, Delete
+- **Filter:** leave empty
+- **Projection:** `{_type}`
+- **HTTP method:** POST
+- **HTTP headers:** `x-webhook-secret: <SANITY_WEBHOOK_SECRET>`
+
+Once publishes are confirmed to refresh pages within seconds, raise `CONTENT_REVALIDATE_SECONDS` and every page's `export const revalidate` from 60 to 3600. That way Sanity is read hourly instead of every minute.
+
+`{ "_type": "calEvents" }` refreshes the booking pages straight after a change in Cal.com (they otherwise refresh every 5 minutes).
 
 ---
 
@@ -135,7 +148,7 @@ Only coupons with `isActive == true` are returned by `getCoupons()`.
 
 ### Shipping Method (`studio/schemaTypes/shippingMethod.ts`)
 
-Available shipping options shown at checkout. Fetched via `GET /api/shipping-methods`.
+Available shipping options shown at checkout. Read live (`getShippingMethods`) by the checkout page and by server pricing.
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -159,9 +172,9 @@ These are simpler content types managed in Sanity. Most are single-document type
 | `teamMember` | About → Team | `name`, `title`, `bio`, `image`, `specialties`, ordered by `orderRank` |
 | `partner` | About → Partners | `name`, `description`, `logo`, `websiteUrl`, ordered by `orderRank` |
 | `pressItem` | Featured → Press | `title`, `description`, `image`, `link`, ordered by `orderRank` |
-| `awardItem` | Featured → Awards | `title`, `description`, `image`, ordered by `orderRank` |
+| `awardItem` | Featured → Media (Awards section, shown once one is published) | `title`, `description`, `image`, ordered by `orderRank` |
 | `mediaItem` | Featured → Media | `title`, `description`, `youtubeUrl`, ordered by `orderRank` |
-| `qcShowFlyer` | Featured → QC Show | Single document, image only |
+| `qcShowFlyer` | `/media` (The QC Show) | Single document, image only |
 | `qcShowEpisode` | Featured → QC Show | `youtubeUrl`, ordered by `_createdAt` |
 
 **Singleton image documents** (one document per page section):
@@ -170,16 +183,16 @@ These are simpler content types managed in Sanity. Most are single-document type
 |-----------|---------|-------------|
 | `homePageImages` | Homepage about + culinary images | Pages → Home → Images |
 | `aboutPageImages` | `/about` hero image | Pages → About Us → About Us Page → Images |
-| `ourStoryImages` | About → Our Story | Pages → About Us → Our Story → Images |
+| `ourStoryImages` | `/about` (The Source of Hope image) | Pages → About Us → Our Story → Images |
 | `servicesPageImages` | `/services` section images | Pages → Services → Services Page → Images |
 | `conciergeImages` | Services → Concierge | Pages → Services → Concierge → Images |
-| `virtualConsultationsImages` | Services → Virtual Consultations | Pages → Services → Virtual Consultations → Images |
-| `educationPageImages` | `/education` hero image | Pages → Education → Education Page → Images |
-| `certificationImages` | Education → Certifications | Pages → Education → Practitioner Certifications → Images |
-| `licenseeProgramImages` | Education → Licensee Program | Pages → Education → Licensee Programs → Images |
+| `virtualConsultationsImages` | `/services` (video consultations image) | Pages → Services → Virtual Consultations → Images |
+| `educationPageImages` | `/training` (education center image) | Pages → Education → Education Page → Images |
+| `certificationImages` | `/training` (certifications image) | Pages → Education → Practitioner Certifications → Images |
+| `licenseeProgramImages` | `/training` (licensing image) | Pages → Education → Licensee Programs → Images |
 | `cuppingImages` | Education → Cupping | Pages → Education → Cupping → Images |
-| `featuredPageImages` | `/featured` hero image | Pages → Featured On → Featured On Page → Images |
-| `qcShowFlyer` | Featured → QC Show | Pages → Featured On → QC Show → Flyer |
+| `featuredPageImages` | Unused: `/featured` now redirects to `/media` | Pages → Featured On → Featured On Page → Images |
+| `qcShowFlyer` | `/media` (The QC Show) | Pages → Featured On → QC Show → Flyer |
 
 These use a fixed `_id` (same as `_type`) so there is always exactly one document per type. Queried with `[0]` selector and the `_id` filter.
 

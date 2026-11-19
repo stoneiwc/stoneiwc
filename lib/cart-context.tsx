@@ -6,6 +6,7 @@ import {
   useReducer,
   useCallback,
   useEffect,
+  useState,
   type ReactNode,
 } from "react"
 import type { Product } from "@/lib/products"
@@ -20,6 +21,7 @@ export interface AppliedCoupon {
   description: string
   type: "percentage" | "fixed"
   value: number
+  minSubtotal?: number | null
 }
 
 interface CartState {
@@ -110,6 +112,9 @@ interface CartContextValue {
   removeCoupon: () => void
   discountAmount: number
   totalPrice: number
+  // True once the saved cart has been read from localStorage. Until then
+  // `items` is the empty initial state, not the customer's cart.
+  isHydrated: boolean
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -120,6 +125,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isOpen: false,
     coupon: null,
   })
+
+  // False until the saved cart has been read. Saving waits for it: otherwise
+  // the first save runs with the initial empty cart and overwrites the saved
+  // one (React StrictMode then reads that empty cart back and the cart is lost).
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -142,11 +152,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("Failed to load cart from localStorage:", error)
+    } finally {
+      setIsHydrated(true)
     }
   }, [])
 
-  // Save cart to localStorage whenever items change
+  // Save cart to localStorage whenever items change, once the saved cart is loaded
   useEffect(() => {
+    if (!isHydrated) return
     try {
       localStorage.setItem(
         "stone-iwc-cart",
@@ -155,7 +168,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to save cart to localStorage:", error)
     }
-  }, [state.items, state.coupon])
+  }, [isHydrated, state.items, state.coupon])
 
   const setOpen = useCallback(
     (isOpen: boolean) => dispatch({ type: "SET_OPEN", isOpen }),
@@ -193,14 +206,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (sum, i) => sum + i.product.price * i.quantity,
     0
   )
-  const discountAmount = state.coupon
-    ? Math.min(
-        state.coupon.type === "percentage"
-          ? (subtotal * state.coupon.value) / 100
-          : state.coupon.value,
-        subtotal
-      )
-    : 0
+  // Mirrors computeOrderPricing (lib/pricing.ts): the minimum-spend rule is
+  // re-checked here, and the discount is rounded to cents, so the total shown
+  // is the total the server charges.
+  const couponApplies =
+    !!state.coupon &&
+    (state.coupon.minSubtotal == null || subtotal >= state.coupon.minSubtotal)
+  const rawDiscount =
+    couponApplies && state.coupon
+      ? state.coupon.type === "percentage"
+        ? (subtotal * state.coupon.value) / 100
+        : state.coupon.value
+      : 0
+  const discountAmount =
+    Math.round(Math.min(rawDiscount, subtotal) * 100) / 100
   const totalPrice = Math.max(subtotal - discountAmount, 0)
 
   return (
@@ -220,6 +239,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeCoupon,
         discountAmount,
         totalPrice,
+        isHydrated,
       }}
     >
       {children}

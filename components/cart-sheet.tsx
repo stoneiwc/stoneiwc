@@ -164,21 +164,8 @@ export function CartSheet() {
                   )}
                   <div className="flex items-center justify-between text-sm font-body">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span className="text-foreground">
-                      {subtotal >= 75 ? (
-                        <span className="font-semibold text-primary">Free</span>
-                      ) : (
-                        "At checkout"
-                      )}
-                    </span>
+                    <span className="text-foreground">Calculated at checkout</span>
                   </div>
-                  {subtotal < 75 && (
-                    <div className="rounded-sm bg-secondary px-3 py-2 mt-2">
-                      <p className="text-xs font-body text-muted-foreground">
-                        Add ${(75 - subtotal).toFixed(2)} more for free shipping
-                      </p>
-                    </div>
-                  )}
                   <div className="h-px bg-border my-3" />
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-sans text-lg font-bold text-foreground">

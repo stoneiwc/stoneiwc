@@ -111,7 +111,7 @@ This usually happens because:
 - Webhook didn't receive the event (see [stuck pending](#order-stuck-in-pending-forever))
 - `SANITY_API_TOKEN` lacks Editor permission
 - The gift card was deactivated between checkout and webhook arrival
-- The card hit the optimistic-concurrency retry limit (5 attempts) — high contention, very rare
+- The card hit the revision-conflict retry limit (5 attempts) — very rare. The webhook returned 500, so Stripe retries on its own; check the event's delivery attempts in Stripe
 
 **Fix:**
 - Manually adjust `currentBalance` and append to `redemptions` in Studio

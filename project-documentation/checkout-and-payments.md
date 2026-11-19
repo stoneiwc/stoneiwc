@@ -93,11 +93,11 @@ Collects:
 - Email, first name, last name, phone
 - Billing address (line1, line2, city, state, postal code, country)
 - Shipping address (or "same as billing" toggle)
-- Shipping method (radio list fetched from `/api/shipping-methods`)
+- Shipping method (radio list of the active Sanity shipping methods, read on the server by `app/checkout/page.tsx` and passed in)
 - Gift card code input (validated live against `/api/gift-cards/validate`)
 
 On "Continue to Payment":
-1. `POST /api/checkout/retrieve-stripe-publishable-key` → gets `publishableKey`
+1. Stripe.js loads via `getStripe()` ([`lib/stripe-client.ts`](../lib/stripe-client.ts)), using `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` from the bundle.
 2. `POST /api/checkout/create-stripe-payment-intent` → gets `clientSecret`
 3. Stripe Elements (`<PaymentElement>`) renders
 
@@ -155,9 +155,9 @@ await stripe.confirmPayment({ elements, redirect: 'if_required', ... })
 ```
 
 On success:
-- Redirects to `/checkout/success?payment_intent=pi_xxx`
-- Success page calls `GET /api/checkout/retrieve-stripe-payment-intent-status?payment_intent=pi_xxx`
-- Verifies `status === "succeeded"`, shows confirmation, clears cart
+- Redirects to `/checkout/success?payment_intent=pi_xxx&payment_intent_client_secret=…` (Stripe adds both on its own redirects; the form adds them when a card payment completes without one)
+- The success page is a server component. `getVerifiedPaymentStatus` ([`lib/payment-status.ts`](../lib/payment-status.ts)) retrieves the PaymentIntent and only trusts it if the client secret matches, so the PaymentIntent ID alone reveals nothing.
+- It shows the confirmation for `succeeded`, a processing or failed state otherwise, and "no payment found" without valid parameters. The cart is cleared only for a completed storefront order; gift card purchases leave it alone.
 
 ---
 
@@ -166,11 +166,10 @@ On success:
 Fires on `payment_intent.succeeded`. Two responsibilities:
 
 **A) Gift card redemption** (any order type):
-- If `metadata.gift_card_promotion_code_id` exists → `stripe.promotionCodes.update(id, { active: false })`
-- This prevents the code from being reused
+- If `metadata.gift_card_code` and `metadata.gift_card_applied_amount` exist → `redeemGiftCard()` deducts the amount from the card's balance in Sanity, at most once per order
 
 **B) Gift card creation** (gift card orders only):
-- If `metadata.order_type === "gift_card"` → generate `STONE-XXXX-XXXX` code, create Stripe Coupon + PromotionCode, send email via Resend
+- If `metadata.order_type === "gift_card"` → `createGiftCard()` stores a new `STONE-XXXX-XXXX` card in Sanity, then the code is emailed via Resend
 
 See `project-documentation/gift-card.md` for full webhook details.
 
@@ -190,7 +189,7 @@ Displays in order:
 
 ## Shipping Methods
 
-Fetched from Sanity at checkout load time via `GET /api/shipping-methods`.
+Read live from Sanity (`getShippingMethods`, no cache) when `/checkout` renders on the server, and again by `lib/pricing.ts` when the PaymentIntent is created, so the price charged always matches an active method.
 
 **Sanity fields:** `id` (slug), `name`, `description`, `cost`, `isActive`, `order`
 

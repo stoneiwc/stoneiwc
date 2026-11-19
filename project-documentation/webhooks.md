@@ -20,12 +20,15 @@ The cost: that handler has multiple branches. Worth it for the simplicity.
 
 ## Events handled
 
+The route ([`app/api/webhooks/stripe/route.ts`](../app/api/webhooks/stripe/route.ts)) only verifies the signature; everything else is in [`lib/stripe-webhook.ts`](../lib/stripe-webhook.ts) (`handleStripeEvent`), which has unit tests in `lib/__tests__/stripe-webhook.test.ts`.
+
 | Event | When Stripe sends it | What we do |
 |---|---|---|
-| `payment_intent.succeeded` | Card charged successfully | If storefront order → mark Sanity Order `paid` + email customer. If gift card purchase → create Sanity Gift Card + email recipient (+ purchaser). If gift card was applied → redeem balance. |
-| `payment_intent.payment_failed` | Charge failed (decline, insufficient funds, expired card, etc.) | If storefront order → mark Sanity Order `failed`. Gift cards NOT decremented. |
+| `payment_intent.succeeded` | Card charged successfully | Storefront order → mark the Sanity order `paid` + email the customer and the owner. No order found → recover one from the PaymentIntent (below). Gift card purchase → create the Sanity gift card + email the recipient (+ purchaser). Gift card applied to an order → redeem its balance. |
+| `payment_intent.payment_failed` | Charge failed (decline, insufficient funds, expired card, etc.) | Storefront order → mark the Sanity order `failed`. Gift cards are not touched. |
+| `payment_intent.canceled` | PaymentIntent cancelled (including by checkout when the order couldn't be recorded) | Storefront order → mark the Sanity order `cancelled` (only from `pending`). |
 
-Any other event type is acknowledged with `{ received: true }` and ignored. Stripe is configured to only send these two — but if a future change adds more, the early return prevents accidental processing.
+Any other event type is acknowledged with `{ received: true }` and ignored.
 
 > **Why not `charge.succeeded`?** PaymentIntents are the higher-level abstraction; one PaymentIntent can produce multiple Charges (retries, refunds). PaymentIntent events fire at the right level for our needs.
 
@@ -36,31 +39,36 @@ Any other event type is acknowledged with `{ received: true }` and ignored. Stri
 The handler reads `paymentIntent.metadata.order_type` to decide which flow to run:
 
 ```
-event.type === 'payment_intent.succeeded'
+payment_intent.succeeded
 │
-├── meta.order_type === 'storefront'
-│   ├── markOrderPaid(paymentIntentId)
-│   └── send order confirmation email (only on pending→paid transition)
+├── order_type === 'storefront'
+│   ├── markOrderPaid(paymentIntentId)            throws → 500 (Stripe retries)
+│   ├── transitioned → customer + owner emails     (once: only the winning delivery)
+│   └── no order → recoverPaidOrder(paymentIntent) creates a paid order from metadata
+│                  created → one "[Needs review]" email to the owner
 │
-├── meta.gift_card_code && meta.gift_card_applied_amount > 0
-│   └── redeemGiftCard(code, amount, paymentIntentId)
+├── gift_card_code && gift_card_applied_amount > 0
+│   └── redeemGiftCard(code, amount, paymentIntentId)   throws → 500
 │
-└── meta.order_type === 'gift_card'
-    ├── createGiftCard(...) (idempotent by paymentIntentId)
-    ├── send gift card email to recipient
-    └── if recipient !== purchaser: send confirmation email to purchaser
+└── order_type === 'gift_card'
+    ├── getOrCreateGiftCardForPayment(...)   _id derived from the PaymentIntent
+    ├── claimGiftCardEmail(card)              false → already sent, return 200
+    ├── email the recipient                   failed → release claim, 500 (Stripe retries)
+    └── if recipient !== purchaser: email the purchaser (best effort)
 
-event.type === 'payment_intent.payment_failed'
-│
-└── meta.order_type === 'storefront'
-    └── markOrderFailed(paymentIntentId)
+payment_intent.payment_failed → markOrderFailed    (storefront; error → 500)
+payment_intent.canceled       → markOrderCanceled  (storefront; error → 500)
 ```
 
 `order_type` is set when the PaymentIntent is created:
-- `'storefront'` — set by [`create-stripe-payment-intent/route.tsx`](../app/api/checkout/create-stripe-payment-intent/route.tsx)
-- `'gift_card'` — set by [`gift-cards/create-payment-intent/route.ts`](../app/api/gift-cards/create-payment-intent/route.ts)
+- `'storefront'`: set by [`create-stripe-payment-intent/route.tsx`](../app/api/checkout/create-stripe-payment-intent/route.tsx)
+- `'gift_card'`: set by [`gift-cards/create-payment-intent/route.ts`](../app/api/gift-cards/create-payment-intent/route.ts)
 
-A storefront order with a gift card applied has `order_type = 'storefront'` AND `gift_card_code` set. The handler processes both: marks order paid, then redeems balance.
+A storefront order with a gift card applied has `order_type = 'storefront'` AND `gift_card_code` set. The handler processes both: marks the order paid, then redeems the balance.
+
+### Recovered orders
+
+Checkout creates a `pending` Sanity order before the customer pays. If that write fails, it cancels the PaymentIntent and answers 503 to the browser, so normally every payment has an order. If a paid PaymentIntent still has no order (a pending order was deleted by hand, or something slipped through), `recoverPaidOrder` in [`lib/orders.ts`](../lib/orders.ts) creates a `paid` order from the PaymentIntent metadata: customer, shipping address, totals, coupon and gift card. Its `_id` is `order.recovered-<paymentIntentId>` and it has **no line items**. The item summary from Stripe goes in `internalNotes`, and the owner gets a `[Needs review] Paid order …` email. Check the items in the Stripe payment before fulfilling.
 
 ---
 
@@ -83,18 +91,19 @@ If verification fails:
 
 ## Idempotency
 
-Stripe **will** retry webhook delivery on failure. Network blips, function cold starts, intermittent errors — Stripe doesn't trust a single 200, it expects the same event to be safe to process twice. Our handler treats every event as potentially duplicated.
+Stripe **will** retry webhook delivery on failure, and staff can resend events from the Dashboard. Two deliveries of the same event can even run at the same time. Every write is safe to repeat:
 
 ### How each write is idempotent
 
 | Write | Idempotency guard |
 |---|---|
-| `markOrderPaid` | Only transitions from `pending` or `failed`; if already `paid` (or further along like `shipped`), returns `{ transitioned: false }` and skips the email send |
-| `markOrderFailed` | Only transitions from `pending`; finalized states are not overwritten |
-| `createGiftCard` | First fetches by `paymentIntentId`; if a Gift Card document already exists for this PI, returns its `code` without creating a duplicate |
-| `redeemGiftCard` | Optimistic concurrency: re-fetches current balance + `redemptions` array, checks if this `paymentIntentId` is already in the array, only commits the patch if no duplicate. See [`lib/gift-cards.ts`](../lib/gift-cards.ts) |
-| Order confirmation email | Only sent on the `pending → paid` transition (`if (result.transitioned)`) — Stripe replays don't trigger duplicate emails |
-| Gift card emails | Sent every time the handler runs for a gift card event, but the create step is idempotent so the email itself can be considered idempotent in practice — receiving a second email is annoying but not catastrophic |
+| `markOrderPaid` | Only transitions from `pending` or `failed`, and commits with `ifRevisionId`, so of two concurrent deliveries exactly one wins `{ transitioned: true }`. Already `paid` (or `shipped`, …) → `{ transitioned: false }` |
+| Order emails | Sent only by the delivery that won the `pending → paid` transition |
+| `recoverPaidOrder` | The `_id` is derived from the PaymentIntent, so a second create fails with 409 → `{ created: false }`, and no second alert is sent |
+| `markOrderFailed` / `markOrderCanceled` | Only transition from `pending`; finalized states are not overwritten |
+| `getOrCreateGiftCardForPayment` | Looks up the card by `paymentIntentId` first; creates with `_id: giftCard.<paymentIntentId>`, so a concurrent create gets 409 and returns the existing card. One card per payment |
+| Gift card email | `claimGiftCardEmail` sets `emailedAt` with `ifRevisionId` *before* sending; a card that already has `emailedAt` (or loses the claim race) is not emailed again. If the send fails, `releaseGiftCardEmail` clears the claim and the handler returns 500 so Stripe retries the email |
+| `redeemGiftCard` | Skips the deduction if `redemptions` already has an entry with this `paymentIntentId` as `orderId`. Commits with `ifRevisionId` and re-reads + retries on a conflict (up to 5 attempts). If it still fails, the handler returns 500 so Stripe retries. See [`lib/gift-cards.ts`](../lib/gift-cards.ts) |
 
 ### Manual test of idempotency
 
@@ -102,27 +111,21 @@ In any test mode purchase, after the success page loads:
 1. Stripe Dashboard → Developers → Webhooks → click the endpoint → "Event deliveries"
 2. Find the most recent `payment_intent.succeeded` event
 3. Click "Resend"
-4. Verify in Sanity: order didn't duplicate, balance didn't double-decrement
+4. Verify: the order didn't duplicate, the gift card balance didn't double-decrement, and no second email arrived (customer, owner or gift card recipient)
 
 This is part of the test scenarios in [runbook.md](runbook.md#test-scenarios).
 
 ---
 
-## Always returns 200 (almost)
+## Response codes (what makes Stripe retry)
 
-The handler is structured to return `{ received: true }` for any case that isn't catastrophic, even when something internal fails. This is intentional:
+Stripe retries any non-2xx response for up to 3 days. Because every write above is idempotent, the handler returns 500 whenever a retry could fix the problem, and 200 when it has finished (or there's nothing to do):
 
-- Stripe retries on non-200 responses
-- A persistent failure (e.g. Sanity is down) would cause Stripe to retry indefinitely
-- We'd rather log the error and let an admin recover than fight retry storms
-
-Returns that are NOT 200:
-- 400 on missing `stripe-signature` header
-- 400 on signature verification failure
-- 500 on `Stripe is not configured` (missing env vars)
-- 500 on gift card creation failure (only branch that fails the request, because the email send depends on the code)
-
-All other errors (`markOrderPaid` failure, email send failure) are caught, logged, and the handler proceeds to return 200.
+| Response | When |
+|---|---|
+| 200 | Event handled; event type not handled; already processed (a retry); order emails failed to send. That last one returns 200 because a retry couldn't resend them without duplicating the ones that did go out, so check the logs. |
+| 400 | Missing `stripe-signature` header; signature verification failed; gift card PaymentIntent missing required metadata |
+| 500 | `Stripe is not configured`; Sanity error marking an order paid / failed / cancelled; recovering an order failed; gift card redemption failed; gift card creation failed; gift card email failed to send; any unexpected error |
 
 ---
 
@@ -170,12 +173,12 @@ Two endpoints, one per Stripe mode:
 
 | Stripe mode | Endpoint URL | Events |
 |---|---|---|
-| Test | `https://dev.stoneiwc.com/api/webhooks/stripe?x-vercel-protection-bypass=…&x-vercel-set-bypass-cookie=true` | `payment_intent.succeeded`, `payment_intent.payment_failed` |
-| Live | `https://stoneiwc.com/api/webhooks/stripe` | `payment_intent.succeeded`, `payment_intent.payment_failed` |
+| Test | `https://dev.stoneiwc.com/api/webhooks/stripe?x-vercel-protection-bypass=…&x-vercel-set-bypass-cookie=true` | `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled` |
+| Live | `https://stoneiwc.com/api/webhooks/stripe` | `payment_intent.succeeded`, `payment_intent.payment_failed`, `payment_intent.canceled` |
 
 The bypass token is needed for the Test endpoint because `dev.stoneiwc.com` has Vercel Deployment Protection enabled. Production is public, no token needed.
 
-**Don't add more events** without updating the handler — the route filters unknown events with an early return, so they'd just be acknowledged and dropped silently. Worse than dropping is processing the wrong way.
+**Don't add more events** without updating the handler — `handleStripeEvent` acknowledges unknown event types and does nothing with them. `payment_intent.canceled` is handled (it marks a pending order cancelled) but must be ticked on each endpoint, or cancelled orders stay `pending`.
 
 ---
 
@@ -215,7 +218,7 @@ stripe trigger payment_intent.succeeded
 stripe trigger payment_intent.payment_failed
 ```
 
-These generate synthetic events with auto-populated metadata — they won't match real Sanity orders, so `markOrderPaid` will log `no order for PaymentIntent` but return 200. Useful for testing the signature verification path.
+These generate synthetic events with no `order_type` metadata, so the handler acknowledges them (200) without touching Sanity or sending email. Useful for testing the signature verification path.
 
 ---
 

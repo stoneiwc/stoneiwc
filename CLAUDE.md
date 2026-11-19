@@ -26,8 +26,9 @@ Stone International Wellness Center is a Next.js 16 (App Router) full-stack web 
 
 ```bash
 pnpm dev        # Start Next.js with Turbopack
-pnpm build      # Production build
-pnpm lint       # ESLint
+pnpm build      # Production build (type-checks; type errors fail the build)
+pnpm test       # Vitest unit tests (lib/__tests__/)
+# pnpm lint is currently broken: Next 16 removed `next lint` and there's no ESLint config yet
 
 # Sanity Studio (run separately)
 cd studio && pnpm dev   # http://localhost:3333
@@ -59,6 +60,11 @@ CONTACT_EMAIL_TO=
 # Cal.com
 NEXT_PUBLIC_CAL_USERNAME=
 CAL_API_KEY=
+
+# Revalidation + rate limiting (both optional locally)
+SANITY_WEBHOOK_SECRET=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 
 # App
 NEXT_PUBLIC_FRONTEND_URL=http://localhost:3000
@@ -100,9 +106,8 @@ public/                Static assets
 | `POST /api/checkout/create-stripe-payment-intent` | Storefront checkout |
 | `POST /api/gift-cards/create-payment-intent` | Gift card purchase |
 | `GET  /api/gift-cards/validate` | Validate a gift card code |
-| `POST /api/webhooks/stripe` | Stripe event handler |
+| `POST /api/webhooks/stripe` | Stripe event handler (logic in `lib/stripe-webhook.ts`) |
 | `POST /api/validate-coupon` | Validate a Sanity coupon code |
-| `GET  /api/shipping-methods` | Fetch active shipping methods |
 | `POST /api/contact` | Contact form + auto-reply |
 | `POST /api/revalidate` | Trigger ISR cache revalidation |
 
@@ -110,13 +115,18 @@ public/                Static assets
 
 ## Key Conventions
 
-- **Gift card product slug:** `stoneiwc-gift-certificate` — this slug triggers a special purchase UI. The constant `GIFT_CARD_SLUG` in `components/products/gift-card-purchase.tsx` is the single source of truth.
+- **Gift card product slug:** `stoneiwc-gift-certificate` — this slug triggers a special purchase UI. The constant `GIFT_CARD_SLUG` in `lib/constants.ts` is the single source of truth. Import it from there, not from `gift-card-purchase.tsx`, which pulls Stripe into whatever imports it.
+- **Gift card amounts:** `GIFT_CARD_MIN` ($25) and `GIFT_CARD_MAX` ($500) in `lib/gift-card-math.ts`, shared by the API and the form.
 - **Free Cal.com services:** slugs ending in `-free` display "Free" pricing on the booking page.
 - **Consultation-required services:** slugs containing `-consultation-` show a badge and "Price for Consultation" label.
 - **Product filters:** stored in URL query params (`?category=X&sort=Y&q=Z`). Default values are not written to the URL.
 - **Prices in Stripe:** always in cents (e.g. `$100 → 10000`). Sanity and the cart use dollars.
-- **ISR revalidation:** all Sanity queries are tagged. Pages use `export const revalidate = 60`.
-- **Webhook idempotency:** Stripe events are de-duplicated by `stripePaymentIntentId` before any Sanity write or email send.
+- **ISR revalidation:** page content goes through `contentFetch` in `lib/sanity.queries.ts` (cached, tagged with types from `lib/sanity-tags.ts`). Checkout data (coupons, shipping, pricing, orders, gift cards) is read live with `cache: 'no-store'`. Pages use `export const revalidate = 60`.
+- **Webhook idempotency:** every write is safe to repeat. Order emails go out only on the revision-checked `pending → paid` transition, gift cards are created once per PaymentIntent and emailed once (`emailedAt` claim), and the handler returns 500 whenever a Stripe retry could fix the problem. See `project-documentation/webhooks.md`.
+- **Server-only code:** `lib/sanity.client.ts` (holds the Sanity token) is `server-only`. Use `readClient` for reads and `writeClient` only in `lib/orders.ts` and `lib/gift-cards.ts`. Client components build image URLs with `lib/sanity.image.ts`, which doesn't import the client.
+- **Private Sanity documents:** the dataset is public (free plan), so orders and gift cards must be created with `privateId()` from `lib/sanity-ids.ts` (IDs like `order.<uuid>`), which Sanity never serves without a token. Never create them with a plain ID; Studio can't create or duplicate them for that reason. `scripts/migrate-private-ids.mjs` moves any stragglers.
+- **Metadata:** every page sets its own canonical URL and Open Graph tags with `pageMetadata()` from `lib/seo.ts`. The root layout deliberately sets neither.
+- **Public API routes** are rate-limited per IP with `rateLimit()` from `lib/rate-limit.ts` (Upstash Redis; off when its env vars are unset).
 - **Email reply-to:** all transactional emails set `replyTo: CONTACT_EMAIL_TO` so customer replies land in the team inbox.
 
 ---

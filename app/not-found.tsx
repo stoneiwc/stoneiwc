@@ -12,7 +12,7 @@ export default function NotFound() {
         Error 404
       </p>
 
-      <h1 className="font-heading text-6xl md:text-8xl font-light text-primary mb-6">
+      <h1 className="font-sans text-6xl md:text-8xl font-light text-primary mb-6">
         Lost in Wellness
       </h1>
 

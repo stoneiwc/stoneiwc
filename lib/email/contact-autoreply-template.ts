@@ -1,6 +1,13 @@
+import { CONTACT_INFO } from '../navigation'
+
 export interface ContactAutoReplyData {
   firstName: string
 }
+
+// The route sends this with replyTo set to the team inbox, so replies reach a
+// person; urgent questions go to the phone rather than back to the same inbox.
+const PHONE_DISPLAY = CONTACT_INFO.phone
+const PHONE_HREF = `tel:${CONTACT_INFO.phone.replace(/[^+\d]/g, '')}`
 
 function escapeHtml(text: string): string {
   return text
@@ -45,8 +52,8 @@ export function contactAutoReplyHtml(data: ContactAutoReplyData): string {
                 We've received your message and a member of our team will get back to you as soon as possible.
               </p>
               <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.7;">
-                If your inquiry is urgent, you can also reach us directly at
-                <a href="mailto:info@stoneiwc.com" style="color:#c9a96e;text-decoration:none;">info@stoneiwc.com</a>.
+                If your inquiry is urgent, please call us at
+                <a href="${PHONE_HREF}" style="color:#c9a96e;text-decoration:none;">${PHONE_DISPLAY}</a>.
               </p>
               <p style="margin:24px 0 0;font-size:15px;color:#555;line-height:1.7;">
                 Warm regards,<br/>
@@ -58,7 +65,7 @@ export function contactAutoReplyHtml(data: ContactAutoReplyData): string {
           <tr>
             <td style="background:#f9f8f5;border-top:1px solid #e0ddd5;padding:24px 40px;text-align:center;">
               <p style="margin:0;font-size:12px;color:#aaa;">
-                This is an automated confirmation. Please do not reply to this message.
+                This is an automated confirmation. You can reply to this email to add anything to your message.
               </p>
             </td>
           </tr>
@@ -79,11 +86,11 @@ export function contactAutoReplyText(data: ContactAutoReplyData): string {
     "Thank you for reaching out to Stone International Wellness Center.",
     "We've received your message and a member of our team will get back to you as soon as possible.",
     '',
-    'If your inquiry is urgent, you can also reach us directly at info@stoneiwc.com.',
+    `If your inquiry is urgent, please call us at ${PHONE_DISPLAY}.`,
     '',
     'Warm regards,',
     'The Stone IWC Team',
     '',
-    '— This is an automated confirmation. Please do not reply to this message.',
+    '— This is an automated confirmation. You can reply to this email to add anything to your message.',
   ].join('\n')
 }

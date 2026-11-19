@@ -4,10 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Search, X, ArrowRight } from "lucide-react"
-import type { CalEventType } from "@/lib/cal-api"
+import type { CalEventSummary } from "@/lib/cal-api"
 
 type Props = {
-  events: CalEventType[]
+  events: CalEventSummary[]
 }
 
 export function BookingSearch({ events }: Props) {

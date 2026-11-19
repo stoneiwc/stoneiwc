@@ -24,22 +24,6 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 
 **Future fix:** Add auth (Clerk recommended on Vercel — Marketplace integration). Then query Sanity by `customer.email` for the order list. Email confirmation already contains the order number for one-off lookup.
 
-### Server-side price re-validation
-
-**What:** The server creates the Stripe PaymentIntent using the client-sent `totalAmount`. A determined attacker could send a low value via the API and pay less than the real price.
-
-**Mitigations today:**
-- Sanity is read-only client-side, so the prices shown in the UI are correct
-- The server records the breakdown (subtotal, coupon, gift card, shipping) sent by the client into the order doc — divergence from the total is visible if you audit
-
-**Why open:** No actual exploitation observed; impact is "discount" not "free", since the customer still pays *something*. Real fix is non-trivial because the cart/checkout flow trusts the client's computed total.
-
-**Future fix:** In [`create-stripe-payment-intent/route.tsx`](../app/api/checkout/create-stripe-payment-intent/route.tsx), before creating the PI:
-1. Re-fetch each item's price from Sanity by ID
-2. Re-fetch the coupon by code (already done indirectly via `validate-coupon`)
-3. Re-compute the expected total
-4. Reject (or correct) if it disagrees with the client value by more than $0.01
-
 ### Custom shipping notification email
 
 **What:** When the order status flips to `shipped`, no email is sent. Customer has to check Sanity-managed tracking — which they don't have access to.
@@ -56,21 +40,11 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 
 **Future fix:** Add `quantity` field to Sanity product schema. Decrement on `markOrderPaid` (atomically per item, with concurrency guards similar to gift card redemption). Show "X left" badge under low-stock threshold.
 
-### Sanity validation: shipping cost minimum
+### `payment_intent.canceled` not subscribed in Stripe
 
-**What:** Shipping `cost` field accepts any value ≥ 0. Setting it between $0 and $0.50 creates orders Stripe will reject (below minimum charge).
+**What:** The webhook handler marks a pending order `cancelled` on `payment_intent.canceled` (checkout also cancels the PaymentIntent itself when it can't record the order). Neither Stripe webhook endpoint is subscribed to that event yet, so those orders stay `pending`.
 
-**Why open:** Trust-based — no admin has set this incorrectly so far.
-
-**Future fix:** Add validation rule to [`studio/schemaTypes/shippingMethod.ts`](../studio/schemaTypes/shippingMethod.ts) — `Rule.custom((cost) => cost === 0 || cost >= 0.5 || 'Cost must be 0 (free) or at least $0.50')`.
-
-### `payment_intent.canceled` not handled
-
-**What:** Webhook subscribes to `succeeded` + `payment_failed`. The `canceled` event (when a PI is canceled before payment, e.g. via API) is ignored.
-
-**Why open:** Not generated in normal customer flow. Only happens if an admin explicitly cancels a PI.
-
-**Future fix:** Add `canceled` to the subscribed events on both Stripe webhook endpoints, add a handler branch that marks the order as `cancelled`.
+**Fix (Dashboard only):** Stripe → Developers → Webhooks → each endpoint (Test and Live) → add `payment_intent.canceled`. See [webhooks.md](webhooks.md#stripe-webhook-configuration-dashboard).
 
 ---
 
@@ -136,9 +110,9 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 
 ### Sanity webhook → revalidate not wired
 
-**What:** When content is edited in Sanity Studio, ISR pages refresh on the next 60-second cycle. There's no instant revalidation.
+**What:** The code side is done: every content query is cached and tagged, and `/api/revalidate` covers every cached type ([`lib/sanity-tags.ts`](../lib/sanity-tags.ts)). The webhook itself isn't configured in Sanity yet, so pages still refresh on the 60-second cycle.
 
-**Future fix:** Configure Sanity Studio webhook to POST to `/api/revalidate` with a secret. Already supports it — see [`app/api/revalidate/route.ts`](../app/api/revalidate/route.ts) for the entry point.
+**Fix:** Create the webhook in sanity.io/manage and set `SANITY_WEBHOOK_SECRET` (steps in [sanity-cms.md](sanity-cms.md#on-demand-revalidation-sanity-webhook)). Once publishes refresh pages within seconds, raise `CONTENT_REVALIDATE_SECONDS` and the pages' `revalidate` from 60 to 3600.
 
 ### No automated sitemap submission
 
@@ -188,17 +162,15 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 
 ### No CI / pre-merge checks
 
-**What:** No GitHub Actions workflow. No PR builds beyond what Vercel does.
+**What:** No GitHub Actions workflow. No PR builds beyond what Vercel does. `pnpm lint` doesn't work: Next 16 removed `next lint`, and the repo has no ESLint config or install.
 
-**Future fix:** A workflow that runs `pnpm lint` + `pnpm tsc --noEmit` + `pnpm build` on every PR. Block merge on failure.
+**Future fix:** Add ESLint (flat config with `eslint-config-next`) and point `pnpm lint` at `eslint .`. Then add a workflow that runs `pnpm lint`, `pnpm test`, `pnpm tsc --noEmit` and `pnpm build` on every PR, and block merging on failure.
 
-### No automated tests
+### Test coverage is partial
 
-**What:** No unit or integration tests in the repo.
+**What:** Vitest (`pnpm test`) covers the money path and API plumbing: server pricing, gift card math and redemption, the Stripe webhook handler, rate limiting, `/api/revalidate` and the Cal.com client (`lib/__tests__/`). Nothing yet covers the React components, `lib/cart-context.tsx`, or a full checkout against Stripe test mode, and nothing runs the tests automatically (see "No CI / pre-merge checks").
 
-**Why open:** Small codebase, integration-test-y by nature (Stripe + Sanity + Resend in a flow). Hard to mock realistically.
-
-**Future fix:** Start with the high-value, contained logic — `lib/orders.ts`, `lib/gift-cards.ts`, the coupon calculation in `lib/cart-context.tsx`. Vitest is the obvious choice.
+**Future fix:** Run `pnpm test` in CI. Add tests for `lib/orders.ts` (`recoverPaidOrder`, `createPendingOrder`) and the cart's coupon math, then a Playwright smoke test of a test-mode checkout.
 
 ### Vercel CLI is outdated locally
 
@@ -215,12 +187,6 @@ Grouped by area, ordered roughly by impact. Items here are NOT blocking producti
 **What:** Same token used for Prod, Preview, Dev. Compromise of dev exposes prod write access.
 
 **Future fix:** Generate separate tokens per scope. Trade-off: more tokens to rotate.
-
-### Rate limiting is in-memory (resets on cold start)
-
-**What:** Contact form rate limit lives in memory, dies on each function instance restart.
-
-**Future fix:** Move to Vercel Edge Config or Upstash Redis for persistent rate limit state.
 
 ### No audit log of admin actions
 

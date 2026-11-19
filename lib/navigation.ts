@@ -1,55 +1,53 @@
-export interface NavItem {
+export interface NavLink {
   label: string
   href: string
-  children?: NavItem[]
 }
 
+// A top-level menu entry: a plain link, or a group that opens a list of links.
+export type NavItem =
+  | (NavLink & { children?: undefined })
+  | { label: string; href?: undefined; children: NavLink[] }
+
+// The site's main menu (header and mobile menu). The sitemap also lists every
+// link here. "Book now" is a separate button in the header, not a menu item.
 export const navigation: NavItem[] = [
-  { label: "Home", href: "/" },
-  {
-    label: "About Us",
-    href: "/about",
-    children: [
-      { label: "Our Story", href: "/about/our-story" },
-      { label: "Team Members", href: "/about/team" },
-      { label: "Partners & Affiliates", href: "/about/partners" },
-    ],
-  },
   {
     label: "Services",
-    href: "/services",
     children: [
-      { label: "Professional Treatments", href: "/services/treatments" },
+      { label: "All services", href: "/services" },
       { label: "Concierge", href: "/services/concierge" },
-      { label: "Virtual Consultations", href: "/services/virtual-consultations" },
-    ],
-  },
-  { label: "Products", href: "/products" },
-  {
-    label: "Education",
-    href: "/education",
-    children: [
-      { label: "Practitioner Certifications", href: "/education/certifications" },
-      { label: "Licensee Programs", href: "/education/licensee" },
-      { label: "General Services Information", href: "/education/general" },
-      { label: "Concerns", href: "/education/concerns" },
-      { label: "Cupping", href: "/education/cupping" },
-      { label: "Articles", href: "/education/articles" },
+      { label: "Video consultations", href: "/services#video" },
+      { label: "Health concerns", href: "/education/concerns" },
+      { label: "Questions & policies", href: "/faq" },
     ],
   },
   {
-    label: "Featured On",
-    href: "/featured",
+    label: "Training",
     children: [
-      { label: "Press", href: "/featured/press" },
-      { label: "Media", href: "/featured/media" },
-      { label: "Awards", href: "/featured/awards" },
-      { label: "Stoneiwc Podcast", href: "/featured/podcast" },
-      { label: "The QC Show", href: "/featured/qc-show" },
+      { label: "Training & education", href: "/training" },
+      { label: "Certification courses", href: "/training#certifications" },
+      { label: "Classes & workshops", href: "/training#classes" },
+      { label: "Licensing", href: "/training#licensing" },
+      { label: "Cupping guide", href: "/education/cupping" },
     ],
   },
-  { label: "Contact Us", href: "/contact" },
+  { label: "Shop", href: "/products" },
+  {
+    label: "About",
+    children: [
+      { label: "About us", href: "/about" },
+      { label: "Team", href: "/about/team" },
+      { label: "Partners", href: "/about/partners" },
+      { label: "Media", href: "/media" },
+    ],
+  },
+  { label: "Contact", href: "/contact" },
 ]
+
+/** Every link in the menu, for the sitemap. */
+export function allNavLinks(): NavLink[] {
+  return navigation.flatMap((item) => (item.children ? item.children : [item]))
+}
 
 export const BOOKING_URL = "/book"
 

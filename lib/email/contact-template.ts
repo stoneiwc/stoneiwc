@@ -6,9 +6,23 @@ interface ContactEmailData {
   message: string
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 export function contactEmailHtml(data: ContactEmailData): string {
-  const { firstName, lastName, email, phone, message } = data
-  const escapedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br/>")
+  // Every field comes from the public form, so all of it is escaped — including
+  // the ones used inside href attributes — before it goes into the HTML.
+  const firstName = escapeHtml(data.firstName)
+  const lastName = escapeHtml(data.lastName)
+  const email = escapeHtml(data.email)
+  const phone = data.phone ? escapeHtml(data.phone) : undefined
+  const escapedMessage = escapeHtml(data.message).replace(/\n/g, "<br/>")
 
   return `<!DOCTYPE html>
 <html lang="en">

@@ -35,21 +35,21 @@ def create_event(title, slug, length_minutes, price_cents, description=""):
 
 CUPPING_SERVICES = [
     {
-        "title": "One Side Full Body Detox - Front (CPT-97139)",
+        "title": "Full Body Detox – Front",
         "slug": "cupping-full-body-detox-front",
         "length_minutes": 60,
         "price_cents": 40000,
         "description": "Full front-body cupping detox session to stimulate circulation and release toxins.\nCPT Code: CPT-97139",
     },
     {
-        "title": "One Side Full Body Detox - Back (CPT-97139)",
+        "title": "Full Body Detox – Back",
         "slug": "cupping-full-body-detox-back",
         "length_minutes": 120,
         "price_cents": 40000,
         "description": "Full back-body cupping detox session for deep tissue release and lymphatic support.\nCPT Code: CPT-97139",
     },
     {
-        "title": "Back Maintenance Cupping & Acupressure (CPT-97139)",
+        "title": "Cupping & Acupressure – Back",
         "slug": "cupping-back-maintenance",
         "length_minutes": 60,
         "price_cents": 25000,
@@ -63,7 +63,7 @@ CUPPING_SERVICES = [
         "description": "Oxygen LED cupping bubble cleaning treatment, session of 5.\nCPT Code: CPT-94640",
     },
     {
-        "title": "Front Maintenance Cupping & Acupressure (CPT-97139)",
+        "title": "Cupping & Acupressure – Front",
         "slug": "cupping-front-maintenance",
         "length_minutes": 60,
         "price_cents": 25000,

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -13,7 +14,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
-import { GiftCardPurchase, GIFT_CARD_SLUG } from "@/components/products/gift-card-purchase"
+import { GIFT_CARD_SLUG } from "@/lib/constants"
+
+// The gift card form brings in Stripe. Loading it on demand keeps Stripe's code
+// off every other product page; only the gift card product downloads it.
+const GiftCardPurchase = dynamic(
+  () => import("@/components/products/gift-card-purchase").then((m) => m.GiftCardPurchase),
+  { loading: () => <p className="text-sm font-body text-muted-foreground">Loading…</p> },
+)
 
 export function ProductDetail({ product }: { product: Product }) {
   const isGiftCard = product.slug === GIFT_CARD_SLUG

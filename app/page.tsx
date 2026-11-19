@@ -1,39 +1,57 @@
+import type { Metadata } from "next"
 import { Hero } from "@/components/home/hero"
-import { Philosophy } from "@/components/home/philosophy"
-import { AboutSection } from "@/components/home/about-section"
-import { ServicesPreview } from "@/components/home/services-preview"
-import { WhereWeServe } from "@/components/home/where-we-serve"
-import { CulinaryWellness } from "@/components/home/culinary-wellness"
-import { ProductsSection } from "@/components/home/products-section"
-import { Testimonials } from "@/components/home/testimonials"
-import { PoliciesSection } from "@/components/home/policies-section"
-import { CTASection } from "@/components/home/cta-section"
-import { getHeroSlides, getHomePageImages } from "@/lib/sanity.queries"
+import { Offerings } from "@/components/home/offerings"
+import { AboutFeature } from "@/components/home/about-feature"
+import { ConciergeFeature } from "@/components/home/concierge-feature"
+import { ShopFeature } from "@/components/home/shop-feature"
+import { Review } from "@/components/home/review"
+import { CtaBand } from "@/components/ui/cta-band"
+import {
+  getFeaturedProducts,
+  getHeroSlides,
+  getHomePageImages,
+  getProductBySlug,
+} from "@/lib/sanity.queries"
+import { GIFT_CARD_SLUG } from "@/lib/constants"
 
-// Revalidate this page every 60 seconds
+// Title and description come from the root layout; only the URL is the
+// homepage's own. openGraph is repeated whole because Next replaces it
+// rather than merging it with the root's.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "Stone International Wellness Center",
+    title: "Stone International Wellness Center",
+    url: "/",
+    locale: "en_US",
+  },
+}
+
 export const revalidate = 60
 
 export default async function HomePage() {
-  const [heroSlides, homePageImages] = await Promise.all([
+  const [heroSlides, homePageImages, giftCard, featuredProducts] = await Promise.all([
     getHeroSlides(),
     getHomePageImages(),
+    getProductBySlug(GIFT_CARD_SLUG),
+    getFeaturedProducts(),
   ])
 
   return (
     <>
       <Hero slides={heroSlides} />
-      <Philosophy />
-      <AboutSection image={homePageImages?.aboutImage} />
-      <ServicesPreview
-        conciergeImage={homePageImages?.servicesConciergeImage}
-        treatmentRoomImage={homePageImages?.servicesTreatmentRoomImage}
-      />
-      <WhereWeServe />
-      <CulinaryWellness image={homePageImages?.culinaryImage} />
-      <ProductsSection />
-      <Testimonials />
-      <PoliciesSection />
-      <CTASection />
+      <Offerings />
+      <AboutFeature image={homePageImages?.aboutImage} />
+      <ConciergeFeature image={homePageImages?.servicesConciergeImage} />
+      <ShopFeature giftCard={giftCard} featuredProducts={featuredProducts} />
+      <Review />
+      <CtaBand
+        title="Book an appointment"
+        secondary={{ label: "Our policies", href: "/faq#policies" }}
+      >
+        Appointments only, paid when you book. Cancel at least 24 hours ahead for a refund.
+      </CtaBand>
     </>
   )
 }

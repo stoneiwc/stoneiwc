@@ -2,47 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
 @layer base {
   :root {
+    /* Palette: warm cream, deep brown, gold. */
     --background: 38 30% 97%;
     --foreground: 25 20% 12%;
     --card: 37 35% 95%;
     --card-foreground: 25 20% 12%;
     --popover: 38 30% 97%;
     --popover-foreground: 25 20% 12%;
+
+    /* Gold. Fill only: text on it is the dark foreground (6.7:1). Cream text
+       on gold measured 2.3:1, below the 4.5:1 minimum. */
     --primary: 38 72% 50%;
-    --primary-foreground: 38 30% 97%;
+    --primary-foreground: 25 20% 12%;
+    /* Darker gold for gold *text* and outlines on light backgrounds (5.1:1). */
+    --primary-strong: 38 72% 32%;
+
     --secondary: 28 25% 90%;
     --secondary-foreground: 25 20% 12%;
     --muted: 35 18% 91%;
-    --muted-foreground: 25 10% 40%;
+    --muted-foreground: 25 10% 36%;
     --accent: 25 55% 38%;
     --accent-foreground: 38 30% 97%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 70% 42%;
     --destructive-foreground: 0 0% 98%;
+    --success: 145 45% 28%;
+    --success-foreground: 0 0% 98%;
+    --warning: 32 85% 32%;
+    --warning-foreground: 0 0% 98%;
+
     --border: 35 22% 85%;
-    --input: 35 22% 85%;
-    --ring: 38 72% 50%;
-    --chart-1: 38 72% 50%;
-    --chart-2: 25 55% 38%;
-    --chart-3: 25 20% 20%;
-    --chart-4: 38 40% 68%;
-    --chart-5: 25 35% 55%;
-    --radius: 0.375rem;
-    --sidebar-background: 38 30% 96%;
-    --sidebar-foreground: 25 20% 15%;
-    --sidebar-primary: 38 72% 50%;
-    --sidebar-primary-foreground: 38 30% 97%;
-    --sidebar-accent: 28 25% 90%;
-    --sidebar-accent-foreground: 25 20% 15%;
-    --sidebar-border: 35 22% 85%;
-    --sidebar-ring: 38 72% 50%;
+    --input: 35 18% 76%;
+    /* Focus rings use the dark gold so they're visible on cream (3:1+). */
+    --ring: 38 72% 32%;
+    --radius: 0.5rem;
   }
 }
 
@@ -50,10 +44,42 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    scroll-behavior: smooth;
+  /* One visible focus style for every keyboard-focusable element. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  /* Type scale. Headings use the display serif; everything else the body sans. */
+  .text-display {
+    @apply font-sans text-4xl font-semibold leading-[1.1] tracking-tight text-balance md:text-5xl lg:text-6xl;
+  }
+  .text-h1 {
+    @apply font-sans text-4xl font-semibold leading-tight tracking-tight text-balance md:text-5xl;
+  }
+  .text-h2 {
+    @apply font-sans text-3xl font-semibold leading-tight tracking-tight text-balance md:text-4xl;
+  }
+  .text-h3 {
+    @apply font-sans text-xl font-semibold leading-snug md:text-2xl;
+  }
+  .text-eyebrow {
+    @apply font-body text-xs font-bold uppercase tracking-[0.2em] text-primary-strong;
+  }
+  .text-lead {
+    @apply font-body text-base leading-relaxed text-muted-foreground md:text-lg;
   }
 }
