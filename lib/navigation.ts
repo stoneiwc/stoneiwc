@@ -15,35 +15,21 @@ export const navigation: NavItem[] = [
     label: "Services",
     children: [
       { label: "All services", href: "/services" },
-      { label: "Treatments", href: "/services/treatments" },
       { label: "Concierge", href: "/services/concierge" },
-      { label: "Virtual consultations", href: "/services/virtual-consultations" },
-    ],
-  },
-  {
-    label: "Learn",
-    children: [
-      { label: "Health concerns", href: "/education/concerns" },
       { label: "Cupping", href: "/education/cupping" },
-      { label: "FAQ & how it works", href: "/education/general" },
+      { label: "Health concerns", href: "/education/concerns" },
+      { label: "Questions & policies", href: "/faq" },
     ],
   },
-  {
-    label: "Training",
-    children: [
-      { label: "Practitioner certifications", href: "/education/certifications" },
-      { label: "Licensing", href: "/education/licensee" },
-    ],
-  },
+  { label: "Training", href: "/training" },
   { label: "Shop", href: "/products" },
   {
     label: "About",
     children: [
       { label: "About us", href: "/about" },
-      { label: "Our story", href: "/about/our-story" },
       { label: "Team", href: "/about/team" },
       { label: "Partners", href: "/about/partners" },
-      { label: "Media & press", href: "/featured" },
+      { label: "Media", href: "/media" },
     ],
   },
   { label: "Contact", href: "/contact" },

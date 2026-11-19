@@ -167,7 +167,7 @@ To enforce it:
    - a checkout with a 3-D Secure test card (`4000 0027 6000 3184`)
    - a gift card purchase
    - a booking page
-   - `/featured/podcast` and `/featured/media`
+   - `/media` (YouTube thumbnails and the Spotify embed)
    - the home page with analytics loading
 2. Add any origin that shows up as `[Report Only] Refused to …` to the matching directive.
 3. Rename the header key to `Content-Security-Policy`.

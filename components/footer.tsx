@@ -11,13 +11,14 @@ const linkClass =
   "inline-flex min-h-9 items-center font-body text-sm text-background/75 transition-colors hover:text-primary"
 
 // Link columns come from the main menu, so the footer never links to a page
-// the menu doesn't have. Groups only (Shop and Contact are in "More").
+// the menu doesn't have. Groups only (the menu's plain links are in "More").
 const linkGroups = navigation.filter((item) => item.children)
 const moreLinks = [
   { label: "Shop", href: "/products" },
+  { label: "Training", href: "/training" },
   { label: "Book an appointment", href: BOOKING_URL },
   { label: "Contact", href: "/contact" },
-  { label: "Our policies", href: "/our-policies" },
+  { label: "Our policies", href: "/faq#policies" },
 ]
 
 export function Footer() {
@@ -65,7 +66,7 @@ export function Footer() {
             </Button>
           </div>
 
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-5">
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3">
             {[...linkGroups, { label: "More", children: moreLinks }].map((group) => (
               <div key={group.label}>
                 <h2 className="mb-4 font-body text-xs font-bold uppercase tracking-[0.2em] text-primary">

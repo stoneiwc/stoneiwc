@@ -79,8 +79,24 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // The Articles section was removed; its pages are still in search indexes.
-      { source: "/education/articles/:slug*", destination: "/education", permanent: true },
+      // Pages merged into others in the 2026 redesign. Old URLs are still in
+      // search indexes, bookmarks and printed material, so each goes to the
+      // section of the page that replaced it.
+      { source: "/services/treatments", destination: "/services", permanent: true },
+      { source: "/services/virtual-consultations", destination: "/services#video", permanent: true },
+      { source: "/education", destination: "/faq", permanent: true },
+      { source: "/education/general", destination: "/faq", permanent: true },
+      { source: "/education/articles/:slug*", destination: "/faq", permanent: true },
+      { source: "/education/certifications", destination: "/training#certifications", permanent: true },
+      { source: "/education/licensee", destination: "/training#licensing", permanent: true },
+      { source: "/our-policies", destination: "/faq#policies", permanent: true },
+      { source: "/about/our-story", destination: "/about", permanent: true },
+      { source: "/featured", destination: "/media", permanent: true },
+      { source: "/featured/press", destination: "/media#press", permanent: true },
+      { source: "/featured/media", destination: "/media#video", permanent: true },
+      { source: "/featured/qc-show", destination: "/media#qc-show", permanent: true },
+      { source: "/featured/podcast", destination: "/media#podcast", permanent: true },
+      { source: "/featured/:path*", destination: "/media", permanent: true },
     ]
   },
 }

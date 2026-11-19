@@ -4,7 +4,7 @@ import type { SanityHomePageImages } from "@/lib/sanity.queries"
 import { CONTACT_INFO } from "@/lib/navigation"
 import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section"
-import { FeatureSplit } from "@/components/home/feature-split"
+import { FeatureSplit } from "@/components/ui/feature-split"
 
 export function ConciergeFeature({ image }: { image?: SanityHomePageImages["servicesConciergeImage"] }) {
   return (

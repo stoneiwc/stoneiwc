@@ -36,6 +36,7 @@ export const partnerType = defineType({
       name: 'websiteUrl',
       title: 'Website URL',
       type: 'url',
+      validation: (Rule) => Rule.uri({scheme: ['http', 'https']}),
     }),
   ],
   orderings: [orderRankOrdering],

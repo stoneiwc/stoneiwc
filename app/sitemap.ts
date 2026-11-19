@@ -13,12 +13,9 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: BASE_URL, priority: 1.0, changeFrequency: "weekly" },
   { url: `${BASE_URL}/products`, priority: 0.9, changeFrequency: "daily" },
   { url: `${BASE_URL}/book`, priority: 0.9, changeFrequency: "weekly" },
-  { url: `${BASE_URL}/education`, priority: 0.8, changeFrequency: "weekly" },
   { url: `${BASE_URL}/about`, priority: 0.7, changeFrequency: "monthly" },
   { url: `${BASE_URL}/services`, priority: 0.8, changeFrequency: "monthly" },
-  { url: `${BASE_URL}/featured`, priority: 0.7, changeFrequency: "weekly" },
   { url: `${BASE_URL}/contact`, priority: 0.6, changeFrequency: "yearly" },
-  { url: `${BASE_URL}/our-policies`, priority: 0.3, changeFrequency: "yearly" },
 ]
 
 // Every page in the menu, so a page added to the menu is in the sitemap too

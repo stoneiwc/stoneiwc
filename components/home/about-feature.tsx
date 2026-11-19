@@ -3,7 +3,7 @@ import { urlFor } from "@/lib/sanity.image"
 import type { SanityHomePageImages } from "@/lib/sanity.queries"
 import { Button } from "@/components/ui/button"
 import { SectionHeading } from "@/components/ui/section"
-import { FeatureSplit } from "@/components/home/feature-split"
+import { FeatureSplit } from "@/components/ui/feature-split"
 
 export function AboutFeature({ image }: { image?: SanityHomePageImages["aboutImage"] }) {
   return (
@@ -24,7 +24,7 @@ export function AboutFeature({ image }: { image?: SanityHomePageImages["aboutIma
         education, and wellness programs for families across Dallas–Fort Worth.
       </p>
       <Button asChild variant="outline">
-        <Link href="/about/our-story">Our story</Link>
+        <Link href="/about">About us</Link>
       </Button>
     </FeatureSplit>
   )

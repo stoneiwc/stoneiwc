@@ -48,7 +48,7 @@ export default async function HomePage() {
       <Review />
       <CtaBand
         title="Book an appointment"
-        secondary={{ label: "Our policies", href: "/our-policies" }}
+        secondary={{ label: "Our policies", href: "/faq#policies" }}
       >
         Appointments only, paid when you book. Cancel at least 24 hours ahead for a refund.
       </CtaBand>

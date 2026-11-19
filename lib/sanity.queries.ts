@@ -257,29 +257,7 @@ export async function getVirtualConsultationsImages(): Promise<SanityVirtualCons
 
 // ─── Education Page ──────────────────────────────────────────────────────────
 
-export interface SanityEducationPageImages {
-  heroImage?: SanityImageField
-}
-
-export async function getEducationPageImages(): Promise<SanityEducationPageImages | null> {
-  const query = `*[_type == "educationPageImages" && _id == "educationPageImages"][0] {
-    heroImage
-  }`
-  return contentFetch<SanityEducationPageImages | null>(query, {}, ['educationPageImages'])
-}
-
 // ─── Featured On Page ────────────────────────────────────────────────────────
-
-export interface SanityFeaturedPageImages {
-  heroImage?: SanityImageField
-}
-
-export async function getFeaturedPageImages(): Promise<SanityFeaturedPageImages | null> {
-  const query = `*[_type == "featuredPageImages" && _id == "featuredPageImages"][0] {
-    heroImage
-  }`
-  return contentFetch<SanityFeaturedPageImages | null>(query, {}, ['featuredPageImages'])
-}
 
 // ─── Education ───────────────────────────────────────────────────────────────
 

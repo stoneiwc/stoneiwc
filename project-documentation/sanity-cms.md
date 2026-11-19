@@ -174,7 +174,7 @@ These are simpler content types managed in Sanity. Most are single-document type
 | `pressItem` | Featured → Press | `title`, `description`, `image`, `link`, ordered by `orderRank` |
 | `awardItem` | Featured → Media (Awards section, shown once one is published) | `title`, `description`, `image`, ordered by `orderRank` |
 | `mediaItem` | Featured → Media | `title`, `description`, `youtubeUrl`, ordered by `orderRank` |
-| `qcShowFlyer` | Featured → QC Show | Single document, image only |
+| `qcShowFlyer` | `/media` (The QC Show) | Single document, image only |
 | `qcShowEpisode` | Featured → QC Show | `youtubeUrl`, ordered by `_createdAt` |
 
 **Singleton image documents** (one document per page section):
@@ -183,16 +183,16 @@ These are simpler content types managed in Sanity. Most are single-document type
 |-----------|---------|-------------|
 | `homePageImages` | Homepage about + culinary images | Pages → Home → Images |
 | `aboutPageImages` | `/about` hero image | Pages → About Us → About Us Page → Images |
-| `ourStoryImages` | About → Our Story | Pages → About Us → Our Story → Images |
+| `ourStoryImages` | `/about` (The Source of Hope image) | Pages → About Us → Our Story → Images |
 | `servicesPageImages` | `/services` section images | Pages → Services → Services Page → Images |
 | `conciergeImages` | Services → Concierge | Pages → Services → Concierge → Images |
-| `virtualConsultationsImages` | Services → Virtual Consultations | Pages → Services → Virtual Consultations → Images |
-| `educationPageImages` | `/education` hero image | Pages → Education → Education Page → Images |
-| `certificationImages` | Education → Certifications | Pages → Education → Practitioner Certifications → Images |
-| `licenseeProgramImages` | Education → Licensee Program | Pages → Education → Licensee Programs → Images |
+| `virtualConsultationsImages` | `/services` (video consultations image) | Pages → Services → Virtual Consultations → Images |
+| `educationPageImages` | Unused: `/education` now redirects to `/faq` | Pages → Education → Education Page → Images |
+| `certificationImages` | `/training` (certifications image) | Pages → Education → Practitioner Certifications → Images |
+| `licenseeProgramImages` | `/training` (licensing image) | Pages → Education → Licensee Programs → Images |
 | `cuppingImages` | Education → Cupping | Pages → Education → Cupping → Images |
-| `featuredPageImages` | `/featured` hero image | Pages → Featured On → Featured On Page → Images |
-| `qcShowFlyer` | Featured → QC Show | Pages → Featured On → QC Show → Flyer |
+| `featuredPageImages` | Unused: `/featured` now redirects to `/media` | Pages → Featured On → Featured On Page → Images |
+| `qcShowFlyer` | `/media` (The QC Show) | Pages → Featured On → QC Show → Flyer |
 
 These use a fixed `_id` (same as `_type`) so there is always exactly one document per type. Queried with `[0]` selector and the `_id` filter.
 

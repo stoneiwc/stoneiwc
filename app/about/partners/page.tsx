@@ -4,6 +4,7 @@ import Image from "next/image"
 import { PageHeader } from "@/components/page-header"
 import { getPartners } from "@/lib/sanity.queries"
 import { urlFor } from "@/lib/sanity.image"
+import { httpUrl } from "@/lib/external-links"
 import { ArrowUpRight } from "lucide-react"
 
 export const metadata: Metadata = pageMetadata({
@@ -62,9 +63,9 @@ export default async function PartnersPage() {
                     </p>
                   )}
 
-                  {partner.websiteUrl && (
+                  {httpUrl(partner.websiteUrl) && (
                     <a
-                      href={partner.websiteUrl}
+                      href={httpUrl(partner.websiteUrl)!}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-6 inline-flex items-center gap-1.5 font-body text-sm font-bold tracking-wider text-primary transition-colors hover:text-primary/70"

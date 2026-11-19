@@ -259,10 +259,10 @@ export default async function CuppingPage() {
               Book a Cupping Session
             </Link>
             <Link
-              href="/services/treatments"
+              href="/services"
               className="inline-flex items-center justify-center rounded-sm border border-background/30 px-10 py-3.5 text-sm font-body font-bold tracking-wider text-background transition-all hover:border-primary hover:text-primary"
             >
-              View All Treatments
+              See all services
             </Link>
           </div>
         </div>
