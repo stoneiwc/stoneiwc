@@ -16,12 +16,21 @@ export const navigation: NavItem[] = [
     children: [
       { label: "All services", href: "/services" },
       { label: "Concierge", href: "/services/concierge" },
-      { label: "Cupping", href: "/education/cupping" },
+      { label: "Video consultations", href: "/services#video" },
       { label: "Health concerns", href: "/education/concerns" },
       { label: "Questions & policies", href: "/faq" },
     ],
   },
-  { label: "Training", href: "/training" },
+  {
+    label: "Training",
+    children: [
+      { label: "Training & education", href: "/training" },
+      { label: "Certification courses", href: "/training#certifications" },
+      { label: "Classes & workshops", href: "/training#classes" },
+      { label: "Licensing", href: "/training#licensing" },
+      { label: "Cupping guide", href: "/education/cupping" },
+    ],
+  },
   { label: "Shop", href: "/products" },
   {
     label: "About",

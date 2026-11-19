@@ -187,7 +187,7 @@ These are simpler content types managed in Sanity. Most are single-document type
 | `servicesPageImages` | `/services` section images | Pages → Services → Services Page → Images |
 | `conciergeImages` | Services → Concierge | Pages → Services → Concierge → Images |
 | `virtualConsultationsImages` | `/services` (video consultations image) | Pages → Services → Virtual Consultations → Images |
-| `educationPageImages` | Unused: `/education` now redirects to `/faq` | Pages → Education → Education Page → Images |
+| `educationPageImages` | `/training` (education center image) | Pages → Education → Education Page → Images |
 | `certificationImages` | `/training` (certifications image) | Pages → Education → Practitioner Certifications → Images |
 | `licenseeProgramImages` | `/training` (licensing image) | Pages → Education → Licensee Programs → Images |
 | `cuppingImages` | Education → Cupping | Pages → Education → Cupping → Images |

@@ -261,6 +261,17 @@ export async function getVirtualConsultationsImages(): Promise<SanityVirtualCons
 
 // ─── Education ───────────────────────────────────────────────────────────────
 
+export interface SanityEducationPageImages {
+  heroImage?: SanityImageField
+}
+
+export async function getEducationPageImages(): Promise<SanityEducationPageImages | null> {
+  const query = `*[_type == "educationPageImages" && _id == "educationPageImages"][0] {
+    heroImage
+  }`
+  return contentFetch<SanityEducationPageImages | null>(query, {}, ['educationPageImages'])
+}
+
 export async function getCertificationImages(): Promise<{mainImage?: SanityImageField} | null> {
   return contentFetch(`*[_type == "certificationImages" && _id == "certificationImages"][0]{mainImage}`, {}, ['certificationImages'])
 }

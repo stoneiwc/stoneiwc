@@ -112,7 +112,7 @@ function DesktopNavItem({ item, pathname }: { item: NavItem; pathname: string })
     )
   }
 
-  const active = item.children.some((child) => pathname === child.href)
+  const active = item.children.some((child) => pathname === child.href.split("#")[0])
   const menuId = `menu-${item.label.toLowerCase()}`
 
   return (
@@ -136,6 +136,9 @@ function DesktopNavItem({ item, pathname }: { item: NavItem; pathname: string })
             <li key={child.href}>
               <Link
                 href={child.href}
+                // Section links (/training#licensing) don't change the path,
+                // so close the menu on click rather than on navigation.
+                onClick={() => setOpen(false)}
                 aria-current={pathname === child.href ? "page" : undefined}
                 className={cn(
                   "block rounded-md px-4 py-2.5 font-body text-sm transition-colors hover:bg-muted",

@@ -15,7 +15,6 @@ const linkClass =
 const linkGroups = navigation.filter((item) => item.children)
 const moreLinks = [
   { label: "Shop", href: "/products" },
-  { label: "Training", href: "/training" },
   { label: "Book an appointment", href: BOOKING_URL },
   { label: "Contact", href: "/contact" },
   { label: "Our policies", href: "/faq#policies" },
@@ -66,7 +65,7 @@ export function Footer() {
             </Button>
           </div>
 
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3">
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-4">
             {[...linkGroups, { label: "More", children: moreLinks }].map((group) => (
               <div key={group.label}>
                 <h2 className="mb-4 font-body text-xs font-bold uppercase tracking-[0.2em] text-primary">

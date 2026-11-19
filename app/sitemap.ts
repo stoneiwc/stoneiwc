@@ -22,7 +22,8 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
 // (minus the ones already listed above).
 const STATIC_URLS = new Set(STATIC_ROUTES.map((route) => route.url))
 const SUBPAGE_ROUTES: MetadataRoute.Sitemap = allNavLinks()
-  .map((link) => `${BASE_URL}${link.href}`)
+  // Section links (/training#licensing) are the same page as /training.
+  .map((link) => `${BASE_URL}${link.href.split("#")[0]}`)
   .filter((url, i, all) => !STATIC_URLS.has(url) && all.indexOf(url) === i)
   .map((url) => ({ url, priority: 0.7, changeFrequency: "monthly" as const }))
 

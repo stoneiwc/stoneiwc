@@ -61,7 +61,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
 }
 
 function MobileNavItem({ item, pathname, onClose }: { item: NavItem; pathname: string; onClose: () => void }) {
-  const active = item.children ? item.children.some((c) => c.href === pathname) : item.href === pathname
+  const active = item.children ? item.children.some((c) => c.href.split("#")[0] === pathname) : item.href === pathname
   const [expanded, setExpanded] = useState(active)
   const rowClass = cn(
     "flex min-h-12 w-full items-center justify-between px-6 font-body text-base font-bold transition-colors hover:text-primary-strong",
