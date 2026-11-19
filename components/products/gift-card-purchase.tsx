@@ -167,6 +167,7 @@ export function GiftCardPurchase() {
                 <button
                   key={amt}
                   type="button"
+                  aria-pressed={!isCustom && selectedAmount === amt}
                   onClick={() => { setSelectedAmount(amt); setIsCustom(false) }}
                   className={`rounded-sm border py-2.5 text-sm font-body font-bold tracking-wide transition-colors ${
                     !isCustom && selectedAmount === amt
@@ -180,6 +181,7 @@ export function GiftCardPurchase() {
             </div>
             <button
               type="button"
+              aria-pressed={isCustom}
               onClick={() => setIsCustom(true)}
               className={`mt-2 w-full rounded-sm border py-2.5 text-sm font-body font-bold tracking-wide transition-colors ${
                 isCustom

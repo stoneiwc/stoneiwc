@@ -78,6 +78,8 @@ export function ProductFilters({
         {categories.map((cat) => (
           <button
             key={cat}
+            type="button"
+            aria-pressed={category === cat}
             onClick={() => onCategoryChange(cat)}
             className={cn(
               "rounded-full px-4 py-2 text-xs font-body font-bold tracking-wider transition-all",
