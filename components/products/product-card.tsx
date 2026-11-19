@@ -7,7 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import type { Product } from "@/lib/products"
 import { GIFT_CARD_SLUG } from "@/lib/constants"
+import { GIFT_CARD_MIN } from "@/lib/gift-card-math"
+import { formatPrice } from "@/lib/format"
 
+// Every card is the same height in a row: it fills its grid cell, and the
+// name and description always take exactly two lines.
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity } = useCart()
   const isGiftCard = product.slug === GIFT_CARD_SLUG
@@ -17,7 +21,7 @@ export function ProductCard({ product }: { product: Product }) {
   const isOutOfStock = !product.inStock
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-sm border border-border bg-card transition-all duration-300 hover:shadow-xl hover:border-primary/30">
+    <div className="group flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card transition-all duration-300 hover:shadow-xl hover:border-primary/30">
       <Link
         href={`/products/${product.slug}`}
         className="relative aspect-square overflow-hidden"
@@ -45,29 +49,29 @@ export function ProductCard({ product }: { product: Product }) {
       </Link>
 
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-xs font-body font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="truncate text-xs font-body font-bold uppercase tracking-[0.2em] text-muted-foreground">
           {product.category}
         </p>
 
         <Link href={`/products/${product.slug}`}>
-          <h3 className="mt-2 font-sans text-lg font-semibold text-foreground transition-colors group-hover:text-primary leading-snug">
+          <h3 className="mt-2 line-clamp-2 min-h-[2lh] font-sans text-lg font-semibold text-foreground transition-colors group-hover:text-primary leading-snug">
             {product.name}
           </h3>
         </Link>
 
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground font-body line-clamp-2">
+        <p className="mt-2 line-clamp-2 min-h-[2lh] text-sm leading-relaxed text-muted-foreground font-body">
           {product.shortDescription}
         </p>
 
 
-        <div className="mt-4 flex items-end justify-between">
+        <div className="mt-auto flex items-end justify-between pt-4">
           <div className="flex items-baseline gap-2">
             <span className="font-sans text-xl font-semibold text-foreground">
-              {isGiftCard ? 'From $25' : `$${product.price}`}
+              {isGiftCard ? `From ${formatPrice(GIFT_CARD_MIN)}` : formatPrice(product.price)}
             </span>
             {!isGiftCard && isOnSale && (
               <span className="text-sm font-body text-muted-foreground line-through">
-                ${product.originalPrice}
+                {formatPrice(product.originalPrice!)}
               </span>
             )}
           </div>
