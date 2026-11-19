@@ -84,6 +84,7 @@ function transformProduct(sanityProduct: SanityProduct): Product {
     description: sanityProduct.description,
     shortDescription: sanityProduct.shortDescription,
     image: urlFor(sanityProduct.image).width(800).height(800).url(),
+    imageAlt: sanityProduct.image?.alt?.trim() || undefined,
     category: sanityProduct.category.name,
     tags: sanityProduct.tags || [],
     inStock: sanityProduct.inStock,

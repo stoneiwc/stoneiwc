@@ -118,7 +118,7 @@ export default function ViewCartPage() {
 										>
 											<Image
 												src={product.image}
-												alt={product.name}
+												alt={product.imageAlt || product.name}
 												fill
 												sizes="(max-width: 640px) 104px, 136px"
 												className="object-cover"

@@ -51,7 +51,7 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="relative aspect-square overflow-hidden rounded-sm bg-secondary">
           <Image
             src={product.image}
-            alt={product.name}
+            alt={product.imageAlt || product.name}
             fill
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 50vw"

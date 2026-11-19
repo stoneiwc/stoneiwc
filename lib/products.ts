@@ -8,6 +8,8 @@ export interface Product {
   description?: string
   shortDescription: string
   image: string
+  /** Alt text from Sanity; falls back to the product name where it's empty. */
+  imageAlt?: string
   category: string
   tags: string[]
   inStock: boolean

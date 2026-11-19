@@ -83,7 +83,7 @@ export function CartSheet() {
                     >
                       <Image
                         src={product.image}
-                        alt={product.name}
+                        alt={product.imageAlt || product.name}
                         fill
                         className="object-cover"
                         sizes="96px"
