@@ -147,7 +147,7 @@ The frontend **never writes to Sanity directly**. All writes go through API rout
 | Convention | Where |
 |---|---|
 | Prices are stored in **dollars** in Sanity and the cart, converted to **cents** only at the Stripe boundary (`Math.round(amount * 100)`) | [`create-stripe-payment-intent/route.tsx`](../app/api/checkout/create-stripe-payment-intent/route.tsx) |
-| Gift card product is identified by the slug `stoneiwc-gift-certificate` (single source of truth: `GIFT_CARD_SLUG`) | [`components/products/gift-card-purchase.tsx`](../components/products/gift-card-purchase.tsx) |
+| Gift card product is identified by the slug `stoneiwc-gift-certificate` (single source of truth: `GIFT_CARD_SLUG`) | [`lib/constants.ts`](../lib/constants.ts) |
 | Cal.com slugs ending in `-free` render as "Free", containing `-consultation-` show "Price for Consultation" | [`cal-com-booking.md`](cal-com-booking.md) |
 | All ISR pages: `export const revalidate = 60` + Sanity queries tagged with their schema name | [`sanity-cms.md`](sanity-cms.md) |
 | Gift cards apply only to merchandise (capped at `subtotal - couponDiscount`); shipping is always paid → no $0 orders | [`orders.md`](orders.md) |

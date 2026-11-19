@@ -8,27 +8,25 @@ This document covers everything implemented for SEO, what remains to be done, an
 
 ### 1. Sitemap — `app/sitemap.ts`
 
-Dynamically generated via Next.js `MetadataRoute.Sitemap`. On every build, it fetches all product slugs and article slugs from Sanity and merges them with hardcoded static routes.
+Dynamically generated via Next.js `MetadataRoute.Sitemap`. It is rebuilt hourly (`revalidate = 3600`), and publishing a product also refreshes it through the `product` cache tag, so new products and services appear without a deploy.
 
 **Covered routes:**
 
-| Route | Priority | Change Frequency |
-|-------|----------|-----------------|
-| `/` | 1.0 | weekly |
-| `/products` | 0.9 | daily |
-| `/book` | 0.9 | weekly |
-| `/education` | 0.8 | weekly |
-| `/services` | 0.8 | monthly |
-| `/about` | 0.7 | monthly |
-| `/featured` | 0.7 | weekly |
-| `/contact` | 0.6 | yearly |
-| `/our-policies` | 0.3 | yearly |
-| `/products/[slug]` (all) | 0.8 | weekly |
-| `/education/articles/[slug]` (all) | 0.7 | monthly |
+| Routes | Source | Priority | Change Frequency |
+|--------|--------|----------|-----------------|
+| `/` | `STATIC_ROUTES` | 1.0 | weekly |
+| `/products`, `/book` | `STATIC_ROUTES` | 0.9 | daily / weekly |
+| `/education`, `/services` | `STATIC_ROUTES` | 0.8 | weekly / monthly |
+| `/about`, `/featured` | `STATIC_ROUTES` | 0.7 | monthly / weekly |
+| `/contact` | `STATIC_ROUTES` | 0.6 | yearly |
+| `/our-policies` | `STATIC_ROUTES` | 0.3 | yearly |
+| Every nav dropdown page (`navigation[].children` in `lib/navigation.ts`) | `SUBPAGE_ROUTES` | 0.7 | monthly |
+| `/products/[slug]` (all, from Sanity) | `getAllProductSlugs()` | 0.8 | weekly |
+| `/book/[slug]` (all, from Cal.com) | `getEventTypes()` | 0.7 | weekly |
 
 Accessible at: `{NEXT_PUBLIC_FRONTEND_URL}/sitemap.xml`
 
-**Note:** `/book/[slug]` booking pages are not included in the sitemap because they are rendered dynamically via Cal.com at runtime and should not be indexed independently.
+**Note:** If Cal.com is down when the sitemap rebuilds, the booking pages are left out rather than failing the whole sitemap. Adding a page to the nav menu adds it to the sitemap automatically; a page that isn't in the nav needs an entry in `STATIC_ROUTES`.
 
 ---
 
@@ -66,19 +64,18 @@ A reusable `JsonLd` component lives at `components/seo/json-ld.tsx`. It renders 
 |------|------------|
 | Root layout | `LocalBusiness` + `WebSite` |
 | `/products/[slug]` | `Product` with `Offer` (price, currency, stock status) |
-| `/education/articles/[slug]` | `Article` with publisher and cover image |
 
-These schemas enable **rich results** in Google Search (product price/availability panels, article cards).
+These schemas enable **rich results** in Google Search (product price/availability panels).
 
 ---
 
-### 5. Dynamic Metadata — Product & Article Pages
+### 5. Dynamic Metadata — Product Pages
 
-Both `generateMetadata` functions were extended with:
+`app/products/[slug]/page.tsx` builds its metadata with `pageMetadata()` from `lib/seo.ts`, the same helper other pages use:
 
-- `alternates.canonical` — full URL for the specific product or article
-- `openGraph` — includes Sanity image URL at 1200×630, correct `type` (`website` for products, `article` for articles), `publishedTime` for articles
-- `twitter` — `summary_large_image` with Sanity image
+- `alternates.canonical` — the page's own path (the root layout sets no canonical, so pages never inherit the homepage's)
+- `openGraph` — `type: website`, site name, title, description and the product image (the 800×800 Sanity URL)
+- `twitter` — `summary_large_image` with the same image
 
 ---
 
@@ -141,7 +138,7 @@ Not implemented. Google officially ignores the `keywords` meta tag, so this is l
 
 ### Structured Data — BreadcrumbList
 
-No breadcrumb schema is in place. Adding `BreadcrumbList` JSON-LD to product and article pages would enable breadcrumb rich results in Google Search, which increase CTR.
+No breadcrumb schema is in place. Adding `BreadcrumbList` JSON-LD to product pages would enable breadcrumb rich results in Google Search, which increase CTR.
 
 ### Structured Data — FAQPage
 
@@ -162,4 +159,3 @@ Not applicable. The site is English-only. If a Spanish version is ever added, `h
 | `app/layout.tsx` | Root metadata, JSON-LD Organization/WebSite |
 | `components/seo/json-ld.tsx` | Reusable JSON-LD script component |
 | `app/products/[slug]/page.tsx` | Product metadata + JSON-LD |
-| `app/education/articles/[slug]/page.tsx` | Article metadata + JSON-LD |

@@ -90,7 +90,7 @@ The core e-commerce document type.
 
 **Special product — Gift Certificate:**
 - Slug must be exactly `stoneiwc-gift-certificate`
-- This slug is hardcoded in `components/products/gift-card-purchase.tsx` as `GIFT_CARD_SLUG`
+- This slug is defined once as `GIFT_CARD_SLUG` in `lib/constants.ts`
 - When this slug is detected, the product detail page renders a gift card purchase form instead of the standard add-to-cart UI
 - The `price` field is ignored for this product — pricing is handled dynamically in the purchase form
 
